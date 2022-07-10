@@ -7,7 +7,6 @@ sys.path.append("..")
 import parsers.disguise as disguise
 import log.custom_logger as custom_logger
 import database.db_operator as db_operator
-import conf
 
 class CollectCHNGovBondsRates:
     # 从中国债券信息网收集 中国债券到期收益率

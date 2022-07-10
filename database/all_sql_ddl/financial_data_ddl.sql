@@ -226,6 +226,7 @@ COMMENT '沪深300指数的成分股';
 /* --------- db：financial_data ------ */
 /*创建一个表，excellent_performance_indices_di，用于存储 多年表现优异的指数*/
 
+/*
 USE financial_data;
 DROP TABLE IF EXISTS `index_excellent_performance_indices_di`;
 CREATE TABLE IF NOT EXISTS `index_excellent_performance_indices_di`(
@@ -243,3 +244,4 @@ CREATE TABLE IF NOT EXISTS `index_excellent_performance_indices_di`(
 	PRIMARY KEY ( `id` )
 	)ENGINE=InnoDB DEFAULT CHARSET=utf8
 COMMENT '表现优异的指数及其跟踪基金';
+ */

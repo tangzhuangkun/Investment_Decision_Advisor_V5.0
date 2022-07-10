@@ -1,10 +1,13 @@
-import requests
-import time
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# author: Tang Zhuangkun
 
 import sys
+import time
+import requests
+
 sys.path.append("..")
 import log.custom_logger as custom_logger
-import conf
 import data_miner.data_miner_common_db_operator as data_miner_common_db_operator
 
 class WechatNotification:
@@ -12,35 +15,6 @@ class WechatNotification:
 
     def __init__(self):
         pass
-
-    '''
-    # 废弃，zhuangkun，2022-01-02，虾推啥推送代码，虾推啥服务中断了
-        def push_customized_content(self, token, object, send_content):
-        # 自定义微信推送主题+内容，仅推送给特定的人
-        # param: token, 收信人token
-        # param: object, 主题
-        # param: send_content, 自定义的内容
-        # 发送微信推送
-
-        # 虾推啥的格式
-        wechat_push = {
-            'text': object,
-            'desp': send_content
-        }
-
-        try:
-            # 调用接口发送推送
-            # 虾推啥接口
-            requests.post('http://wx.xtuis.cn/'+token+'.send', data=wechat_push)
-            # 日志记录
-            log_msg = '成功, 向' +token+' 微信推送成功'
-            custom_logger.CustomLogger().log_writter(log_msg, 'info')
-        except Exception as e:
-            # 日志记录
-            log_msg = '失败, 微信推送失败' + wechat_push['text'] + '  '+ wechat_push['desp']+ str(e)
-            custom_logger.CustomLogger().log_writter(log_msg, 'error')
-    '''
-
 
     def replace_one_enter_key_with_two(self, send_content):
         '''

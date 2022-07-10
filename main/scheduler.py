@@ -30,9 +30,16 @@ class Scheduler:
 
 		#####################      每天运行    ###################################################
 
-
-
 		#########  盘前(00:00-9:29)  #########
+		try:
+			# 每天创建一个日级日志文件
+			scheduler.add_job(func=custom_logger.CustomLogger().daily_log_creator,
+							  trigger='cron',
+							  hour=0,minute=1,day_of_week='mon,tue,wed,thu,fri',
+							  id='createDailyLogFile')
+		except Exception as e:
+			# 抛错
+			custom_logger.CustomLogger().log_writter(e, 'error')
 
 
 		#########  盘中(9:30-15:00)  #########

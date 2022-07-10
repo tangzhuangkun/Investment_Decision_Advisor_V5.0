@@ -3,6 +3,7 @@ import time
 import sys
 import os
 import inspect
+import conf
 
 
 class CustomLogger:
@@ -19,17 +20,18 @@ class CustomLogger:
 		# msg: 需要写入日志文件的信息
 		# lev: 日志的级别，默认 error,需要小写
 		# 日志级别：debug<info<warning<error<critical 
-		# 只有warning，error，critical才会写入日志文件
+		# 只有info, warning，error，critical才会写入日志文件
 		# 输出：会在log文件夹中，按日期生成日志文件
 		
 		
 		# 创建logger，如果参数为空则返回root logger
-		logger = logging.getLogger("Investment&DecisionAdvisorV3.0")
-		# 设置logger日志等级,设置日志器将会处理的日志消息的最低严重级别
+		logger = logging.getLogger(conf.project_name)
+		# 设置logger日志等级,设置日志器将会处理的日志消息的最低严重级别,
+		# 只有info, warning，error，critical才会写入日志文件
 		# DEBUG<INFO<WARNING<ERROR<CRITICAL
 		logger.setLevel(logging.INFO)  
 
-		# 如果logger.handlers列表为空，且日志级别不为debug和不为info，则添加，否则，直接去写日志
+		# 如果logger.handlers列表为空，且日志级别不为debug，则添加，否则，直接去写日志
 		#if not logger.handlers and lev != 'debug':
 
 		# 如果logger.handlers列表为空,则先创建日志文件，然后再写入日志
@@ -87,15 +89,47 @@ class CustomLogger:
 		# msg: 需要写入日志文件的信息
 		# lev: 日志的级别，默认 error,需要小写
 		# 日志级别：debug<info<warning<error<critical 
-		# 只有warning，error，critical才会写入日志文件
+		# 只有info, warning，error，critical才会写入日志文件
 		# 输出：会在log文件夹中，按日期生成日志文件
 		
 		
 		current_working_dir = os.path.realpath(sys.argv[0])
 		func_name = inspect.stack()[1][3]
 		self.my_logger('\''+current_working_dir+'/'+func_name+'()\'',msg,lev)
-		
-		
+
+	def daily_log_creator(self):
+		# 创建日级日志文件
+		# 每天凌晨00：01分时，自行创建一个当日的日志文件
+
+		# 创建logger，如果参数为空则返回root logger
+		logger = logging.getLogger(conf.project_name)
+		# 设置logger日志等级,设置日志器将会处理的日志消息的最低严重级别,
+		# 只有info, warning，error，critical才会写入日志文件
+		# DEBUG<INFO<WARNING<ERROR<CRITICAL
+		logger.setLevel(logging.INFO)
+
+		# 如果logger.handlers列表为空，且日志级别不为debug，则添加，否则，直接去写日志
+		# if not logger.handlers and lev != 'debug':
+
+		# 如果logger.handlers列表为空,则先创建日志文件，然后再写入日志
+		if not logger.handlers:
+			# 创建handler
+			fh = logging.FileHandler("../log/daily_log/" + self.today + ".log", encoding="utf-8")
+			ch = logging.StreamHandler()
+
+			# 设置输出日志格式
+			formatter = logging.Formatter(
+				fmt="%(asctime)s %(name)s %(message)s",
+				datefmt="%Y-%m-%d  %H:%M:%S %a"
+			)
+
+			# 为handler指定输出格式
+			fh.setFormatter(formatter)
+			ch.setFormatter(formatter)
+
+			# 为logger添加的日志处理器
+			logger.addHandler(fh)
+			logger.addHandler(ch)
 
 if __name__ == "__main__":
 	
@@ -110,5 +144,6 @@ if __name__ == "__main__":
 
 	go = CustomLogger()
 	#go.my_logger('/Users/tangzekun/Desktop/KunCloud/Coding_Projects/Investment_Decision_AdvisorV3.0_Git/main',"MSG",'warning')
-	go.log_writter("MSG",'warning')
+	#go.log_writter("MSG",'warning')
+	go.daily_log_creator()
 

@@ -3,19 +3,17 @@
 # author: Tang Zhuangkun
 
 import datetime
+import json
+import sys
+import time
 from datetime import date
 
 import requests
-import json
-import time
-import os
-import sys
 
 sys.path.append("..")
 import database.db_operator as db_operator
 import log.custom_logger as custom_logger
-import main.get_conf_info as get_conf_info
-
+import data_miner.data_miner_common_db_operator as data_miner_common_db_operator
 
 
 
@@ -246,10 +244,13 @@ class CollectStockHistoricalEstimationInfo:
             stock_code_name_dict[stock_code] = stock_info_dicts.get(stock_code).get('stock_name')
         return stock_code_name_dict
 
-    def get_lxr_token(self):
-        # 随机获取一个理杏仁的token、
+    """
+        def get_lxr_token(self):
+        # 随机获取一个理杏仁的token
         # 输出：理杏仁的token
-        return get_conf_info.GetConfInfo().get_lxr_token()
+        return data_miner_common_db_operator.DataMinerCommonDBOperator().get_one_token("lxr")
+    """
+
 
     def tell_exchange_market_and_determine_url(self, exchange_location_mic):
         '''
@@ -342,7 +343,7 @@ class CollectStockHistoricalEstimationInfo:
         estimations_list = self.tell_exchange_market_and_determine_what_estimations_need_to_get(exchange_location_mic)
 
         # 随机获取一个token
-        token = self.get_lxr_token()
+        token = data_miner_common_db_operator.DataMinerCommonDBOperator().get_one_token("lxr")
         # 理杏仁要求 在请求的headers里面设置Content-Type为application/json。
         headers = {'Content-Type': 'application/json'}
 
@@ -404,7 +405,7 @@ class CollectStockHistoricalEstimationInfo:
         estimations_list = self.tell_exchange_market_and_determine_what_estimations_need_to_get(exchange_location_mic)
 
         # 随机获取一个token
-        token = self.get_lxr_token()
+        token = data_miner_common_db_operator.DataMinerCommonDBOperator().get_one_token("lxr")
         #token = "44589fdc-423d-4a31-b82d-83f94d626661"
         # 理杏仁要求 在请求的headers里面设置Content-Type为application/json。
         headers = {'Content-Type': 'application/json'}
@@ -702,7 +703,7 @@ if __name__ == "__main__":
     time_start = time.time()
     go = CollectStockHistoricalEstimationInfo()
     #result = go.get_all_exchange_locaiton_mics()
-    #result = go.get_lxr_token()
+    #result = go.data_miner_common_db_operator.DataMinerCommonDBOperator().get_one_token("lxr")
     #print(result)
     #result = go.all_tracking_stocks("XHKG")
     #print(stock_codes_names_dict)

@@ -184,7 +184,7 @@ class FundStrategyPEEstimation:
         # 获取当前日期
         today = time.strftime("%Y-%m-%d", time.localtime())
         #today = "2021-06-17"
-        the_last_trading_date = data_miner_common_db_operator.DataMinerCommonDBOperation().get_the_last_trading_date(today)
+        the_last_trading_date = data_miner_common_db_operator.DataMinerCommonDBOperator().get_the_last_trading_date(today)
 
         # 获取指数上一个交易日的动态市盈率和扣非市盈率
         # 整体市盈率除以有效权重得到有效市盈率

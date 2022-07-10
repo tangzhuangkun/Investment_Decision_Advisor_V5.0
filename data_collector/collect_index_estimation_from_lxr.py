@@ -1,13 +1,14 @@
 import datetime
-import requests
 import json
-import time
 import sys
+import time
+
+import requests
 
 sys.path.append("..")
 import database.db_operator as db_operator
 import log.custom_logger as custom_logger
-import main.get_conf_info as get_conf_info
+import data_miner.data_miner_common_db_operator as data_miner_common_db_operator
 
 class CollectIndexEstimationFromLXR:
     # 从理杏仁收集指数估值信息
@@ -33,7 +34,7 @@ class CollectIndexEstimationFromLXR:
         # 输出： 将获取到指数估值数据存入数据库
 
         # 随机获取一个token
-        token = get_conf_info.GetConfInfo().get_lxr_token()
+        token = data_miner_common_db_operator.DataMinerCommonDBOperator().get_one_token("lxr")
         # 理杏仁要求 在请求的headers里面设置Content-Type为application/json。
         headers = {'Content-Type': 'application/json'}
         # 理杏仁 获取A股指数基本面数据 接口，文档如下
@@ -118,7 +119,7 @@ class CollectIndexEstimationFromLXR:
         # 输出： 将获取到指数估值数据存入数据库
 
         # 随机获取一个token
-        token = get_conf_info.GetConfInfo().get_lxr_token()
+        token = data_miner_common_db_operator.DataMinerCommonDBOperator().get_one_token("lxr")
         # 理杏仁要求 在请求的headers里面设置Content-Type为application/json。
         headers = {'Content-Type': 'application/json'}
         # 理杏仁 获取A股指数基本面数据 接口，文档如下

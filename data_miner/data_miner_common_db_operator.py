@@ -9,7 +9,7 @@ sys.path.append("..")
 import database.db_operator as db_operator
 import log.custom_logger as custom_logger
 
-class DataMinerCommonDBOperation:
+class DataMinerCommonDBOperator:
     # 通用，常用的（非基金或股票信息）数据库操作
 
     def __init__(self):
@@ -37,10 +37,46 @@ class DataMinerCommonDBOperation:
             return "0000-00-00"
 
 
+    def get_all_tokens(self,platform_code):
+        # 获取某个平台的全部令牌
+        # platform_code: 平台代码，如 理杏仁的代码为 lxr
+        # return: 如果存在令牌，则返回全部令牌,为有一个list
+        #         如果不存在，则返回空列表， []
+
+        # 返回的令牌列表
+        token_list = list()
+
+        # 查询SQL
+        selecting_sql = "SELECT token FROM token_record WHERE platform_code = '%s' " % (platform_code)
+        # 查询
+        selecting_result = db_operator.DBOperator().select_all("parser_component", selecting_sql)
+
+        # 将令牌从dict转为list
+        for token_unit in selecting_result:
+            token_list.append(token_unit['token'])
+        return token_list
+
+
+    def get_one_token(self,platform_code):
+        # 随机获取某个平台的一个令牌
+        # platform_code: 平台代码，如 理杏仁的代码为 lxr
+
+        # 查询SQL
+        selecting_sql = "SELECT token FROM token_record WHERE platform_code = '%s' ORDER BY RAND() LIMIT 1" % (platform_code)
+        # 查询
+        selecting_result = db_operator.DBOperator().select_one("parser_component", selecting_sql)
+
+        return selecting_result["token"]
+
 if __name__ == '__main__':
     time_start = time.time()
-    go = DataMinerCommonDBOperation()
-    last_trade_day = go.get_the_last_trading_date("2022-03-20")
-    print(last_trade_day)
+    go = DataMinerCommonDBOperator()
+    #last_trade_day = go.get_the_last_trading_date("2022-03-20")
+    #print(last_trade_day)
+    #token_list = go.get_all_tokens("lxr")
+    #print(token_list)
+    token = go.get_one_token("lxr")
+    print(token)
+
     time_end = time.time()
     print('Time Cost: ' + str(time_end - time_start))

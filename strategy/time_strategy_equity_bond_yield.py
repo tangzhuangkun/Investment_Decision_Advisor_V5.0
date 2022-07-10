@@ -34,7 +34,7 @@ class TimeStrategyEquityBondYield:
         today = time.strftime("%Y-%m-%d", time.localtime())
 
         # 获取最新交易日期
-        lastest_trading_date = str(data_miner_common_db_operator.DataMinerCommonDBOperation().get_the_last_trading_date(today))
+        lastest_trading_date = str(data_miner_common_db_operator.DataMinerCommonDBOperator().get_the_last_trading_date(today))
 
         # 返回的字典
         today_info_dict = {}

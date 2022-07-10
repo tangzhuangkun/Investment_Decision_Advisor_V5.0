@@ -173,7 +173,7 @@ class FundStrategyPBEstimation:
         # 获取当前日期
         today = time.strftime("%Y-%m-%d", time.localtime())
         # today = "2021-06-17"
-        the_last_trading_date = data_miner_common_db_operator.DataMinerCommonDBOperation().get_the_last_trading_date(
+        the_last_trading_date = data_miner_common_db_operator.DataMinerCommonDBOperator().get_the_last_trading_date(
             today)
 
         # 获取指数上一个交易日的市净率 和 扣商誉市净率

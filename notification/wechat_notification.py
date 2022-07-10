@@ -5,6 +5,7 @@ import sys
 sys.path.append("..")
 import log.custom_logger as custom_logger
 import conf
+import data_miner.data_miner_common_db_operator as data_miner_common_db_operator
 
 class WechatNotification:
     # 发送微信通知
@@ -80,7 +81,7 @@ class WechatNotification:
         # param: send_content, 自定义的内容
 
         # 获取token，决定需要推送给哪些人
-        tokens = conf.wechat_tokens
+        tokens = data_miner_common_db_operator.DataMinerCommonDBOperator().get_all_tokens("ServerChan")
         # 需要发送的文本中，每个换行符都替换成两个
         replaced_send_content = self.replace_one_enter_key_with_two(send_content)
         # 推送给所有人
@@ -93,6 +94,6 @@ if __name__ == '__main__':
     go = WechatNotification()
     # 获取当前时间
     today = time.strftime("%Y-%m-%d", time.localtime())
-    go.push_to_all(' 基金行情分析test', 'good night FC')
+    go.push_to_all(' 基金行情分析test', '测试从数据库获取token')
     time_end = time.time()
     print(time_end-time_start)

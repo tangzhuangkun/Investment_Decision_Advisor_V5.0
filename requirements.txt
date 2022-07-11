@@ -1,0 +1,9 @@
+PyMySQL==0.9.3
+requests==2.24.0
+xlrd==1.2.0
+DBUtils==2.0
+Flask==2.0.2
+APScheduler==3.6.3
+fake_useragent==0.1.11
+akshare==1.4.78
+pandas==1.0.5

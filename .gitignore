@@ -134,5 +134,5 @@ conf.py
 daily_log
 /.idea/
 /test/
-TodoList.txt
-this_time_deployment_check_list.txt
+TodoList.py
+this_time_deployment_check_list.py

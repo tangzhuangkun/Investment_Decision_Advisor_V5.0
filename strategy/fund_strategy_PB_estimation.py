@@ -5,7 +5,7 @@ import threading
 
 sys.path.append("..")
 import database.db_operator as db_operator
-import data_collector.get_stock_real_time_indicator_from_interfaces as get_stock_real_time_indicator_from_interfaces
+import data_collector.get_target_real_time_indicator_from_interfaces as get_stock_real_time_indicator_from_interfaces
 import log.custom_logger as custom_logger
 import data_miner.data_miner_common_index_operator as data_miner_common_index_operator
 import data_miner.data_miner_common_db_operator as data_miner_common_db_operator
@@ -90,9 +90,9 @@ class FundStrategyPBEstimation:
         # threadLock：线程锁
 
         # 通过抓取数据雪球页面，获取单个股票的实时滚动市净率
-        # stock_real_time_pb = xueqiu.GetStockRealTimeIndicatorFromXueqiu().get_single_stock_real_time_indicator(stock_id, 'pb')
+        # stock_real_time_pb = xueqiu.GetStockRealTimeIndicatorFromXueqiu().get_single_target_real_time_indicator(stock_id, 'pb')
         # 从腾讯接口获取实时市净率估值数据
-        stock_real_time_pb = get_stock_real_time_indicator_from_interfaces.GetStockRealTimeIndicatorFromInterfaces().get_single_stock_real_time_indicator(
+        stock_real_time_pb = get_stock_real_time_indicator_from_interfaces.GetTargetRealTimeIndicatorFromInterfaces().get_single_target_real_time_indicator(
             stock_id, 'pb')
 
         # 获取锁，用于线程同步

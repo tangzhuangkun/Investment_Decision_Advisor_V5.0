@@ -6,7 +6,7 @@ sys.path.append("..")
 import database.db_operator as db_operator
 import log.custom_logger as custom_logger
 import data_miner.data_miner_common_target_stock_operator as data_miner_common_target_stock_operator
-import data_collector.get_stock_real_time_indicator_from_interfaces as get_stock_real_time_indicator_from_interfaces
+import data_collector.get_target_real_time_indicator_from_interfaces as get_stock_real_time_indicator_from_interfaces
 
 
 class StockStrategyMonitoringEstimation:
@@ -100,7 +100,7 @@ class StockStrategyMonitoringEstimation:
         trigger_conclusion = ""
 
         # 从腾讯接口获取实时估值数据
-        realtime_estimation = get_stock_real_time_indicator_from_interfaces.GetStockRealTimeIndicatorFromInterfaces().get_single_stock_real_time_indicator(
+        realtime_estimation = get_stock_real_time_indicator_from_interfaces.GetTargetRealTimeIndicatorFromInterfaces().get_single_target_real_time_indicator(
            stock_code_with_location, estimation_method)
         realtime_estimation = float(realtime_estimation)
 

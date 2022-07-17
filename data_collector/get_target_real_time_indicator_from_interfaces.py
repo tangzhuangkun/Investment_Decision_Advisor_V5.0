@@ -2,29 +2,30 @@
 # -*- coding: utf-8 -*-
 # author: Tang Zhuangkun
 
-import requests
+import sys
 import time
 
-import sys
+import requests
+
 sys.path.append("..")
-import parsers.disguise as disguise
 import log.custom_logger as custom_logger
 
-class GetStockRealTimeIndicatorFromInterfaces:
+class GetTargetRealTimeIndicatorFromInterfaces:
     # 从腾讯接口获取实时估值数据
     # 1、获取实时的股票滚动市盈率,pe_ttm
     # 2、获取实时的股票市净率,pb
     # 3、获取实时的股票滚动股息率,dr_ttm
+    # 4、获取实时的涨跌幅，change
 
     def __init__(self):
         pass
 
 
-    def get_single_stock_real_time_indicator(self, stock_id, indicator):
+    def get_single_target_real_time_indicator(self, stock_id, indicator):
         '''
         解析接口信息,从接口获取实时的股票指标
         :param stock_id: 股票代码（2位上市地+6位数字， 如 sz000596）
-        :param indicator: 需要抓取的指标，如 pe_ttm,市盈率TTM；pb,市净率，dr_ttm,滚动股息率 等
+        :param indicator: 需要抓取的指标，如 pe_ttm,市盈率TTM；pb,市净率；dr_ttm,滚动股息率；change,涨跌幅 等
         :return: 获取的实时的股票滚动市盈率 格式如 32.74
         '''
 
@@ -54,6 +55,8 @@ class GetStockRealTimeIndicatorFromInterfaces:
                 return data_list[46]
             elif indicator == "dr_ttm":
                 return data_list[64]
+            elif indicator == "change":
+                return data_list[32]
             else:
                 # 日志记录
                 msg = "Unknown indicator"
@@ -67,7 +70,7 @@ class GetStockRealTimeIndicatorFromInterfaces:
             msg = "Collected stock real time " + indicator + " from " + interface_address + '  ' + "ReadTimeout"
             custom_logger.CustomLogger().log_writter(msg, lev='warning')
             # 返回解析页面得到的股票指标
-            return self.get_single_stock_real_time_indicator(stock_id, indicator)
+            return self.get_single_target_real_time_indicator(stock_id, indicator)
 
         # 如果连接请求超时，重新在执行一遍解析页面
         except requests.exceptions.ConnectTimeout:
@@ -75,7 +78,7 @@ class GetStockRealTimeIndicatorFromInterfaces:
             msg = "Collected stock real time " + indicator + " from " + interface_address + '  ' + "ConnectTimeout"
             custom_logger.CustomLogger().log_writter(msg, lev='warning')
             # 返回解析页面得到的股票指标
-            return self.get_single_stock_real_time_indicator(stock_id, indicator)
+            return self.get_single_target_real_time_indicator(stock_id, indicator)
 
         # 如果请求超时，重新在执行一遍解析页面
         except requests.exceptions.Timeout:
@@ -83,20 +86,20 @@ class GetStockRealTimeIndicatorFromInterfaces:
             msg = "Collected stock real time " + indicator + " from " + interface_address + '  ' + "Timeout"
             custom_logger.CustomLogger().log_writter(msg, lev='warning')
             # 返回解析页面得到的股票指标
-            return self.get_single_stock_real_time_indicator(stock_id, indicator)
+            return self.get_single_target_real_time_indicator(stock_id, indicator)
 
         except Exception as e:
             # 日志记录
             msg = interface_address + str(e)
             custom_logger.CustomLogger().log_writter(msg, lev='warning')
             # 返回解析页面得到的股票指标
-            return self.get_single_stock_real_time_indicator(stock_id, indicator)
+            return self.get_single_target_real_time_indicator(stock_id, indicator)
 
 
 
     """
     
-    def get_single_stock_real_time_indicator(self, stock_id, header, proxy, indicator):
+    def get_single_target_real_time_indicator(self, stock_id, header, proxy, indicator):
         '''
         解析接口信息,从接口获取实时的股票指标
         :param stock_id: 股票代码（2位上市地+6位数字， 如 sz000596）
@@ -145,7 +148,7 @@ class GetStockRealTimeIndicatorFromInterfaces:
             msg = "Collected stock real time " + indicator + " from " + interface_address + '  ' + "ReadTimeout"
             custom_logger.CustomLogger().log_writter(msg, lev='warning')
             # 返回解析页面得到的股票指标
-            return self.get_single_stock_real_time_indicator(stock_id, header, proxy, indicator)
+            return self.get_single_target_real_time_indicator(stock_id, header, proxy, indicator)
 
         # 如果连接请求超时，重新在执行一遍解析页面
         except requests.exceptions.ConnectTimeout:
@@ -153,7 +156,7 @@ class GetStockRealTimeIndicatorFromInterfaces:
             msg = "Collected stock real time " + indicator + " from " + interface_address + '  ' + "ConnectTimeout"
             custom_logger.CustomLogger().log_writter(msg, lev='warning')
             # 返回解析页面得到的股票指标
-            return self.get_single_stock_real_time_indicator(stock_id, header, proxy, indicator)
+            return self.get_single_target_real_time_indicator(stock_id, header, proxy, indicator)
 
         # 如果请求超时，重新在执行一遍解析页面
         except requests.exceptions.Timeout:
@@ -161,20 +164,20 @@ class GetStockRealTimeIndicatorFromInterfaces:
             msg = "Collected stock real time " + indicator + " from " + interface_address + '  ' + "Timeout"
             custom_logger.CustomLogger().log_writter(msg, lev='warning')
             # 返回解析页面得到的股票指标
-            return self.get_single_stock_real_time_indicator(stock_id, header, proxy, indicator)
+            return self.get_single_target_real_time_indicator(stock_id, header, proxy, indicator)
 
         except Exception as e:
             # 日志记录
             msg = interface_address + str(e)
             custom_logger.CustomLogger().log_writter(msg, lev='warning')
             # 返回解析页面得到的股票指标
-            return self.get_single_stock_real_time_indicator(stock_id, header, proxy, indicator)
+            return self.get_single_target_real_time_indicator(stock_id, header, proxy, indicator)
     
     """
 
 
     '''
-        def get_single_stock_real_time_indicator(self, stock_id, indicator):
+        def get_single_target_real_time_indicator(self, stock_id, indicator):
         # 从接口获取实时的股票指标
         # stock_id: 股票代码（2位上市地+6位数字， 如 sz000596）
         # indicator, 需要抓取的指标，如 pe_ttm,市盈率TTM；pb,市净率，dr_ttm,滚动股息率 等
@@ -197,8 +200,8 @@ class GetStockRealTimeIndicatorFromInterfaces:
 
 if __name__ == '__main__':
     time_start = time.time()
-    go = GetStockRealTimeIndicatorFromInterfaces()
-    result = go.get_single_stock_real_time_indicator("sh600519","pe_ttm")
+    go = GetTargetRealTimeIndicatorFromInterfaces()
+    result = go.get_single_target_real_time_indicator("sh510330","change")
     print(result)
     time_end = time.time()
     print('Time Cost: ' + str(time_end - time_start))

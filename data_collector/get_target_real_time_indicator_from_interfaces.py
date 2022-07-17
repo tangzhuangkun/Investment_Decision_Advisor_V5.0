@@ -12,6 +12,7 @@ import log.custom_logger as custom_logger
 
 class GetTargetRealTimeIndicatorFromInterfaces:
     # 从腾讯接口获取实时估值数据
+    # 参考资料，https://www.173it.cn/xitong/xinxi/3/43901.html
     # 1、获取实时的股票滚动市盈率,pe_ttm
     # 2、获取实时的股票市净率,pb
     # 3、获取实时的股票滚动股息率,dr_ttm

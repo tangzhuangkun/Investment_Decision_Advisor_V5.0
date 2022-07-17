@@ -1,8 +1,10 @@
 import logging
 import time
-import sys
 import os
 import inspect
+
+import sys
+sys.path.append('..')
 import conf
 
 
@@ -99,7 +101,6 @@ class CustomLogger:
 
 	def daily_log_creator(self):
 		# 创建日级日志文件
-		# 每天凌晨00：01分时，自行创建一个当日的日志文件
 
 		# 创建logger，如果参数为空则返回root logger
 		logger = logging.getLogger(conf.project_name)

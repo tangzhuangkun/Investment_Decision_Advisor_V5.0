@@ -11,19 +11,19 @@ sys.path.append("..")
 import log.custom_logger as custom_logger
 
 class GetTargetRealTimeIndicatorFromInterfaces:
-    # 从腾讯接口获取实时估值数据
-    # 参考资料，https://www.173it.cn/xitong/xinxi/3/43901.html
-    # 1、获取实时的股票滚动市盈率,pe_ttm
-    # 2、获取实时的股票市净率,pb
-    # 3、获取实时的股票滚动股息率,dr_ttm
-    # 4、获取实时的涨跌幅，change
+    # 从接口获取实时数据
 
     def __init__(self):
         pass
 
-
     def get_single_target_real_time_indicator(self, stock_id, indicator):
         '''
+        # 从腾讯接口获取实时估值数据
+        # 参考资料，https://www.173it.cn/xitong/xinxi/3/43901.html
+        # 1、获取实时的股票滚动市盈率,pe_ttm
+        # 2、获取实时的股票市净率,pb
+        # 3、获取实时的股票滚动股息率,dr_ttm
+        # 4、获取实时的涨跌幅，change
         解析接口信息,从接口获取实时的股票指标
         :param stock_id: 股票代码（2位上市地+6位数字， 如 sz000596）
         :param indicator: 需要抓取的指标，如 pe_ttm,市盈率TTM；pb,市净率；dr_ttm,滚动股息率；change,涨跌幅 等
@@ -68,7 +68,7 @@ class GetTargetRealTimeIndicatorFromInterfaces:
         # 如果读取超时，重新在执行一遍解析页面
         except requests.exceptions.ReadTimeout:
             # 日志记录
-            msg = "Collected stock real time " + indicator + " from " + interface_address + '  ' + "ReadTimeout"
+            msg = "Collected target real time " + indicator + " from " + interface_address + '  ' + "ReadTimeout"
             custom_logger.CustomLogger().log_writter(msg, lev='warning')
             # 返回解析页面得到的股票指标
             return self.get_single_target_real_time_indicator(stock_id, indicator)
@@ -76,42 +76,45 @@ class GetTargetRealTimeIndicatorFromInterfaces:
         # 如果连接请求超时，重新在执行一遍解析页面
         except requests.exceptions.ConnectTimeout:
             # 日志记录
-            msg = "Collected stock real time " + indicator + " from " + interface_address + '  ' + "ConnectTimeout"
+            msg = "Collected target real time " + indicator + " from " + interface_address + '  ' + "ConnectTimeout"
             custom_logger.CustomLogger().log_writter(msg, lev='warning')
-            # 返回解析页面得到的股票指标
+            # 返回解析页面得到的标的物指标
             return self.get_single_target_real_time_indicator(stock_id, indicator)
 
         # 如果请求超时，重新在执行一遍解析页面
         except requests.exceptions.Timeout:
             # 日志记录
-            msg = "Collected stock real time " + indicator + " from " + interface_address + '  ' + "Timeout"
+            msg = "Collected target real time " + indicator + " from " + interface_address + '  ' + "Timeout"
             custom_logger.CustomLogger().log_writter(msg, lev='warning')
-            # 返回解析页面得到的股票指标
+            # 返回解析页面得到的标的物指标
             return self.get_single_target_real_time_indicator(stock_id, indicator)
 
         except Exception as e:
             # 日志记录
             msg = interface_address + str(e)
             custom_logger.CustomLogger().log_writter(msg, lev='warning')
-            # 返回解析页面得到的股票指标
+            # 返回解析页面得到的标的物指标
             return self.get_single_target_real_time_indicator(stock_id, indicator)
 
 
+    def get_real_time_treasury_yield(self,indicator):
+        """
+        从新浪接口获取国债实时收益率
+        :param indicator: 需要抓取的指标，必传，如 globalbd_gcny10 ：中国10年期国债
+        """
 
-    """
-    
-    def get_single_target_real_time_indicator(self, stock_id, header, proxy, indicator):
-        '''
-        解析接口信息,从接口获取实时的股票指标
-        :param stock_id: 股票代码（2位上市地+6位数字， 如 sz000596）
-        :param header: 伪装的UA
-        :param proxy: 伪装的IP
-        :param indicator: 需要抓取的指标，如 pe_ttm,市盈率TTM；pb,市净率，dr_ttm,滚动股息率 等
-        :return: 获取的实时的股票滚动市盈率 格式如 32.74
-        '''
+        if(indicator!="globalbd_gcny10"):
+            # 日志记录
+            msg = "Unknown indicator"
+            custom_logger.CustomLogger().log_writter(msg, lev='warning')
+            # 返回 空
+            return None
 
+
+        # 获取13位时间戳
+        timestamp = int(time.time() * 1000)
         # 地址模板
-        interface_address = 'https://qt.gtimg.cn/q=' + stock_id
+        interface_address =  'http://hq.sinajs.cn/?rn=' + str(timestamp) + 'list=' + indicator
 
         # 递归算法，处理异常
         try:
@@ -124,77 +127,46 @@ class GetTargetRealTimeIndicatorFromInterfaces:
 
             # 忽略警告
             requests.packages.urllib3.disable_warnings()
-
+            # 配置头文件
+            headers = {'referer': 'http://finance.sina.com.cn'}
             # 得到接口返回的信息
-            raw_data = requests.get(interface_address, headers=header, proxies=proxy, verify=False, stream=False,
-                                        timeout=10).text
-
-            data_list = raw_data.split("~")
-            if indicator=="pe_ttm":
-                return data_list[39]
-            elif indicator=="pb":
-                return data_list[46]
-            elif indicator=="dr_ttm":
-                return data_list[64]
-            else:
-                # 日志记录
-                msg = "Unknown indicator"
-                custom_logger.CustomLogger().log_writter(msg, lev='warning')
-                # 返回 空
-                return -10000
+            raw_data = requests.get(interface_address, verify=False, stream=False,headers=headers,
+                                    timeout=10).text
+            # 解析返回数据
+            data_list = raw_data.split(",")
+            # 返回实时收益率
+            return data_list[3]
 
         # 如果读取超时，重新在执行一遍解析页面
         except requests.exceptions.ReadTimeout:
             # 日志记录
-            msg = "Collected stock real time " + indicator + " from " + interface_address + '  ' + "ReadTimeout"
+            msg = " 从 " + interface_address + "获取国债实时收益率 " + indicator + '  ' + "ReadTimeout"
             custom_logger.CustomLogger().log_writter(msg, lev='warning')
-            # 返回解析页面得到的股票指标
-            return self.get_single_target_real_time_indicator(stock_id, header, proxy, indicator)
+            # 返回解析页面得到的国债指标
+            return self.get_real_time_treasury_yield(indicator)
 
         # 如果连接请求超时，重新在执行一遍解析页面
         except requests.exceptions.ConnectTimeout:
             # 日志记录
-            msg = "Collected stock real time " + indicator + " from " + interface_address + '  ' + "ConnectTimeout"
+            msg = " 从 " + interface_address + "获取国债实时收益率 " + indicator + '  ' + "ConnectTimeout"
             custom_logger.CustomLogger().log_writter(msg, lev='warning')
-            # 返回解析页面得到的股票指标
-            return self.get_single_target_real_time_indicator(stock_id, header, proxy, indicator)
+            # 返回解析页面得到的国债指标
+            return self.get_real_time_treasury_yield(indicator)
 
         # 如果请求超时，重新在执行一遍解析页面
         except requests.exceptions.Timeout:
             # 日志记录
-            msg = "Collected stock real time " + indicator + " from " + interface_address + '  ' + "Timeout"
+            msg = " 从 " + interface_address + "获取国债实时收益率 " + indicator + '  ' + "Timeout"
             custom_logger.CustomLogger().log_writter(msg, lev='warning')
-            # 返回解析页面得到的股票指标
-            return self.get_single_target_real_time_indicator(stock_id, header, proxy, indicator)
+            # 返回解析页面得到的国债指标
+            return self.get_real_time_treasury_yield(indicator)
 
         except Exception as e:
             # 日志记录
             msg = interface_address + str(e)
             custom_logger.CustomLogger().log_writter(msg, lev='warning')
-            # 返回解析页面得到的股票指标
-            return self.get_single_target_real_time_indicator(stock_id, header, proxy, indicator)
-    
-    """
-
-
-    '''
-        def get_single_target_real_time_indicator(self, stock_id, indicator):
-        # 从接口获取实时的股票指标
-        # stock_id: 股票代码（2位上市地+6位数字， 如 sz000596）
-        # indicator, 需要抓取的指标，如 pe_ttm,市盈率TTM；pb,市净率，dr_ttm,滚动股息率 等
-        # 返回： 获取的实时的股票滚动市盈率 格式如 32.74
-
-        # 伪装，隐藏UA和IP
-        header, proxy = disguise.Disguise().assemble_header_proxy()
-
-        # 暂时写死，该API对IP要求不高
-        # 不调用IP代理的API来获取新的IP，可节约代理IP账户中的资源
-        #header = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36 QIHU 360SE'}
-        #proxy =  {"http": 'http://118.190.244.234:3128', "https": 'https://118.190.244.234:3128'}
-
-        return self.get_interface_content(stock_id, header, proxy, indicator)
-    
-    '''
+            # 返回解析页面得到的国债指标
+            return self.get_real_time_treasury_yield(indicator)
 
 
 
@@ -202,7 +174,8 @@ class GetTargetRealTimeIndicatorFromInterfaces:
 if __name__ == '__main__':
     time_start = time.time()
     go = GetTargetRealTimeIndicatorFromInterfaces()
-    result = go.get_single_target_real_time_indicator("sh510330","change")
+    #result = go.get_single_target_real_time_indicator("sh510330","change")
+    result = go.get_real_time_treasury_yield("globalbd_gcny10")
     print(result)
     time_end = time.time()
     print('Time Cost: ' + str(time_end - time_start))

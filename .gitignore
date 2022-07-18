@@ -136,4 +136,7 @@ daily_log
 /test/
 TodoList.py
 this_time_deployment_check_list.py
+# 剔除所有以~$开头的文件
 ~$*
+# 剔除所有子路径里以~$开头的文件
+/~$

@@ -101,6 +101,7 @@ class GetTargetRealTimeIndicatorFromInterfaces:
         """
         从新浪接口获取国债实时收益率
         :param indicator: 需要抓取的指标，必传，如 globalbd_gcny10 ：中国10年期国债
+        return :  2.8030
         """
 
         if(indicator!="globalbd_gcny10"):

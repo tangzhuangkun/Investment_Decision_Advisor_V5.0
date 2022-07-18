@@ -5,7 +5,8 @@ select index_code,
        index_name,
        trading_date,
        pe,
-       round(1 / pe, 6)                       as stock_yield_rate,
+       /*  使用cast代替round，解决精度问题 */
+       cast(1/pe as decimal(9,6))             as stock_yield_rate,
        round(10y / 100, 6)                    as bond_rate,
        round(1 / pe, 6) / round(10y / 100, 6) as ratio
 from (

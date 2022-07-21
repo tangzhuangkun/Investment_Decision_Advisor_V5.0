@@ -7,7 +7,6 @@ import time
 import decimal
 
 sys.path.append("..")
-import log.custom_logger as custom_logger
 import database.db_operator as db_operator
 import data_collector.get_target_real_time_indicator_from_interfaces as get_target_real_time_indicator_from_interfaces
 import data_miner.data_miner_common_db_operator as data_miner_common_db_operator
@@ -117,6 +116,7 @@ class TimeStrategyRealtimeEquityBondYield:
         # 当前实时预估的股债收益比在近3，5，8年的排位信息
         # 年数, 当前实时股债收益比, 历史排位百分比, 如   (3, 2.8855, 87.81)
         three_year_equity_bond_yield_info = self.estimate_current_realtime_equity_bond_yield_rank(3)
+        #three_year_equity_bond_yield_info = (3, 3.8855, 87.81)
         five_year_equity_bond_yield_info = self.estimate_current_realtime_equity_bond_yield_rank(5)
         eight_year_equity_bond_yield_info = self.estimate_current_realtime_equity_bond_yield_rank(8)
         # 当前预估的实时股债收益比
@@ -142,12 +142,13 @@ class TimeStrategyRealtimeEquityBondYield:
                 msg += '近8年历史排位大于阈值95： ' + str(eight_year_equity_bond_yield_info[2]) + ' %' + ' \n'
             else:
                 msg += '近8年历史排位： ' + str(eight_year_equity_bond_yield_info[2]) + ' %' + ' \n'
-        if(msg==''):
+        if msg == '':
             return None
         return msg
 
     def main(self):
-        self.generate_investment_notification_msg()
+        # 主入口
+        return self.generate_investment_notification_msg()
 
 
 if __name__ == '__main__':
@@ -157,8 +158,9 @@ if __name__ == '__main__':
     #result = go.get_last_trading_day_CSI_300_yield_rate()
     #result = go.calculate_realtime_equity_bond_yield()
     #result =go.estimate_current_realtime_equity_bond_yield_rank(3)
-    result = go.generate_pure_notification_msg()
-    #result = go.generate_investment_notification_msg()
+    #result = go.generate_pure_notification_msg()
+    result = go.generate_investment_notification_msg()
+    #result = go.main()
     print(result)
     time_end = time.time()
     print('Time Cost: ' + str(time_end - time_start))

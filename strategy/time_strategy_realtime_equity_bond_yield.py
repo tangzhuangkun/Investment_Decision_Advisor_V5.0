@@ -101,22 +101,10 @@ class TimeStrategyRealtimeEquityBondYield:
         msg = ''
         msg += current_time + ' \n'
         msg += '基于沪深300指数' + ' \n'
-        if (estimate_realtime_equity_bond_yield >= 3):
-            msg += '预估实时股债收益比大于阈值3： ' + str(estimate_realtime_equity_bond_yield) + ' \n'
-        else:
-            msg += '预估实时股债收益比： ' + str(estimate_realtime_equity_bond_yield) + ' \n'
-        if (three_year_equity_bond_yield_info[2] >= 95):
-            msg += '近3年历史排位大于阈值95： ' + str(three_year_equity_bond_yield_info[2]) + ' %' + ' \n'
-        else:
-            msg += '近3年历史排位： ' + str(three_year_equity_bond_yield_info[2]) + ' %' + ' \n'
-        if (five_year_equity_bond_yield_info[2] >= 95):
-            msg += '近5年历史排位大于阈值95： ' + str(five_year_equity_bond_yield_info[2]) + ' %' + ' \n'
-        else:
-            msg += '近5年历史排位： ' + str(five_year_equity_bond_yield_info[2]) + ' %' + ' \n'
-        if (eight_year_equity_bond_yield_info[2] >= 95):
-            msg += '近8年历史排位大于阈值95： ' + str(eight_year_equity_bond_yield_info[2]) + ' %' + ' \n'
-        else:
-            msg += '近8年历史排位： ' + str(eight_year_equity_bond_yield_info[2]) + ' %' + ' \n'
+        msg += '预估实时股债收益比： ' + str(estimate_realtime_equity_bond_yield) + ' \n'
+        msg += '近3年历史排位： ' + str(three_year_equity_bond_yield_info[2]) + ' %' + ' \n'
+        msg += '近5年历史排位： ' + str(five_year_equity_bond_yield_info[2]) + ' %' + ' \n'
+        msg += '近8年历史排位： ' + str(eight_year_equity_bond_yield_info[2]) + ' %' + ' \n'
 
         return msg
 
@@ -158,6 +146,9 @@ class TimeStrategyRealtimeEquityBondYield:
             return None
         return msg
 
+    def main(self):
+        self.generate_investment_notification_msg()
+
 
 if __name__ == '__main__':
     time_start = time.time()
@@ -166,8 +157,8 @@ if __name__ == '__main__':
     #result = go.get_last_trading_day_CSI_300_yield_rate()
     #result = go.calculate_realtime_equity_bond_yield()
     #result =go.estimate_current_realtime_equity_bond_yield_rank(3)
-    #result = go.generate_pure_notification_msg()
-    result = go.generate_investment_notification_msg()
+    result = go.generate_pure_notification_msg()
+    #result = go.generate_investment_notification_msg()
     print(result)
     time_end = time.time()
     print('Time Cost: ' + str(time_end - time_start))

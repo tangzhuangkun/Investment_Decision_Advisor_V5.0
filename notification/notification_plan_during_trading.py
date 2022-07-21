@@ -8,6 +8,7 @@ import strategy.stock_strategy_monitoring_estimation as stock_strategy_monitorin
 import log.custom_logger as custom_logger
 import notification.email_notification as email_notification
 import notification.wechat_notification as wechat_notification
+import strategy.time_strategy_realtime_equity_bond_yield as time_strategy_realtime_equity_bond_yield
 
 
 class NotificationPlanDuringTrading:
@@ -108,15 +109,50 @@ class NotificationPlanDuringTrading:
                     custom_logger.CustomLogger().log_writter(log_msg, 'error')
 
 
+    def minutely_equity_bond_notification(self):
+        # 通知 预估的实时股债收益比信息, 邮件通知，微信通知，目前只针对 股债收益比
+        # 频率：分钟级
 
+        # 当前时间
+        current_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+        # 通知的标题
+        title = current_time + ' 预估实时股债收益率触发阈值'
+        # 预估的实时股债收益比信息
+        estimated_realtime_equity_bond_yield_msg = time_strategy_realtime_equity_bond_yield.TimeStrategyRealtimeEquityBondYield().main()
+        #estimated_realtime_equity_bond_yield_msg = "2022-07-21 22:58:12 \n基于沪深300指数 \n预估实时股债收益比大于阈值3： 3.8855 \n近3年历史排位： 87.81 % \n近5年历史排位： 87.78 % \n近8年历史排位： 86.57 % "
+        # 如果有返回信息
+        if(estimated_realtime_equity_bond_yield_msg != None):
+
+            # 邮件发送所有估值信息
+            try:
+                email_notification.EmailNotification().send_customized_content(title, estimated_realtime_equity_bond_yield_msg)
+                # 日志记录
+                log_msg = '成功, 成功发送' + current_time + ' 的预估实时股债收益率数据至邮件'
+                custom_logger.CustomLogger().log_writter(log_msg, 'info')
+            except Exception as e:
+                # 日志记录
+                log_msg = '失败, ' + current_time + ' 的预估实时股债收益率数据邮件发送失败 ' + str(e)
+                custom_logger.CustomLogger().log_writter(log_msg, 'error')
+
+            # 微信推送所有估值信息
+            try:
+                wechat_notification.WechatNotification().push_to_all(title, estimated_realtime_equity_bond_yield_msg)
+                # 日志记录
+                log_msg = '成功, 成功推送' + current_time + ' 的预估实时股债收益率数据至微信'
+                custom_logger.CustomLogger().log_writter(log_msg, 'info')
+            except Exception as e:
+                # 日志记录
+                log_msg = '失败, ' + current_time + ' 的预估实时股债收益率数据微信推送失败 ' + str(e)
+                custom_logger.CustomLogger().log_writter(log_msg, 'error')
 
 
 
 if __name__ == '__main__':
     time_start = time.time()
     go = NotificationPlanDuringTrading()
-    go.daily_estimation_notification()
+    #go.daily_estimation_notification()
     #go.minutely_estimation_notification()
+    go.minutely_equity_bond_notification()
     time_end = time.time()
     print(time_end - time_start)
 

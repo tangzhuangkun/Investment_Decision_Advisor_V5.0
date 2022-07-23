@@ -17,7 +17,6 @@ import data_collector.collect_index_weight_from_csindex_file as collect_index_we
 import data_collector.collect_index_weight_from_cnindex_interface as collect_index_weight_from_cnindex_interface
 import data_miner.gather_all_tracking_stocks as gather_all_tracking_stocks
 import web_service.web_service_impl as web_service_impl
-import strategy.time_strategy_realtime_equity_bond_yield as time_strategy_realtime_equity_bond_yield
 
 class Scheduler:
 	# 任务调度器，根据时间安排工作
@@ -35,7 +34,7 @@ class Scheduler:
 		try:
 			# 每天创建一个日级日志文件
 			scheduler.add_job(func=custom_logger.CustomLogger().daily_log_creator,
-							  trigger='cron',hour=0, minute=1, day_of_week='mon,tue,wed,thu,fri',
+							  trigger='cron',hour=1, minute=1, day_of_week='mon,tue,wed,thu,fri',
 							  id='createDailyLogFile')
 
 		except Exception as e:

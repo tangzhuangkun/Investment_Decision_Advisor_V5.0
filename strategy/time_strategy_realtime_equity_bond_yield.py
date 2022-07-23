@@ -10,6 +10,7 @@ sys.path.append("..")
 import database.db_operator as db_operator
 import data_collector.get_target_real_time_indicator_from_interfaces as get_target_real_time_indicator_from_interfaces
 import data_miner.data_miner_common_db_operator as data_miner_common_db_operator
+import data_miner.data_miner_common_target_index_operator as data_miner_common_target_index_operator
 
 class TimeStrategyRealtimeEquityBondYield:
     # 择时策略，估算实时股债收益率
@@ -113,33 +114,50 @@ class TimeStrategyRealtimeEquityBondYield:
         # 当前时间
         current_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
+        # 获取触发值信息
+        # 如 {'trigger_value': Decimal('3.00'), 'trigger_percent': Decimal('95.00')}
+        trigger_info = data_miner_common_target_index_operator.DataMinerCommonTargetIndexOperator().get_given_index_trigger_info("diy_000300-cn10yr","equity_bond_yield")
+        # 触发值
+        trigger_value = trigger_info["trigger_value"]
+        # 触发百分比
+        trigger_percent = trigger_info["trigger_percent"]
+
         # 当前实时预估的股债收益比在近3，5，8年的排位信息
         # 年数, 当前实时股债收益比, 历史排位百分比, 如   (3, 2.8855, 87.81)
+
+        #three_year_equity_bond_yield_info = (3, 3.8855, 95.33)
+        #five_year_equity_bond_yield_info = (5, 3.8855, 95.55)
+        #eight_year_equity_bond_yield_info = (8, 3.8855, 95.88)
         three_year_equity_bond_yield_info = self.estimate_current_realtime_equity_bond_yield_rank(3)
-        #three_year_equity_bond_yield_info = (3, 3.8855, 87.81)
         five_year_equity_bond_yield_info = self.estimate_current_realtime_equity_bond_yield_rank(5)
         eight_year_equity_bond_yield_info = self.estimate_current_realtime_equity_bond_yield_rank(8)
         # 当前预估的实时股债收益比
         estimate_realtime_equity_bond_yield = three_year_equity_bond_yield_info[1]
         # 生成的消息
         msg = ''
-        if(estimate_realtime_equity_bond_yield>=3 or three_year_equity_bond_yield_info[2]>=95 or five_year_equity_bond_yield_info[2]>=95 or eight_year_equity_bond_yield_info[2]>=95):
+        if(estimate_realtime_equity_bond_yield>=trigger_value or three_year_equity_bond_yield_info[2]>=trigger_percent or five_year_equity_bond_yield_info[2]>=trigger_percent or eight_year_equity_bond_yield_info[2]>=trigger_percent):
             msg += current_time + ' \n'
             msg += '基于沪深300指数' + ' \n'
-            if(estimate_realtime_equity_bond_yield>=3):
+            if(estimate_realtime_equity_bond_yield>=trigger_value):
                 msg += '预估实时股债收益比大于阈值3： '  + str(estimate_realtime_equity_bond_yield) + ' \n'
             else:
                 msg += '预估实时股债收益比： ' + str(estimate_realtime_equity_bond_yield) + ' \n'
-            if(three_year_equity_bond_yield_info[2]>=95):
-                msg += '近3年历史排位大于阈值95： '    + str(three_year_equity_bond_yield_info[2]) + ' %' + ' \n'
+
+
+            if(three_year_equity_bond_yield_info[2]>=trigger_percent):
+                msg += '近3年历史排位大于阈值' + str(trigger_percent) +  ":  " + str(three_year_equity_bond_yield_info[2]) + ' %' + ' \n'
             else:
                 msg += '近3年历史排位： ' + str(three_year_equity_bond_yield_info[2]) + ' %' + ' \n'
-            if (five_year_equity_bond_yield_info[2] >= 95):
-                msg += '近5年历史排位大于阈值95： ' + str(five_year_equity_bond_yield_info[2]) + ' %' + ' \n'
+
+
+            if (five_year_equity_bond_yield_info[2] >= trigger_percent):
+                msg += '近5年历史排位大于阈值' + str(trigger_percent) +  ":  " + str(five_year_equity_bond_yield_info[2]) + ' %' + ' \n'
             else:
                 msg += '近5年历史排位： ' + str(five_year_equity_bond_yield_info[2]) + ' %' + ' \n'
-            if (eight_year_equity_bond_yield_info[2] >= 95):
-                msg += '近8年历史排位大于阈值95： ' + str(eight_year_equity_bond_yield_info[2]) + ' %' + ' \n'
+
+
+            if (eight_year_equity_bond_yield_info[2] >= trigger_percent):
+                msg += '近8年历史排位大于阈值' + str(trigger_percent) +  ":  " + str(eight_year_equity_bond_yield_info[2]) + ' %' + ' \n'
             else:
                 msg += '近8年历史排位： ' + str(eight_year_equity_bond_yield_info[2]) + ' %' + ' \n'
         if msg == '':
@@ -148,7 +166,15 @@ class TimeStrategyRealtimeEquityBondYield:
 
     def main(self):
         # 主入口
-        return self.generate_investment_notification_msg()
+
+        # 是否存在需要执行的股债收益比策略
+        is_exist_equity_bond_yield_strategy = data_miner_common_target_index_operator.DataMinerCommonTargetIndexOperator().index_valuated_by_method("equity_bond_yield")
+        # 如果存在需要执行的策略
+        if(is_exist_equity_bond_yield_strategy):
+            return self.generate_investment_notification_msg()
+        # 如果不存在需要执行的策略
+        else:
+            return None
 
 
 if __name__ == '__main__':
@@ -159,8 +185,8 @@ if __name__ == '__main__':
     #result = go.calculate_realtime_equity_bond_yield()
     #result =go.estimate_current_realtime_equity_bond_yield_rank(3)
     #result = go.generate_pure_notification_msg()
-    result = go.generate_investment_notification_msg()
-    #result = go.main()
+    #result = go.generate_investment_notification_msg()
+    result = go.main()
     print(result)
     time_end = time.time()
     print('Time Cost: ' + str(time_end - time_start))

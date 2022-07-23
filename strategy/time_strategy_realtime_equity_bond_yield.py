@@ -56,9 +56,10 @@ class TimeStrategyRealtimeEquityBondYield:
         return realtime_equity_bond_yield
 
 
-    def estimate_current_realtime_equity_bond_yield_rank(self, yearCount):
+    def estimate_current_realtime_equity_bond_yield_rank(self, yearCount, realtime_CSI_300_yield_rate):
         # 估算当前实时股债收益比的与历史数据相比的排位
         # yearCount： 年数，时间跨度，必须为整数，如 2
+        # realtime_CSI_300_yield_rate: 实时股债收益比, 如 0.0806524
         # return：年数, 当前实时股债收益比, 历史排位百分比, 如   (2, 2.8855, 87.81)
         selecting_sql = "select ratio from stock_bond_ratio_di " \
                         "where index_code = '000300' and trading_date > subdate(now(), interval '%s' year) " \
@@ -66,21 +67,19 @@ class TimeStrategyRealtimeEquityBondYield:
 
         # 查询历史上所有股债比
         all_historical_ratio_list = db_operator.DBOperator().select_all("aggregated_data", selecting_sql)
-        # 实时股债收益比
-        estimate_realtime_CSI_300_yield_rate = decimal.Decimal(self.estimate_realtime_equity_bond_yield())
         # 历史上总共有多少数据量
         all_historical_ratio_count = len(all_historical_ratio_list)
         # 如果是极端值，大于历史上的最大值
-        if(estimate_realtime_CSI_300_yield_rate>=all_historical_ratio_list[0]["ratio"]):
-            return (yearCount, round(float(estimate_realtime_CSI_300_yield_rate),4),100)
+        if(realtime_CSI_300_yield_rate>=all_historical_ratio_list[0]["ratio"]):
+            return (yearCount, round(float(realtime_CSI_300_yield_rate),4),100)
         # 如果是极端值，小于历史上的最小值
-        elif(estimate_realtime_CSI_300_yield_rate<all_historical_ratio_list[all_historical_ratio_count-1]["ratio"]):
-            return (yearCount, round(float(estimate_realtime_CSI_300_yield_rate),4), 0)
+        elif(realtime_CSI_300_yield_rate<all_historical_ratio_list[all_historical_ratio_count-1]["ratio"]):
+            return (yearCount, round(float(realtime_CSI_300_yield_rate),4), 0)
         # 处于0%-100%之间
         else:
             for ratio_index in range(all_historical_ratio_count):
-                if(estimate_realtime_CSI_300_yield_rate>all_historical_ratio_list[ratio_index]["ratio"]):
-                    return (yearCount, round(float(estimate_realtime_CSI_300_yield_rate),4), round(((1-ratio_index/all_historical_ratio_count)*100),2))
+                if(realtime_CSI_300_yield_rate>all_historical_ratio_list[ratio_index]["ratio"]):
+                    return (yearCount, round(float(realtime_CSI_300_yield_rate),4), round(((1-ratio_index/all_historical_ratio_count)*100),2))
 
 
     def generate_pure_notification_msg(self):
@@ -126,30 +125,31 @@ class TimeStrategyRealtimeEquityBondYield:
         # 触发百分比
         trigger_percent = trigger_info["trigger_percent"]
 
-        # 当前实时预估的股债收益比在近3，5，8年的排位信息
+        # 实时股债收益比
+        realtime_CSI_300_yield_rate = decimal.Decimal(self.estimate_realtime_equity_bond_yield())
+
+        # 当前实时预估的股债收益比在近3，5，8，10年的排位信息
         # 年数, 当前实时股债收益比, 历史排位百分比, 如   (3, 2.8855, 87.81)
-
-
-        three_year_equity_bond_yield_info = self.estimate_current_realtime_equity_bond_yield_rank(3)
-        five_year_equity_bond_yield_info = self.estimate_current_realtime_equity_bond_yield_rank(5)
-        eight_year_equity_bond_yield_info = self.estimate_current_realtime_equity_bond_yield_rank(8)
-        ten_year_equity_bond_yield_info = self.estimate_current_realtime_equity_bond_yield_rank(10)
+        three_year_equity_bond_yield_info = self.estimate_current_realtime_equity_bond_yield_rank(3, realtime_CSI_300_yield_rate)
+        five_year_equity_bond_yield_info = self.estimate_current_realtime_equity_bond_yield_rank(5, realtime_CSI_300_yield_rate)
+        eight_year_equity_bond_yield_info = self.estimate_current_realtime_equity_bond_yield_rank(8, realtime_CSI_300_yield_rate)
+        ten_year_equity_bond_yield_info = self.estimate_current_realtime_equity_bond_yield_rank(10, realtime_CSI_300_yield_rate)
         # three_year_equity_bond_yield_info = (3, 3.8855, 95.33)
         # five_year_equity_bond_yield_info = (5, 3.8855, 95.55)
         # eight_year_equity_bond_yield_info = (8, 3.8855, 95.88)
         # ten_year_equity_bond_yield_info = (10, 3.8855, 95.00)
 
         # 当前预估的实时股债收益比
-        estimate_realtime_equity_bond_yield = three_year_equity_bond_yield_info[1]
+        realtime_CSI_300_yield_rate = three_year_equity_bond_yield_info[1]
         # 生成的消息
         msg = ''
-        if(estimate_realtime_equity_bond_yield>=trigger_value or three_year_equity_bond_yield_info[2]>=trigger_percent or five_year_equity_bond_yield_info[2]>=trigger_percent or eight_year_equity_bond_yield_info[2]>=trigger_percent or ten_year_equity_bond_yield_info[2]>=trigger_percent):
+        if(realtime_CSI_300_yield_rate>=trigger_value or three_year_equity_bond_yield_info[2]>=trigger_percent or five_year_equity_bond_yield_info[2]>=trigger_percent or eight_year_equity_bond_yield_info[2]>=trigger_percent or ten_year_equity_bond_yield_info[2]>=trigger_percent):
             msg += current_time + ' \n'
             msg += '基于沪深300指数' + ' \n'
-            if(estimate_realtime_equity_bond_yield>=trigger_value):
-                msg += '预估实时股债收益比大于阈值3： '  + str(estimate_realtime_equity_bond_yield) + ' \n'
+            if(realtime_CSI_300_yield_rate>=trigger_value):
+                msg += '预估实时股债收益比大于阈值3： '  + str(realtime_CSI_300_yield_rate) + ' \n'
             else:
-                msg += '预估实时股债收益比： ' + str(estimate_realtime_equity_bond_yield) + ' \n'
+                msg += '预估实时股债收益比： ' + str(realtime_CSI_300_yield_rate) + ' \n'
             if(three_year_equity_bond_yield_info[2]>=trigger_percent):
                 msg += '近3年历史排位大于阈值' + str(trigger_percent) +  ":  " + str(three_year_equity_bond_yield_info[2]) + ' %' + ' \n'
             else:
@@ -192,8 +192,8 @@ if __name__ == '__main__':
     #result = go.calculate_realtime_equity_bond_yield()
     #result =go.estimate_current_realtime_equity_bond_yield_rank(3)
     #result = go.generate_pure_notification_msg()
-    result = go.generate_investment_notification_msg()
-    #result = go.main()
+    #result = go.generate_investment_notification_msg()
+    result = go.main()
     print(result)
     time_end = time.time()
     print('Time Cost: ' + str(time_end - time_start))

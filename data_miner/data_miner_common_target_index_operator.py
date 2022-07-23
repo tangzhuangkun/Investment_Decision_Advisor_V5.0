@@ -106,7 +106,7 @@ class DataMinerCommonTargetIndexOperator:
         # 输入：method, 估值方式，目前有 pe_ttm：市盈率估值法； pb:市净率估值法；equity_bond_yield：股债收益率；
 
         # 输出：
-        # 如 查询 "diy_000300-cn10yr" + "equity_bond_yield"
+        # 如 查询 "diy_000300_cn10yr" + "equity_bond_yield"
         # # 如 {'trigger_value': Decimal('3.00'), 'trigger_percent': Decimal('95.00')}
 
         # 查询SQL
@@ -130,7 +130,7 @@ if __name__ == '__main__':
     time_start = time.time()
     go = DataMinerCommonTargetIndexOperator()
     #result = go.get_given_index_company_index('中证')
-    result = go.get_given_index_trigger_info("diy_000300-cn10yr","equity_bond_yield")
+    result = go.get_given_index_trigger_info("diy_000300_cn10yr","equity_bond_yield")
     print(result)
     time_end = time.time()
     print('time:')

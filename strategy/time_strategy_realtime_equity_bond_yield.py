@@ -120,7 +120,7 @@ class TimeStrategyRealtimeEquityBondYield:
 
         # 获取触发值信息
         # 如 {'trigger_value': Decimal('3.00'), 'trigger_percent': Decimal('95.00')}
-        trigger_info = data_miner_common_target_index_operator.DataMinerCommonTargetIndexOperator().get_given_index_trigger_info("diy_000300-cn10yr","equity_bond_yield")
+        trigger_info = data_miner_common_target_index_operator.DataMinerCommonTargetIndexOperator().get_given_index_trigger_info("diy_000300_cn10yr","equity_bond_yield")
         # 如果无任何触发值信息
         if trigger_info==None:
             return None

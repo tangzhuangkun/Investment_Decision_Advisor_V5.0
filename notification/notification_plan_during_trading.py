@@ -55,7 +55,7 @@ class NotificationPlanDuringTrading:
             log_msg = '失败, '+today+'指数基金估值数据微信推送失败 ' + str(e)
             custom_logger.CustomLogger().log_writter(log_msg, 'error')
 
-    def minutely_estimation_notification(self):
+    def minutely_stock_estimation_notification(self):
         # 估值信息, 邮件通知，微信通知，只要针对 股票
         # 频率：分钟级
 
@@ -109,7 +109,7 @@ class NotificationPlanDuringTrading:
                     custom_logger.CustomLogger().log_writter(log_msg, 'error')
 
 
-    def minutely_equity_bond_notification(self):
+    def minutely_equity_bond_yield_notification(self):
         # 通知 预估的实时股债收益比信息, 邮件通知，微信通知，目前只针对 股债收益比
         # 频率：分钟级
 
@@ -151,8 +151,8 @@ if __name__ == '__main__':
     time_start = time.time()
     go = NotificationPlanDuringTrading()
     #go.daily_estimation_notification()
-    #go.minutely_estimation_notification()
-    go.minutely_equity_bond_notification()
+    #go.minutely_stock_estimation_notification()
+    go.minutely_equity_bond_yield_notification()
     time_end = time.time()
     print(time_end - time_start)
 

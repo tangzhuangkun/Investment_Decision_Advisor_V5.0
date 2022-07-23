@@ -17,6 +17,7 @@ import data_collector.collect_index_weight_from_csindex_file as collect_index_we
 import data_collector.collect_index_weight_from_cnindex_interface as collect_index_weight_from_cnindex_interface
 import data_miner.gather_all_tracking_stocks as gather_all_tracking_stocks
 import web_service.web_service_impl as web_service_impl
+import strategy.time_strategy_realtime_equity_bond_yield as time_strategy_realtime_equity_bond_yield
 
 class Scheduler:
 	# 任务调度器，根据时间安排工作
@@ -46,10 +47,21 @@ class Scheduler:
 
 		try:
 			# 每分钟执行一次股票的监控策略
-			scheduler.add_job(func=notification_plan_during_trading.NotificationPlanDuringTrading().minutely_estimation_notification,
+			scheduler.add_job(func=notification_plan_during_trading.NotificationPlanDuringTrading().minutely_stock_estimation_notification,
 							  trigger='cron',
 							  hour='9,10,11,13,14,15,16',minute='0-59',day_of_week='mon,tue,wed,thu,fri',
 							  id='tradingdaymonitorstocksestimationsandtriggers')
+		except Exception as e:
+			# 抛错
+			custom_logger.CustomLogger().log_writter(e, 'error')
+
+
+		try:
+			# 每分钟执行一次股债收益比的监控策略
+			scheduler.add_job(func=notification_plan_during_trading.NotificationPlanDuringTrading().minutely_equity_bond_yield_notification,
+							  trigger='cron',
+							  hour='9,10,11,13,14,15,16',minute='0-59',second='30',day_of_week='mon,tue,wed,thu,fri',
+							  id='tradingdaymonitorequitybondyield')
 		except Exception as e:
 			# 抛错
 			custom_logger.CustomLogger().log_writter(e, 'error')

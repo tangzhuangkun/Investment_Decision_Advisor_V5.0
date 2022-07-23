@@ -88,11 +88,15 @@ class TimeStrategyRealtimeEquityBondYield:
         # 当前时间
         current_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
-        # 当前实时预估的股债收益比在近3，5，8年的排位信息
+        # 实时股债收益比
+        realtime_CSI_300_yield_rate = decimal.Decimal(self.estimate_realtime_equity_bond_yield())
+
+        # 当前实时预估的股债收益比在近3，5，8，10年的排位信息
         # 年数, 当前实时股债收益比, 历史排位百分比, 如   (2, 2.8855, 87.81)
-        three_year_equity_bond_yield_info = self.estimate_current_realtime_equity_bond_yield_rank(3)
-        five_year_equity_bond_yield_info = self.estimate_current_realtime_equity_bond_yield_rank(5)
-        eight_year_equity_bond_yield_info = self.estimate_current_realtime_equity_bond_yield_rank(8)
+        three_year_equity_bond_yield_info = self.estimate_current_realtime_equity_bond_yield_rank(3, realtime_CSI_300_yield_rate)
+        five_year_equity_bond_yield_info = self.estimate_current_realtime_equity_bond_yield_rank(5, realtime_CSI_300_yield_rate)
+        eight_year_equity_bond_yield_info = self.estimate_current_realtime_equity_bond_yield_rank(8,realtime_CSI_300_yield_rate)
+        ten_year_equity_bond_yield_info = self.estimate_current_realtime_equity_bond_yield_rank(10,realtime_CSI_300_yield_rate)
         # 当前预估的实时股债收益比
         estimate_realtime_equity_bond_yield = three_year_equity_bond_yield_info[1]
 
@@ -104,6 +108,7 @@ class TimeStrategyRealtimeEquityBondYield:
         msg += '近3年历史排位： ' + str(three_year_equity_bond_yield_info[2]) + ' %' + ' \n'
         msg += '近5年历史排位： ' + str(five_year_equity_bond_yield_info[2]) + ' %' + ' \n'
         msg += '近8年历史排位： ' + str(eight_year_equity_bond_yield_info[2]) + ' %' + ' \n'
+        msg += '近10年历史排位： ' + str(ten_year_equity_bond_yield_info[2]) + ' %' + ' \n'
 
         return msg
 

@@ -100,12 +100,32 @@ class DataMinerCommonTargetIndexOperator:
         return selecting_result
     '''
 
+    def get_given_index_trigger_info(self,target_code, method):
+        # 获取特定指数，在一定方法下的 策略触发信息
+        # 输入：target_code，指数代码
+        # 输入：method, 估值方式，目前有 pe_ttm：市盈率估值法； pb:市净率估值法；equity_bond_yield：股债收益率；
+
+        # 输出：
+        # 如 查询 "diy_000300-cn10yr" + "equity_bond_yield"
+        # # 如 [{'index_code': '399965', 'index_name': '中证800地产', 'index_code_with_init': 'sz399965', 'index_code_with_market_code': '399965.XSHE'},，，]
+
+        # 查询SQL
+        selecting_sql = "select trigger_value, trigger_percent " \
+                        "from investment_target where target_type = 'index' and status = 'active' and trade='buy' " \
+                        "and target_code = '%s'  and valuation_method = '%s' " % (target_code, method)
+
+        # 查询
+        selecting_result = db_operator.DBOperator().select_one("target_pool", selecting_sql)
+        # 返回 如
+        # [{'index_code': '399965', 'index_name': '中证800地产', 'index_code_with_init': 'sz399965', 'index_code_with_market_code': '399965.XSHE'},,,]
+        return selecting_result
 
 
 if __name__ == '__main__':
     time_start = time.time()
     go = DataMinerCommonTargetIndexOperator()
-    result = go.get_given_index_company_index('中证')
+    #result = go.get_given_index_company_index('中证')
+    result = go.get_given_index_trigger_info("diy_000300-cn10yr","equity_bond_yield")
     print(result)
     time_end = time.time()
     print('time:')

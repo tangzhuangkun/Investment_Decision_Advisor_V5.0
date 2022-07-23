@@ -107,7 +107,7 @@ class DataMinerCommonTargetIndexOperator:
 
         # 输出：
         # 如 查询 "diy_000300-cn10yr" + "equity_bond_yield"
-        # # 如 [{'index_code': '399965', 'index_name': '中证800地产', 'index_code_with_init': 'sz399965', 'index_code_with_market_code': '399965.XSHE'},，，]
+        # # 如 {'trigger_value': Decimal('3.00'), 'trigger_percent': Decimal('95.00')}
 
         # 查询SQL
         selecting_sql = "select trigger_value, trigger_percent " \
@@ -116,9 +116,14 @@ class DataMinerCommonTargetIndexOperator:
 
         # 查询
         selecting_result = db_operator.DBOperator().select_one("target_pool", selecting_sql)
-        # 返回 如
-        # [{'index_code': '399965', 'index_name': '中证800地产', 'index_code_with_init': 'sz399965', 'index_code_with_market_code': '399965.XSHE'},,,]
-        return selecting_result
+        # 如果存在返回
+        if selecting_result:
+            # 返回 如
+            # {'trigger_value': Decimal('3.00'), 'trigger_percent': Decimal('95.00')}
+            return selecting_result
+        # 如果无任何返回，如 因为状态为 未激活
+        else:
+            return None
 
 
 if __name__ == '__main__':

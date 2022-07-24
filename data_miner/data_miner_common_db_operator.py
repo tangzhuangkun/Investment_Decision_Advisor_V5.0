@@ -15,8 +15,10 @@ class DataMinerCommonDBOperator:
     def __init__(self):
         pass
 
-    def get_the_last_trading_date(self,day):
-        # 获取传入日期参数最近的交易日期, 即上一个交易日
+    def get_the_lastest_trading_date(self,day):
+        # 获取传入日期参数最近的交易日期, 即上一个交易日;
+        # 如果今天有交易，是收盘后调取，则获取的是，今天的交易日期
+        # 仅限于A股
         # day: 交易日期，如 2021-06-09
         # return: 如果存在最近的交易日期，则返回日期
         #         如果不存在，则返回 0000-00-00
@@ -71,7 +73,7 @@ class DataMinerCommonDBOperator:
 if __name__ == '__main__':
     time_start = time.time()
     go = DataMinerCommonDBOperator()
-    #last_trade_day = go.get_the_last_trading_date("2022-03-20")
+    #last_trade_day = go.get_the_lastest_trading_date("2022-03-20")
     #print(last_trade_day)
     #token_list = go.get_all_tokens("lxr")
     #print(token_list)

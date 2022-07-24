@@ -8,7 +8,7 @@ import strategy.stock_strategy_monitoring_estimation as stock_strategy_monitorin
 import log.custom_logger as custom_logger
 import notification.email_notification as email_notification
 import notification.wechat_notification as wechat_notification
-import strategy.time_strategy_realtime_equity_bond_yield as time_strategy_realtime_equity_bond_yield
+import strategy.time_strategy_equity_bond_yield as time_strategy_equity_bond_yield
 
 
 class NotificationPlanDuringTrading:
@@ -118,8 +118,7 @@ class NotificationPlanDuringTrading:
         # 通知的标题
         title = current_time + ' 预估实时股债收益率触发阈值'
         # 预估的实时股债收益比信息
-        estimated_realtime_equity_bond_yield_msg = time_strategy_realtime_equity_bond_yield.TimeStrategyRealtimeEquityBondYield().main()
-        #estimated_realtime_equity_bond_yield_msg = "2022-07-21 22:58:12 \n基于沪深300指数 \n预估实时股债收益比大于阈值3： 3.8855 \n近3年历史排位： 87.81 % \n近5年历史排位： 87.78 % \n近8年历史排位： 86.57 % "
+        estimated_realtime_equity_bond_yield_msg = time_strategy_equity_bond_yield.TimeStrategyEquityBondYield().if_generate_realtime_investment_notification_msg()
         # 如果有返回信息
         if(estimated_realtime_equity_bond_yield_msg != None):
 

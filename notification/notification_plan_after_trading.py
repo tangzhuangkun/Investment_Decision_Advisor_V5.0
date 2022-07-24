@@ -22,31 +22,30 @@ class NotificationPlanAfterTrading:
         title = today+' 股债收益率'
 
         # 股债收益率
-        time_strategy_msg = time_strategy_equity_bond_yield.TimeStrategyEquityBondYield().main()
-        if ("投资" in time_strategy_msg):
-            title = ' 股债收益率, 已进入投资区间'
+        today_equity_bond_yield_msg = time_strategy_equity_bond_yield.TimeStrategyEquityBondYield().generate_today_notification_msg()
+        if today_equity_bond_yield_msg !=None:
 
-        # 邮件发送所有估值信息
-        try:
-            email_notification.EmailNotification().send_customized_content(title, time_strategy_msg)
-            # 日志记录
-            log_msg = '成功, 成功发送' + today + ' 股债收益率数据至邮件'
-            custom_logger.CustomLogger().log_writter(log_msg, 'info')
-        except Exception as e:
-            # 日志记录
-            log_msg = '失败, ' + today + ' 股债收益率数据邮件发送失败 ' + str(e)
-            custom_logger.CustomLogger().log_writter(log_msg, 'error')
+            # 邮件发送所有估值信息
+            try:
+                email_notification.EmailNotification().send_customized_content(title, today_equity_bond_yield_msg)
+                # 日志记录
+                log_msg = '成功, 成功发送' + today + ' 股债收益率数据至邮件'
+                custom_logger.CustomLogger().log_writter(log_msg, 'info')
+            except Exception as e:
+                # 日志记录
+                log_msg = '失败, ' + today + ' 股债收益率数据邮件发送失败 ' + str(e)
+                custom_logger.CustomLogger().log_writter(log_msg, 'error')
 
-        # 微信推送所有估值信息
-        try:
-            wechat_notification.WechatNotification().push_to_all(title, time_strategy_msg)
-            # 日志记录
-            log_msg = '成功, 成功推送' + today + ' 股债收益率数据至微信'
-            custom_logger.CustomLogger().log_writter(log_msg, 'info')
-        except Exception as e:
-            # 日志记录
-            log_msg = '失败, ' + today + ' 股债收益率数据微信推送失败 ' + str(e)
-            custom_logger.CustomLogger().log_writter(log_msg, 'error')
+            # 微信推送所有估值信息
+            try:
+                wechat_notification.WechatNotification().push_to_all(title, today_equity_bond_yield_msg)
+                # 日志记录
+                log_msg = '成功, 成功推送' + today + ' 股债收益率数据至微信'
+                custom_logger.CustomLogger().log_writter(log_msg, 'info')
+            except Exception as e:
+                # 日志记录
+                log_msg = '失败, ' + today + ' 股债收益率数据微信推送失败 ' + str(e)
+                custom_logger.CustomLogger().log_writter(log_msg, 'error')
 
 
 if __name__ == '__main__':

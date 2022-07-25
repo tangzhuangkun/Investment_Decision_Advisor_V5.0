@@ -7,8 +7,8 @@ select index_code,
        pe,
        /*  使用cast代替round，解决精度问题 */
        cast(1/pe as decimal(9,6))             as stock_yield_rate,
-       round(10y / 100, 6)                    as bond_rate,
-       round(1 / pe, 6) / round(10y / 100, 6) as ratio
+       cast(10y/100 as decimal(9,6))                    as bond_rate,
+       cast(cast(1/pe as decimal(9,6)) / cast(10y/100 as decimal(9,6)) as decimal(20,17)) as ratio
 from (
     /*  使用沪深300市值加权的市盈率作为参考 */
       (select index_code, index_name, pe_ttm_mcw as pe, trading_date

@@ -120,6 +120,10 @@ class TimeStrategyEquityBondYield:
     def generate_today_notification_msg(self):
         # 每日收盘后，单纯生成统计数据的通知信息
 
+        # 准备数据，收集最新沪深300指数市值加权估值和国债利率,
+        # 并计算当日收盘后的真实股债收益率
+        self.prepare_index_estimation_bond_rate_and_cal_yield()
+
         # 当天的日期
         today = time.strftime("%Y-%m-%d", time.localtime())
         # 今天收盘的股债收益比
@@ -230,10 +234,10 @@ if __name__ == '__main__':
     #result = go.generate_realtime_investment_notification_msg()
     #go.prepare_index_estimation_bond_rate_and_cal_yield()
     #result = go.main()
-    #result = go.generate_today_notification_msg()
+    result = go.generate_today_notification_msg()
     #result = go.estimate_realtime_equity_bond_yield()
     #result = go.get_the_lastest_trading_day_CSI_300_yield_ratio()
-    result = go.if_generate_realtime_investment_notification_msg()
+    #result = go.if_generate_realtime_investment_notification_msg()
     print(result)
     time_end = time.time()
     print('Time Cost: ' + str(time_end - time_start))

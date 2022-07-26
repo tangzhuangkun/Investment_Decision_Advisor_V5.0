@@ -55,12 +55,12 @@ class WechatNotification:
         # param: send_content, 自定义的内容
 
         # 获取token，决定需要推送给哪些人
-        tokens = data_miner_common_db_operator.DataMinerCommonDBOperator().get_all_tokens("ServerChan")
+        users_list = data_miner_common_db_operator.DataMinerCommonDBOperator().get_all_channel_users("wechat")
         # 需要发送的文本中，每个换行符都替换成两个
         replaced_send_content = self.replace_one_enter_key_with_two(send_content)
         # 推送给所有人
-        for token in tokens:
-            self.push_customized_content(token, object, replaced_send_content)
+        for user in users_list:
+            self.push_customized_content(user, object, replaced_send_content)
 
 
 if __name__ == '__main__':

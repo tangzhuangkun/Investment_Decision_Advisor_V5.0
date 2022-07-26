@@ -70,6 +70,23 @@ class DataMinerCommonDBOperator:
 
         return selecting_result["token"]
 
+    def get_all_channel_users(self,channel):
+        # 获取某个推送渠道的全部用户
+        # channel: 渠道代码，如 email,wechat 等
+        # return: 如果存在用户，则返回全部用户的联系ID,为有一个list
+        #         如果不存在，则返回空列表， []
+
+        # 返回的全部用户的联系ID 列表
+        user_list = list()
+        # 查询SQL
+        selecting_sql = "SELECT contact_id FROM target_users WHERE channel = '%s' " % (channel)
+        # 查询
+        selecting_result = db_operator.DBOperator().select_all("target_pool", selecting_sql)
+        # 将令牌从dict转为list
+        for user_unit in selecting_result:
+            user_list.append(user_unit['contact_id'])
+        return user_list
+
 if __name__ == '__main__':
     time_start = time.time()
     go = DataMinerCommonDBOperator()
@@ -77,8 +94,9 @@ if __name__ == '__main__':
     #print(last_trade_day)
     #token_list = go.get_all_tokens("lxr")
     #print(token_list)
-    token = go.get_one_token("lxr")
-    print(token)
+    #token = go.get_one_token("lxr")
+    result = go.get_all_channel_users("email")
+    print(result)
 
     time_end = time.time()
     print('Time Cost: ' + str(time_end - time_start))

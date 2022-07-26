@@ -9,7 +9,7 @@ import sys
 sys.path.append("..")
 import log.custom_logger as custom_logger
 import conf
-
+import data_miner.data_miner_common_db_operator as data_miner_common_db_operator
 
 class EmailNotification:
 	# 通过邮件发送提醒
@@ -24,8 +24,8 @@ class EmailNotification:
 		self.email_pass = conf.email_pass
 		# 发件人账号
 		self.email_sender = conf.email_sender
-		# 接收邮件
-		self.email_receivers = conf.email_receivers
+		# 接收邮件的账号
+		self.email_receivers = data_miner_common_db_operator.DataMinerCommonDBOperator().get_all_channel_users("email")
 		# 获取当前时间
 		self.today= time.strftime("%Y-%m-%d", time.localtime())
 		# 设置邮件主题
@@ -70,8 +70,8 @@ if __name__ == '__main__':
 	time_start = time.time()
 	go = EmailNotification()
 	#real_time_pe = go.get_index_real_time_pe('399997')
-	send_content = 'hello 2022-04-08  '
-	go.send_customized_content(' 基金行情分析', send_content)
+	send_content = 'hello 2022-07-26  '
+	go.send_customized_content(' 基金行情分析test', send_content)
 	time_end = time.time()
 	print(time_end-time_start)
 	

@@ -29,15 +29,6 @@ CREATE TABLE IF NOT EXISTS `investment_target`(
 COMMENT '跟踪标的及策略池';
 
 
-INSERT INTO `target_pool`.`investment_target`(`target_type`, `target_code`, `target_name`, `index_company`, `exchange_location`, `exchange_location_mic`, `hold_or_not`, `trade`, `valuation_method`, `trigger_value`, `trigger_percent`, `buy_and_hold_strategy`, `sell_out_strategy`, `monitoring_frequency`, `holder`, `status`, `p_day`, `submission_time`, `update_time`) VALUES ('index', '399997', '中证白酒', '中证', 'sz', 'XSHE', 0, 'buy', 'pe_ttm', 25.00, 30.00, NULL, NULL, 'daily', 'zhuangkun', 'active', '2022-03-27', '2022-04-05 14:50:20', '2022-04-26 20:45:49');
-INSERT INTO `target_pool`.`investment_target`(`target_type`, `target_code`, `target_name`, `index_company`, `exchange_location`, `exchange_location_mic`, `hold_or_not`, `trade`, `valuation_method`, `trigger_value`, `trigger_percent`, `buy_and_hold_strategy`, `sell_out_strategy`, `monitoring_frequency`, `holder`, `status`, `p_day`, `submission_time`, `update_time`) VALUES ('index', '399986', '中证银行', '中证', 'sz', 'XSHE', 0, 'buy', 'pb', 0.90, 2.00, NULL, NULL, 'daily', 'zhuangkun', 'active', '2022-03-27', '2022-04-05 14:50:20', NULL);
-INSERT INTO `target_pool`.`investment_target`(`target_type`, `target_code`, `target_name`, `index_company`, `exchange_location`, `exchange_location_mic`, `hold_or_not`, `trade`, `valuation_method`, `trigger_value`, `trigger_percent`, `buy_and_hold_strategy`, `sell_out_strategy`, `monitoring_frequency`, `holder`, `status`, `p_day`, `submission_time`, `update_time`) VALUES ('stock', '000002', '万科A', NULL, 'sz', 'XSHE', 0, 'buy', 'pb', 0.85, 0.10, NULL, NULL, 'minutely', 'zhuangkun', 'active', '2022-03-27', '2022-04-05 14:50:20', '2022-07-22 19:01:00');
-INSERT INTO `target_pool`.`investment_target`(`target_type`, `target_code`, `target_name`, `index_company`, `exchange_location`, `exchange_location_mic`, `hold_or_not`, `trade`, `valuation_method`, `trigger_value`, `trigger_percent`, `buy_and_hold_strategy`, `sell_out_strategy`, `monitoring_frequency`, `holder`, `status`, `p_day`, `submission_time`, `update_time`) VALUES ('stock', '00700', '腾讯控股', NULL, 'hk', 'XHKG', 0, 'buy', 'pe_ttm', 11.20, 0.00, NULL, NULL, 'minutely', 'zhuangkun', 'active', '2022-04-09', '2022-04-09 21:30:43', '2022-05-12 22:57:36');
-INSERT INTO `target_pool`.`investment_target`(`target_type`, `target_code`, `target_name`, `index_company`, `exchange_location`, `exchange_location_mic`, `hold_or_not`, `trade`, `valuation_method`, `trigger_value`, `trigger_percent`, `buy_and_hold_strategy`, `sell_out_strategy`, `monitoring_frequency`, `holder`, `status`, `p_day`, `submission_time`, `update_time`) VALUES ('stock', '09633', '农夫山泉', NULL, 'hk', 'XHKG', 0, 'buy', 'pe_ttm', 25.00, 0.00, NULL, NULL, 'minutely', 'zhuangkun', 'active', '2022-04-11', '2022-04-11 22:24:23', '2022-04-25 22:20:23');
-INSERT INTO `target_pool`.`investment_target`(`target_type`, `target_code`, `target_name`, `index_company`, `exchange_location`, `exchange_location_mic`, `hold_or_not`, `trade`, `valuation_method`, `trigger_value`, `trigger_percent`, `buy_and_hold_strategy`, `sell_out_strategy`, `monitoring_frequency`, `holder`, `status`, `p_day`, `submission_time`, `update_time`) VALUES ('stock', '000858', '五粮液', NULL, 'sz', 'XSHE', 0, 'buy', 'pe_ttm', 17.00, 26.50, NULL, NULL, 'minutely', 'zhuangkun', 'active', '2022-05-11', '2022-05-11 23:58:26', '2022-05-12 23:06:03');
-INSERT INTO `target_pool`.`investment_target`(`target_type`, `target_code`, `target_name`, `index_company`, `exchange_location`, `exchange_location_mic`, `hold_or_not`, `trade`, `valuation_method`, `trigger_value`, `trigger_percent`, `buy_and_hold_strategy`, `sell_out_strategy`, `monitoring_frequency`, `holder`, `status`, `p_day`, `submission_time`, `update_time`) VALUES ('stock', '600519', '贵州茅台', NULL, 'sh', 'XSHG', 0, 'buy', 'pe_ttm', 20.00, 28.00, NULL, NULL, 'minutely', 'zhuangkun', 'active', '2022-05-11', '2022-05-12 00:00:23', '2022-05-12 22:56:34');
-INSERT INTO `target_pool`.`investment_target`(`target_type`, `target_code`, `target_name`, `index_company`, `exchange_location`, `exchange_location_mic`, `hold_or_not`, `trade`, `valuation_method`, `trigger_value`, `trigger_percent`, `buy_and_hold_strategy`, `sell_out_strategy`, `monitoring_frequency`, `holder`, `status`, `p_day`, `submission_time`, `update_time`) VALUES ('stock', '000568', '泸州老窖', NULL, 'sz', 'XSHE', 0, 'buy', 'pe_ttm', 17.80, 30.00, NULL, NULL, 'minutely', 'zhuangkun', 'active', '2022-05-14', '2022-05-14 14:23:26', NULL);
-INSERT INTO `target_pool`.`investment_target`(`target_type`, `target_code`, `target_name`, `index_company`, `exchange_location`, `exchange_location_mic`, `hold_or_not`, `trade`, `valuation_method`, `trigger_value`, `trigger_percent`, `buy_and_hold_strategy`, `sell_out_strategy`, `monitoring_frequency`, `holder`, `status`, `p_day`, `submission_time`, `update_time`) VALUES ('index', 'diy_000300_cn10yr', '股债收益率', NULL, 'sh', 'XSHG', 0, 'buy', 'equity_bond_yield', 3.00, 95.00, NULL, NULL, 'minutely', 'zhuangkun', 'active', '2022-07-23', '2022-07-23 20:27:48', '2022-07-23 23:33:46');
 
 
 /* --------- user：investor1 ------ */
@@ -59,3 +50,25 @@ CREATE TABLE IF NOT EXISTS `all_tracking_stocks_rf`(
 	PRIMARY KEY ( `id` )
 	)ENGINE=InnoDB DEFAULT CHARSET=utf8
 COMMENT '所有的需要被跟踪和收集数据的股票，可实时更新';
+
+
+
+/* --------- user：investor1 ------ */
+/* --------- db：target_pool ------ */
+/*创建一个表，target_users，用于存储 所有的需要被通知的用户*/
+
+USE target_pool;
+DROP TABLE IF EXISTS `target_users`;
+CREATE TABLE IF NOT EXISTS `target_users`(
+	`id` MEDIUMINT NOT NULL AUTO_INCREMENT,
+	`user_name`  VARCHAR(30)  NOT NULL COMMENT '用户名称，如 zhuangkun',
+	`contact_id`  VARCHAR(50) NOT NULL COMMENT '通知方式的ID，如 邮箱地址，微信token等',
+    `channel`  VARCHAR(50) NOT NULL COMMENT '通知渠道，如 wechat,email',
+    `platform_name` VARCHAR(100) DEFAULT NULL COMMENT '平台中文名称',
+	`platform_code` VARCHAR(100) DEFAULT NULL COMMENT '平台代码',
+    `submission_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '提交时间',
+    `update_time` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    UNIQUE INDEX (user_name, contact_id, channel),
+	PRIMARY KEY ( `id` )
+	)ENGINE=InnoDB DEFAULT CHARSET=utf8
+COMMENT '所有的需要被通知的用户';

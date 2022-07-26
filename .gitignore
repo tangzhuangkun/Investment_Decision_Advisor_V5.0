@@ -127,8 +127,8 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-
 conf.py
+db_init_content.sql
 
 /config/
 daily_log

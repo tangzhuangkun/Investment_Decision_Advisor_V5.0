@@ -50,20 +50,39 @@ class GetTargetRealTimeIndicatorFromInterfaces:
                                     timeout=10).text
 
             data_list = raw_data.split("~")
-            if indicator == "pe_ttm":
-                return data_list[39]
-            elif indicator == "pb":
-                return data_list[46]
-            elif indicator == "dr_ttm":
-                return data_list[64]
-            elif indicator == "change":
-                return data_list[32]
+            # 香港市场接口的解析规则
+            if stock_id[:2] == "hk":
+                if indicator == "pe_ttm":
+                    return data_list[57]
+                elif indicator == "pb":
+                    return data_list[58]
+                elif indicator == "dr_ttm":
+                    return data_list[47]
+                elif indicator == "change":
+                    return data_list[32]
+                else:
+                    # 日志记录
+                    msg = "Unknown indicator"
+                    custom_logger.CustomLogger().log_writter(msg, lev='warning')
+                    # 返回 空
+                    return -10000
+
+            # A股市场接口的解析规则
             else:
-                # 日志记录
-                msg = "Unknown indicator"
-                custom_logger.CustomLogger().log_writter(msg, lev='warning')
-                # 返回 空
-                return -10000
+                if indicator == "pe_ttm":
+                    return data_list[39]
+                elif indicator == "pb":
+                    return data_list[46]
+                elif indicator == "dr_ttm":
+                    return data_list[64]
+                elif indicator == "change":
+                    return data_list[32]
+                else:
+                    # 日志记录
+                    msg = "Unknown indicator"
+                    custom_logger.CustomLogger().log_writter(msg, lev='warning')
+                    # 返回 空
+                    return -10000
 
         # 如果读取超时，重新在执行一遍解析页面
         except requests.exceptions.ReadTimeout:
@@ -175,8 +194,8 @@ class GetTargetRealTimeIndicatorFromInterfaces:
 if __name__ == '__main__':
     time_start = time.time()
     go = GetTargetRealTimeIndicatorFromInterfaces()
-    #result = go.get_single_target_real_time_indicator("sh510330","change")
-    result = go.get_real_time_treasury_yield("globalbd_gcny10")
+    result = go.get_single_target_real_time_indicator("sz000002", "pe_ttm")
+    # result = go.get_real_time_treasury_yield("globalbd_gcny10")
     print(result)
     time_end = time.time()
     print('Time Cost: ' + str(time_end - time_start))

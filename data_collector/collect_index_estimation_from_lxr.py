@@ -26,6 +26,7 @@ class CollectIndexEstimationFromLXR:
 
         # 要从理杏仁采集估值的指数
         self.index_code_name_dict = { "1000002":"沪深A股","000300":"沪深300"}
+        #self.index_code_name_dict = {"1000002":"沪深A股"}
         # 获取当前时间
         self.today = time.strftime("%Y-%m-%d", time.localtime())
 
@@ -43,7 +44,7 @@ class CollectIndexEstimationFromLXR:
         headers = {'Content-Type': 'application/json'}
         # 理杏仁 获取A股指数基本面数据 接口，文档如下
         # https://www.lixinger.com/open/api/doc?api-key=a%2Findex%2Ffundamental
-        url = 'https://open.lixinger.com/api/a/index/fundamental'
+        url = 'https://open.lixinger.com/api/cn/index/fundamental'
 
         # 接口参数，
         # dyr：股息率
@@ -71,6 +72,10 @@ class CollectIndexEstimationFromLXR:
                              index_code
                          ],
                      "metricsList": [
+                         "tv",
+                         "ta",
+                         "cp",
+                         "cpc",
                         "pe_ttm.mcw",
                         "pe_ttm.ew",
                         "pe_ttm.ewpvo",
@@ -104,7 +109,7 @@ class CollectIndexEstimationFromLXR:
                       index_code+ '' +self.index_code_name_dict.get(index_code) + ' ' + start_date + ' ' + end_date \
                       + ' 报错token为 ' + token
                 custom_logger.CustomLogger().log_writter(msg, 'error')
-                return self.collect_index_estimation_in_a_period_time(index_code, start_date, end_date)
+                return self.collect_index_estimation_in_a_period_time(start_date, end_date)
 
             try:
                 # 数据存入数据库
@@ -154,6 +159,10 @@ class CollectIndexEstimationFromLXR:
                  "stockCodes":
                      index_code_list,
                  "metricsList": [
+                     "tv",
+                     "ta",
+                     "cp",
+                     "cpc",
                      "pe_ttm.mcw",
                      "pe_ttm.ew",
                      "pe_ttm.ewpvo",
@@ -240,6 +249,13 @@ class CollectIndexEstimationFromLXR:
             index_name = self.index_code_name_dict[index_code]
             trading_date = piece['date'][:10]
 
+            ta = 0
+            if 'ta' in piece:
+                ta = piece['ta']
+
+            tv = piece['tv']
+            cp = piece['cp']
+            cpc = piece['cpc']
 
             pe_ttm_mcw = piece['pe_ttm']['mcw']
             pe_ttm_ew = piece['pe_ttm']['ew']
@@ -266,7 +282,7 @@ class CollectIndexEstimationFromLXR:
             dyr_median = piece['dyr']['median']
 
             # 存入数据库
-            inserting_sql = "INSERT INTO index_estimation_from_lxr_di (index_code, index_name, trading_date,pe_ttm_mcw,pe_ttm_ew,pe_ttm_ewpvo,pe_ttm_avg,pe_ttm_median,pb_mcw,pb_ew,pb_ewpvo,pb_avg,pb_median,ps_ttm_mcw,ps_ttm_ew,ps_ttm_ewpvo,ps_ttm_avg,ps_ttm_median,dyr_mcw,dyr_ew,dyr_ewpvo,dyr_avg,dyr_median,source,submission_date) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s' )" % (index_code,index_name,trading_date,pe_ttm_mcw,pe_ttm_ew,pe_ttm_ewpvo,pe_ttm_avg,pe_ttm_median,pb_mcw,pb_ew,pb_ewpvo,pb_avg,pb_median,ps_ttm_mcw,ps_ttm_ew,ps_ttm_ewpvo,ps_ttm_avg,ps_ttm_median,dyr_mcw,dyr_ew,dyr_ewpvo,dyr_avg,dyr_median,'理杏仁',self.today)
+            inserting_sql = "INSERT INTO index_estimation_from_lxr_di (index_code, index_name, trading_date,tv,ta,cp,cpc,pe_ttm_mcw,pe_ttm_ew,pe_ttm_ewpvo,pe_ttm_avg,pe_ttm_median,pb_mcw,pb_ew,pb_ewpvo,pb_avg,pb_median,ps_ttm_mcw,ps_ttm_ew,ps_ttm_ewpvo,ps_ttm_avg,ps_ttm_median,dyr_mcw,dyr_ew,dyr_ewpvo,dyr_avg,dyr_median,source,submission_date) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s' )" % (index_code,index_name,trading_date,tv,ta,cp,cpc,pe_ttm_mcw,pe_ttm_ew,pe_ttm_ewpvo,pe_ttm_avg,pe_ttm_median,pb_mcw,pb_ew,pb_ewpvo,pb_avg,pb_median,ps_ttm_mcw,ps_ttm_ew,ps_ttm_ewpvo,ps_ttm_avg,ps_ttm_median,dyr_mcw,dyr_ew,dyr_ewpvo,dyr_avg,dyr_median,'理杏仁',self.today)
             db_operator.DBOperator().operate("insert", "financial_data", inserting_sql)
 
 
@@ -287,7 +303,9 @@ class CollectIndexEstimationFromLXR:
 
         # 如果表格为空，收集从 2010-01-01至今的数据
         if selecting_result["total_rows"] == 0:
-            self.collect_index_estimation_in_a_period_time(start_date = "2010-01-01", end_date = self.today)
+            # 分开收集，避开平台最多10年跨度限制
+            self.collect_index_estimation_in_a_period_time(start_date="2010-01-01", end_date="2019-12-31")
+            self.collect_index_estimation_in_a_period_time(start_date="2020-01-01", end_date=self.today)
         else:
             # 获取 理杏仁的指数估值信息表 index_estimation_from_lxr_di 已收集的最新交易日
             try:
@@ -323,8 +341,8 @@ class CollectIndexEstimationFromLXR:
 if __name__ == '__main__':
     time_start = time.time()
     go = CollectIndexEstimationFromLXR()
-    #go.collect_index_estimation_in_a_period_time("2021-11-01","2021-11-05")
-    #go.collect_index_estimation_in_a_special_date("2021-11-05")
+    #go.collect_index_estimation_in_a_period_time("2010-01-01","2015-12-31")
+    #go.collect_index_estimation_in_a_special_date("2022-07-05")
     go.main()
     time_end = time.time()
     print('Time Cost: ' + str(time_end - time_start))

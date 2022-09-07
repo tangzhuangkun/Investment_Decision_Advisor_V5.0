@@ -78,6 +78,17 @@ class Scheduler:
 			custom_logger.CustomLogger().log_writter(e, 'error')
 
 
+		try:
+			# 每个交易日14：50执行一次股债收益比的监控策略
+			scheduler.add_job(func=notification_plan_during_trading.NotificationPlanDuringTrading().minutely_equity_bond_yield_notification,
+							  trigger='cron',
+							  month='1-12', day_of_week='mon,tue,wed,thu,fri', hour=14, minute=50,
+							  id='tradingDayMonitorEquityBondYieldTwo')
+		except Exception as e:
+			# 抛错
+			custom_logger.CustomLogger().log_writter(e, 'error')
+
+
 		#########  盘后(15:00-23:59)  #########
 		try:
 			# 每个交易日18：00 聚合汇总所有需要被跟踪的股票

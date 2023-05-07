@@ -243,3 +243,26 @@ stock_code	stock_name	date	pe_ttm	pb	dividend_yield	row_num	total_record	percent
 600064	南京高科	2022-04-25	5.0040314784824504000000	0.7871833206535755000000	0.0600600600600600500000	10	2983	0.0030181086519114686
 
 """
+
+
+
+
+"""
+-- 某个股票代码，当前最新市净率估值，在过去X年中，处于什么百分比
+select raw.stock_code, raw.stock_name, raw.date, raw.pb, raw.row_num, record.total_record, raw.percent_num from 
+(select stock_code, stock_name, date, pb,
+row_number() OVER (partition by stock_code ORDER BY pb asc) AS row_num,  
+percent_rank() OVER (partition by stock_code ORDER BY pb asc) AS percent_num
+from stocks_main_estimation_indexes_historical_data
+where stock_code = "000429"
+and `date` > SUBDATE(NOW(),INTERVAL 5 YEAR)) raw
+left join 
+(select stock_code, count(1) as total_record from stocks_main_estimation_indexes_historical_data where stock_code = "000429" and `date` > SUBDATE(NOW(),INTERVAL 5 YEAR) group by stock_code) as record
+on raw.stock_code = record.stock_code
+where raw.date = (select max(date) from stocks_main_estimation_indexes_historical_data)
+order by raw.percent_num asc;
+
+stock_code	stock_name	date	pb	row_num	total_record	percent_num
+000429	粤高速A	2023-05-05	1.8041642748988327000000	674	1214	0.5548227535037098
+
+"""

@@ -7,7 +7,7 @@ import json
 import sys
 import time
 from datetime import date
-
+from dateutil.relativedelta import relativedelta
 import requests
 
 sys.path.append("..")
@@ -324,7 +324,52 @@ class CollectStockHistoricalEstimationInfo:
             custom_logger.CustomLogger().log_writter(msg, 'error')
             return 'Unavailable Market Code'
 
-    def collect_a_period_time_estimation(self, stock_code, stock_info_dict, start_date, end_date, exchange_location_mic):
+    '''
+    获取需要收集数据的起止日期list
+    当需要收集的两个日期超过10年时，将日期按9年进行分割
+    param: start_date， 收集数据的起始日期，必选， 如 2010-01-01
+    param: end_date， 收集数据的截止日期， 必选， 如 2032-01-05
+    return:
+        一个日期list，
+        例如 ['2010-01-01', '2019-01-01', '2019-01-02', '2028-01-02', '2028-01-03', '2032-01-05']
+    '''
+    def collect_data_date_when_period_longger_than_ten_years_list(self, start_date, end_date):
+        # start_date = '2010-01-01'
+        # end_date = '2020-08-01'
+        # 用于保存需要收集的日期list
+        date_list = []
+        # 将日期str转化为datetime
+        start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d').date()
+        end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d').date()
+        # 两个日期间隔的年数
+        years_diff = relativedelta(dt1=end_date, dt2=start_date).years
+        # 如果间隔少于10年
+        if (years_diff < 10):
+            # 直接收集两个起止日期即可
+            date_list.append(str(start_date))
+            date_list.append(str(end_date))
+            return date_list
+        # 如果间隔多于10年，需要按9年为间隔进行分割
+        else:
+            while (start_date < end_date):
+                # 起始日期加9年
+                nine_more_years = start_date + relativedelta(years=9)
+                # 起始日期加9年又1天
+                nine_more_years_add_one_day = nine_more_years + relativedelta(days=1)
+                # 如果9年又1天后仍小于截止日期
+                if (nine_more_years_add_one_day < end_date):
+                    date_list.append(str(start_date))
+                    date_list.append(str(nine_more_years))
+                    # 起始日期变为 9年又1天后
+                    start_date = nine_more_years_add_one_day
+                # 如果9年又1天后大于截止日期
+                else:
+                    date_list.append(str(start_date))
+                    date_list.append(str(end_date))
+                    return date_list
+
+    """
+        def collect_a_period_time_estimation(self, stock_code, stock_info_dict, start_date, end_date, exchange_location_mic):
         # 调取理杏仁接口，获取单个股票一段时间范围内，该股票估值数据, 并储存
         # param: stock_code, 股票代码, 如 000001
         # param:  stock_info_dict 股票代码,名称,上市地 字典, 只能1支股票，
@@ -385,6 +430,78 @@ class CollectStockHistoricalEstimationInfo:
             # 日志记录失败
             msg = '数据存入数据库失败。 ' + '理杏仁接口返回为 '+str(content) + '。 抛错为 '+ str(e) + ' 使用的Token为' + token
             custom_logger.CustomLogger().log_writter(msg, 'error')
+    """
+    def collect_a_period_time_estimation(self, stock_code, stock_info_dict, start_date, end_date, exchange_location_mic):
+        # 调取理杏仁接口，获取单个股票一段时间范围内，该股票估值数据, 并储存
+        # param: stock_code, 股票代码, 如 000001
+        # param:  stock_info_dict 股票代码,名称,上市地 字典, 只能1支股票，
+        #         如  {'000001': {'stock_code': '000001', 'stock_name': '平安银行', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}}
+        # param:  start_date, 开始时间，如 2020-11-12
+        # param:  end_date, 结束时间，默认为空，如 2020-11-13
+        # :param exchange_location_mic: 交易所MIC码（如XSHG, XSHE，XHKG）均可， 大小写均可
+        # 输出： 将获取到股票估值数据存入数据库
+
+        # 上市地代码或mic码，转为大写
+        exchange_location_mic = exchange_location_mic.upper()
+        # 判断股票属于哪个交易市场，并决定使用理杏仁哪个获取基本面数据URL
+        # 理杏仁 获取基本面数据 接口
+        url = self.tell_exchange_market_and_determine_url(exchange_location_mic)
+        # 判断股票属于哪个交易市场，并决定需要获取哪些指标
+        estimations_list = self.tell_exchange_market_and_determine_what_estimations_need_to_get(exchange_location_mic)
+
+        # 随机获取一个token
+        token = data_miner_common_db_operator.DataMinerCommonDBOperator().get_one_token("lxr")
+        # 理杏仁要求 在请求的headers里面设置Content-Type为application/json。
+        headers = {'Content-Type': 'application/json'}
+
+        # 获取需要收集数据的起止日期list
+        # 当需要收集的两个日期超过10年时，将日期按9年进行分割
+        date_list = self.collect_data_date_when_period_longger_than_ten_years_list(start_date, end_date)
+        # 遍历需要收集数据的起止日期list
+        for i in range(0, len(date_list), 2):
+            # 收集起始时间
+            colleting_start_date = date_list[i]
+            # 收集结束时间
+            colleting_end_date = date_list[i+1]
+
+            parms = {"token": token,
+                     "startDate": colleting_start_date,
+                     "endDate": colleting_end_date,
+                     "stockCodes":
+                         [stock_code],
+                     "metricsList": estimations_list}
+            # 日志记录
+            #msg = '向理杏仁请求的接口参数 ' + str(parms)
+            #custom_logger.CustomLogger().log_writter(msg, 'info')
+            values = json.dumps(parms)
+            # 调用理杏仁接口
+            req = requests.post(url, data=values, headers=headers)
+            content = req.json()
+
+            # 日志记录
+            #msg = '理杏仁接口返回 ' + str(content)
+            #custom_logger.CustomLogger().log_writter(msg, 'info')
+
+            # content 如 {'code': 0, 'message': 'success', 'data': [{'date': '2020-11-13T00:00:00+08:00', 'pe_ttm': 48.04573277785343, 'd_pe_ttm': 47.83511443886097, 'pb': 14.42765025023379, 'pb_wo_gw': 14.42765025023379, 'ps_ttm': 22.564315310000808, 'pcf_ttm': 49.80250701327664, 'ev_ebit_r': 33.88432187818624, 'ey': 0.029323867066169462, 'dyr': 0.00998533724340176, 'sp': 1705, 'tv': 2815500, 'shn': 114300, 'mc': 2141817249000, 'cmc': 2141817249000, 'ecmc': 899670265725, 'ecmc_psh': 7871131, 'ha_shm': 173164289265, 'fb': 17366179363, 'sb': 2329851810, 'fc_rights': 1705, 'bc_rights': 1705, 'lxr_fc_rights': 1705, 'stockCode': '600519'}, {'date': '2020-11-12T00:00:00+08:00', 'pe_ttm': 48.88519458398379, 'd_pe_ttm': 48.67089629172529, 'pb': 14.679732186277464, 'pb_wo_gw': 14.679732186277464, 'ps_ttm': 22.95856220330575, 'pcf_ttm': 50.672663426136175, 'ev_ebit_r': 34.47543387050795, 'ey': 0.028824017925678805, 'dyr': 0.009813867960963575, 'sp': 1734.79, 'tv': 2347300, 'shn': 114300, 'mc': 2179239381462, 'cmc': 2179239381462, 'ecmc': 915389431248, 'ecmc_psh': 8008656, 'ha_shm': 176618263840, 'fb': 17207679699, 'sb': 2426239128, 'fc_rights': 1734.79, 'bc_rights': 1734.79, 'lxr_fc_rights': 1734.79, 'stockCode': '600519'}]}
+
+
+            if 'error' in content and content.get('error').get('message') == "Illegal token.":
+                # 日志记录失败
+                msg = '使用无效TOKEN ' + token + ' ' + '执行函数collect_a_period_time_estimation获取股票代码 ' + \
+                      stock_code + ' ' +str(stock_info_dict.get(stock_code).get('stock_name')) + ' ' + colleting_start_date + ' ' + colleting_end_date + ' 失败'
+                custom_logger.CustomLogger().log_writter(msg, 'error')
+                return self.collect_a_period_time_estimation(stock_code, stock_info_dict, colleting_start_date, colleting_end_date, exchange_location_mic)
+
+            try:
+                # 数据存入数据库
+                self.save_content_into_db(content, stock_info_dict, "period")
+                # 日志记录
+                msg = "收集了 "+ exchange_location_mic +"."+stock_code + " 从" + colleting_start_date+" 至 "+colleting_end_date +" 的估值数据"
+                custom_logger.CustomLogger().log_writter(msg, 'info')
+            except Exception as e:
+                # 日志记录失败
+                msg = '数据存入数据库失败。 ' + '理杏仁接口返回为 '+str(content) + '。 抛错为 '+ str(e) + ' 使用的Token为' + token
+                custom_logger.CustomLogger().log_writter(msg, 'error')
 
 
     def collect_a_special_date_estimation(self, stock_info_dicts, date, exchange_location_mic):
@@ -707,7 +824,7 @@ if __name__ == "__main__":
     #print(result)
     #result = go.all_tracking_stocks("XHKG")
     #print(stock_codes_names_dict)
-    #go.collect_a_period_time_estimation("00700", {"00700":{"stock_code": "00700", "stock_name": "腾讯控股", "exchange_location": "hk", "exchange_location_mic": "XHKG"}}, "2022-04-01", "2022-04-11")
+    #go.collect_a_period_time_estimation("600900", {"600900":{"stock_code": "600900", "stock_name": "长江电力", "exchange_location": "sh", "exchange_location_mic": "XSHG"}}, "2010-01-01", "2023-05-07", "XSHG")
     #go.collect_a_period_time_estimation('000002', {'000002': {'stock_code': '000002', 'stock_name': '万科A', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}}, "2022-04-01", "2022-04-11", 'XSHE')
     #saved_stock_info_dict = {'000858': {'stock_code': '000858', 'stock_name': '五粮液', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '002714': {'stock_code': '002714', 'stock_name': '牧原股份', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '000568': {'stock_code': '000568', 'stock_name': '泸州老窖', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '300498': {'stock_code': '300498', 'stock_name': '温氏股份', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '002304': {'stock_code': '002304', 'stock_name': '洋河股份', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '000895': {'stock_code': '000895', 'stock_name': '双汇发展', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '000876': {'stock_code': '000876', 'stock_name': '新希望', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '002385': {'stock_code': '002385', 'stock_name': '大北农', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '000596': {'stock_code': '000596', 'stock_name': '古井贡酒', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '300999': {'stock_code': '300999', 'stock_name': '金龙鱼', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '300146': {'stock_code': '300146', 'stock_name': '汤臣倍健', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '000998': {'stock_code': '000998', 'stock_name': '隆平高科', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '002507': {'stock_code': '002507', 'stock_name': '涪陵榨菜', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '002557': {'stock_code': '002557', 'stock_name': '洽洽食品', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '002568': {'stock_code': '002568', 'stock_name': '百润股份', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '002299': {'stock_code': '002299', 'stock_name': '圣农发展', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '000930': {'stock_code': '000930', 'stock_name': '中粮科技', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '002511': {'stock_code': '002511', 'stock_name': '中顺洁柔', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '002157': {'stock_code': '002157', 'stock_name': '正邦科技', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '000729': {'stock_code': '000729', 'stock_name': '燕京啤酒', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '002124': {'stock_code': '002124', 'stock_name': '天邦股份', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '002458': {'stock_code': '002458', 'stock_name': '益生股份', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '000869': {'stock_code': '000869', 'stock_name': '张裕A', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '300741': {'stock_code': '300741', 'stock_name': '华宝股份', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '002946': {'stock_code': '002946', 'stock_name': '新乳业', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '002311': {'stock_code': '002311', 'stock_name': '海大集团', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '000799': {'stock_code': '000799', 'stock_name': '酒鬼酒', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '000860': {'stock_code': '000860', 'stock_name': '顺鑫农业', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '002597': {'stock_code': '002597', 'stock_name': '金禾实业', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '300957': {'stock_code': '300957', 'stock_name': '贝泰妮', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '002505': {'stock_code': '002505', 'stock_name': '鹏都农牧', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '002626': {'stock_code': '002626', 'stock_name': '金达威', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '002481': {'stock_code': '002481', 'stock_name': '双塔食品', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '002216': {'stock_code': '002216', 'stock_name': '三全食品', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '300761': {'stock_code': '300761', 'stock_name': '立华股份', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '300973': {'stock_code': '300973', 'stock_name': '立高食品', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '300783': {'stock_code': '300783', 'stock_name': '三只松鼠', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '002461': {'stock_code': '002461', 'stock_name': '珠江啤酒', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '000002': {'stock_code': '000002', 'stock_name': '万科A', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '001979': {'stock_code': '001979', 'stock_name': '招商蛇口', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '000069': {'stock_code': '000069', 'stock_name': '华侨城A', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '000656': {'stock_code': '000656', 'stock_name': '金科股份', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '000540': {'stock_code': '000540', 'stock_name': '中天金融', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '002146': {'stock_code': '002146', 'stock_name': '荣盛发展', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '000961': {'stock_code': '000961', 'stock_name': '中南建设', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '002244': {'stock_code': '002244', 'stock_name': '滨江集团', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '000402': {'stock_code': '000402', 'stock_name': '金融街', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '001914': {'stock_code': '001914', 'stock_name': '招商积余', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '000718': {'stock_code': '000718', 'stock_name': '苏宁环球', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '000671': {'stock_code': '000671', 'stock_name': '阳光城', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '000031': {'stock_code': '000031', 'stock_name': '大悦城', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '000001': {'stock_code': '000001', 'stock_name': '平安银行', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '002142': {'stock_code': '002142', 'stock_name': '宁波银行', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '002936': {'stock_code': '002936', 'stock_name': '郑州银行', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '002966': {'stock_code': '002966', 'stock_name': '苏州银行', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '002958': {'stock_code': '002958', 'stock_name': '青农商行', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '002839': {'stock_code': '002839', 'stock_name': '张家港行', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '002807': {'stock_code': '002807', 'stock_name': '江阴银行', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '002948': {'stock_code': '002948', 'stock_name': '青岛银行', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '002646': {'stock_code': '002646', 'stock_name': '天佑德酒', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '002582': {'stock_code': '002582', 'stock_name': '好想你', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '002746': {'stock_code': '002746', 'stock_name': '仙坛股份', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '002100': {'stock_code': '002100', 'stock_name': '天康生物', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '002567': {'stock_code': '002567', 'stock_name': '唐人神', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '000848': {'stock_code': '000848', 'stock_name': '承德露露', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '002688': {'stock_code': '002688', 'stock_name': '金河生物', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}, '002234': {'stock_code': '002234', 'stock_name': '民和股份', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}}
     #go.collect_a_special_date_estimation(saved_stock_info_dict, "2022-04-13", "XSHE")

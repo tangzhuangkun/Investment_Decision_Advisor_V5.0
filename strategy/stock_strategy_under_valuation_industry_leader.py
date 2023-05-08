@@ -266,3 +266,32 @@ stock_code	stock_name	date	pb	row_num	total_record	percent_num
 000429	粤高速A	2023-05-05	1.8041642748988327000000	674	1214	0.5548227535037098
 
 """
+
+
+"""
+-- 查看所有监控股票的收集到的最大日期或最小日期
+select his_data.stock_code, all_tracking_stocks.stock_name, his_data.p_day
+from
+(
+select stock_code, stock_name, exchange_location, exchange_location_mic
+from target_pool.all_tracking_stocks_rf
+) as all_tracking_stocks
+left join 
+(
+select stock_code, exchange_location, exchange_location_mic, max(`date`) as p_day
+from financial_data.stocks_main_estimation_indexes_historical_data
+group by stock_code, exchange_location, exchange_location_mic
+) as his_data
+on all_tracking_stocks.stock_code = his_data.stock_code
+and all_tracking_stocks.exchange_location = his_data.exchange_location
+and all_tracking_stocks.exchange_location_mic = his_data.exchange_location_mic
+
+stock_code	stock_name	p_day
+600519	贵州茅台	2023-05-08
+600809	山西汾酒	2023-05-08
+600887	伊利股份	2023-05-08
+603288	海天味业	2023-05-08
+600132	重庆啤酒	2023-05-08
+
+
+"""

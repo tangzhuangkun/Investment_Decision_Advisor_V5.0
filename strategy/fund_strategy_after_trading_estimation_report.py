@@ -117,7 +117,13 @@ class FundStrategyAfterTradingEstimationReport:
                     # 记录上一行的指数代码
                     index_code_last = index_code
                     # 记录估值信息
-                    msg += valuation_method + ": " + str(decimal.Decimal(estimation_value)) + " 在过去" + previous_years + "年处于 "+ str(percentage) + "%" + "\n"
+                    msg += valuation_method + ": " + str(decimal.Decimal(estimation_value)) + " 处于近" + previous_years + "年 "+ str(percentage) + "%" + "\n"
+        # 日志记录，报告信息
+        custom_logger.CustomLogger().log_writter(msg, 'info')
+
+        # 日志记录
+        log_msg = '标的指数盘后估值报告生成完毕'
+        custom_logger.CustomLogger().log_writter(log_msg, 'info')
         return msg
 
 if __name__ == '__main__':

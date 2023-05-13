@@ -26,9 +26,22 @@ class FundStrategyAfterTradingEstimationReport:
         self._PREVIOUS_YEARS_LIST = [3,4,5,7,10]
 
     """
-    生成所有指数在过去X年估值信息字典
+    生成所有标的指数在过去X年估值信息字典
     return： 例如  
-    {'pb': [{'index_code': '399986', 'index_name': '中证银行', 'latest_date': datetime.date(2023, 5, 11), 'pb_effective': Decimal('0.6425'), 'row_num': 55, 'total_num': 729, 'percentage': 7.42, 'previous_year_num': '3'}, {'index_code': '399986', 'index_name': '中证银行', 'latest_date': datetime.date(2023, 5, 11), 'pb_wo_gw_effective': Decimal('0.6452'), 'row_num': 55, 'total_num': 729, 'percentage': 7.42, 'previous_year_num': '3'}, {'index_code': '399986', 'index_name': '中证银行', 'latest_date': datetime.date(2023, 5, 11), 'pb_effective': Decimal('0.6425'), 'row_num': 55, 'total_num': 1214, 'percentage': 4.45, 'previous_year_num': '5'}, {'index_code': '399986', 'index_name': '中证银行', 'latest_date': datetime.date(2023, 5, 11), 'pb_wo_gw_effective': Decimal('0.6452'), 'row_num': 55, 'total_num': 1214, 'percentage': 4.45, 'previous_year_num': '5'}], 'pe_ttm': [{'index_code': '399997', 'index_name': '中证白酒', 'latest_date': datetime.date(2023, 5, 11), 'pe_ttm_effective': Decimal('30.6833'), 'row_num': 26, 'total_num': 729, 'percentage': 3.43, 'previous_year_num': '3'}, {'index_code': '399997', 'index_name': '中证白酒', 'latest_date': datetime.date(2023, 5, 11), 'pe_ttm_nonrecurring_effective': Decimal('31.7515'), 'row_num': 28, 'total_num': 729, 'percentage': 3.71, 'previous_year_num': '3'}, {'index_code': '399997', 'index_name': '中证白酒', 'latest_date': datetime.date(2023, 5, 11), 'pe_ttm_effective': Decimal('30.6833'), 'row_num': 215, 'total_num': 1214, 'percentage': 17.64, 'previous_year_num': '5'}, {'index_code': '399997', 'index_name': '中证白酒', 'latest_date': datetime.date(2023, 5, 11), 'pe_ttm_nonrecurring_effective': Decimal('31.7515'), 'row_num': 313, 'total_num': 1214, 'percentage': 25.72, 'previous_year_num': '5'}], 'equity_bond_yield': [None, None]}
+    {'pb': [
+        {'index_code': '399986', 'index_name': '中证银行', 'latest_date': datetime.date(2023, 5, 11), 'pb_effective': Decimal('0.6425'), 'row_num': 55, 'total_num': 729, 'percentage': 7.42, 'previous_year_num': '3'}, 
+        {'index_code': '399986', 'index_name': '中证银行', 'latest_date': datetime.date(2023, 5, 11), 'pb_wo_gw_effective': Decimal('0.6452'), 'row_num': 55, 'total_num': 729, 'percentage': 7.42, 'previous_year_num': '3'}, 
+        {'index_code': '399986', 'index_name': '中证银行', 'latest_date': datetime.date(2023, 5, 11), 'pb_effective': Decimal('0.6425'), 'row_num': 55, 'total_num': 1214, 'percentage': 4.45, 'previous_year_num': '5'}, 
+        {'index_code': '399986', 'index_name': '中证银行', 'latest_date': datetime.date(2023, 5, 11), 'pb_wo_gw_effective': Decimal('0.6452'), 'row_num': 55, 'total_num': 1214, 'percentage': 4.45, 'previous_year_num': '5'}], 
+        
+    'pe_ttm': [
+        {'index_code': '399997', 'index_name': '中证白酒', 'latest_date': datetime.date(2023, 5, 11), 'pe_ttm_effective': Decimal('30.6833'), 'row_num': 26, 'total_num': 729, 'percentage': 3.43, 'previous_year_num': '3'}, 
+        {'index_code': '399997', 'index_name': '中证白酒', 'latest_date': datetime.date(2023, 5, 11), 'pe_ttm_nonrecurring_effective': Decimal('31.7515'), 'row_num': 28, 'total_num': 729, 'percentage': 3.71, 'previous_year_num': '3'}, 
+        {'index_code': '399997', 'index_name': '中证白酒', 'latest_date': datetime.date(2023, 5, 11), 'pe_ttm_effective': Decimal('30.6833'), 'row_num': 215, 'total_num': 1214, 'percentage': 17.64, 'previous_year_num': '5'}, 
+        {'index_code': '399997', 'index_name': '中证白酒', 'latest_date': datetime.date(2023, 5, 11), 'pe_ttm_nonrecurring_effective': Decimal('31.7515'), 'row_num': 313, 'total_num': 1214, 'percentage': 25.72, 'previous_year_num': '5'}], 
+        
+    'equity_bond_yield': 
+        [None, None]}
     """
     def generate_historical_percentage_estimation_info(self):
         #估值信息字典

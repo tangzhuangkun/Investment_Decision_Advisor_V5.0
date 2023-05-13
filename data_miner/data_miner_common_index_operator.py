@@ -167,7 +167,7 @@ class DataMinerCommonIndexOperator:
             					where raw.latest_date = (select max(historical_date) from aggregated_data.index_components_historical_estimations)
             					order by raw.percent_num asc """ % (years, index_code, years, index_code, years)
 
-        # 滚动市销率
+        # 股息率
         elif (valuation_method == "dividend_yield"):
             selecting_sql = """  select raw.index_code, raw.index_name, raw.latest_date, round(raw.dividend_yield_effective, 4) as dividend_yield_effective, raw.row_num, record.total_num, round(raw.percent_num*100, 2) as percentage, '%s' as previous_year_num  from 
             					(select index_code, index_name, historical_date as latest_date, dividend_yield*100/dividend_yield_effective_weight as dividend_yield_effective,

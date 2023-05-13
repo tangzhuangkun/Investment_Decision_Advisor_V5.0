@@ -7,7 +7,6 @@ import time
 import sys
 
 sys.path.append("..")
-import database.db_operator as db_operator
 import log.custom_logger as custom_logger
 import data_miner.data_miner_common_target_index_operator as data_miner_common_target_index_operator
 import data_miner.data_miner_common_index_operator as data_miner_common_index_operator
@@ -39,7 +38,6 @@ class FundStrategyAfterTradingEstimationReport:
         for index_unit in self.tracking_indexes_valuation_method_and_trigger_dict:
             index_code = index_unit["index_code"]
             valuation_method = index_unit["valuation_method"]
-            valuation_method_extra = None
             # 如果该指数方式还未存入估值信息字典
             if valuation_method not in valuation_method_result_dict:
                 valuation_method_result_dict[valuation_method] = []

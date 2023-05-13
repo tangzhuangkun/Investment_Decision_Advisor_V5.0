@@ -163,10 +163,20 @@ class Scheduler:
 
 		try:
 			# 每个交易日18：10通过邮件/微信发送标的指数估值报告
-			scheduler.add_job(func=notification_plan_after_trading.NotificationPlanAfterTrading().index_fund_strategy_estimation_notification,
+			scheduler.add_job(func=notification_plan_after_trading.NotificationPlanAfterTrading().index_strategy_estimation_notification,
 							  trigger='cron',
 							  month='1-12', day_of_week='mon,tue,wed,thu,fri', hour=18, minute=10,
 							  id='weekdayTargetIndexEstimationReport')
+		except Exception as e:
+			# 抛错
+			custom_logger.CustomLogger().log_writter(e, 'error')
+
+		try:
+			# 每个交易日18:10:30通过邮件/微信发送标的股票估值报告
+			scheduler.add_job(func=notification_plan_after_trading.NotificationPlanAfterTrading().stock_strategy_estimation_notification,
+							  trigger='cron',
+							  month='1-12', day_of_week='mon,tue,wed,thu,fri', hour=18, minute=10, second=30,
+							  id='weekdayTargetStockEstimationReport')
 		except Exception as e:
 			# 抛错
 			custom_logger.CustomLogger().log_writter(e, 'error')

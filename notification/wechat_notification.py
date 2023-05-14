@@ -27,31 +27,31 @@ class WechatNotification:
         replaced_send_content = replaced_send_content.replace("\n","\n\n")
         return replaced_send_content
 
-    def push_customized_content(self, token, object, send_content):
+    def push_customized_content(self, token, title, send_content):
         # 自定义微信推送主题+内容，仅推送给特定的人
         # param: token, 收信人token
-        # param: object, 主题
+        # param: title, 主题
         # param: send_content, 自定义的内容
         # 发送微信推送
 
+        # 组装body data
+        body = {"text": title, "desp": send_content}
         try:
             # 调用接口发送推送
             # server酱（方糖）接口
-            url = "https://sctapi.ftqq.com/"+token+".send?title=" + object + "&desp=" + send_content
-            requests.post(url)
+            url = "https://sctapi.ftqq.com/" + token + ".send"
+            requests.post(url, data=body)
             # 日志记录
-            log_msg = "成功, 向" + token +" "+object+" "+send_content+ " 微信推送成功"
+            log_msg = "成功, 向" + token + " " + title + " " + send_content + " 微信推送成功"
             custom_logger.CustomLogger().log_writter(log_msg, 'info')
         except Exception as e:
             # 日志记录
-            log_msg = "失败, 微信推送失败" + object + "  " + send_content + str(e)
+            log_msg = "失败, 微信推送失败" + title + "  " + send_content + str(e)
             custom_logger.CustomLogger().log_writter(log_msg, 'error')
 
-
-
-    def push_to_all(self, object, send_content):
+    def push_to_all(self, title, send_content):
         # 将自定义内容微信推送给所有人
-        # param: object, 邮件主题
+        # param: title, 邮件主题
         # param: send_content, 自定义的内容
 
         # 获取token，决定需要推送给哪些人
@@ -60,7 +60,7 @@ class WechatNotification:
         replaced_send_content = self.replace_one_enter_key_with_two(send_content)
         # 推送给所有人
         for user in users_list:
-            self.push_customized_content(user, object, replaced_send_content)
+            self.push_customized_content(user, title, replaced_send_content)
 
 
 if __name__ == '__main__':

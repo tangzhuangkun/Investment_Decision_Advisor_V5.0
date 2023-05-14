@@ -147,13 +147,13 @@ class StockStrategyAfterTradingEstimationReport:
                     elif ("pb_wo_gw" in unit):
                         valuation_method_name = "扣非市净率"
                         estimation_value = unit["pb_wo_gw"]
-                    elif (unit["ps_ttm"] != None):
+                    elif ("ps_ttm" in unit):
                         valuation_method_name = "滚动市销率"
                         estimation_value = unit["ps_ttm"]
-                    elif (unit["pcf_ttm"] != None):
+                    elif ("pcf_ttm" in unit):
                         valuation_method_name = "滚动市现率"
                         estimation_value = unit["pcf_ttm"]
-                    elif (unit["dividend_yield"] != None):
+                    elif ("dividend_yield" in unit):
                         valuation_method_name = "股息率"
                         estimation_value = unit["dividend_yield"]
                     # 如果当前股票代码与上一个不一致，说明已执行到新的股票
@@ -227,13 +227,13 @@ class StockStrategyAfterTradingEstimationReport:
                     elif ("pb_wo_gw" in unit):
                         valuation_method_name = "扣非市净率"
                         estimation_value = unit["pb_wo_gw"]
-                    elif (unit["ps_ttm"] != None):
+                    elif ("ps_ttm" in unit):
                         valuation_method_name = "滚动市销率"
                         estimation_value = unit["ps_ttm"]
-                    elif (unit["pcf_ttm"] != None):
+                    elif ("pcf_ttm" in unit):
                         valuation_method_name = "滚动市现率"
                         estimation_value = unit["pcf_ttm"]
-                    elif (unit["dividend_yield"] != None):
+                    elif ("dividend_yield" in unit):
                         valuation_method_name = "股息率"
                         estimation_value = unit["dividend_yield"]
                     # 如果当前股票代码与上一个不一致，说明已执行到新的股票

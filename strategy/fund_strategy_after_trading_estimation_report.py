@@ -76,13 +76,42 @@ class FundStrategyAfterTradingEstimationReport:
 
     """
     根据 生成所有指数在过去X年估值信息字典，生成提示信息
+    
+    2023-05-12 中证白酒(399997)
+    滚动市盈率: 30.2578 处于近3年 2.89%
+    扣非滚动市盈率: 31.3089 处于近3年 3.03%
+    滚动市盈率: 30.2578 处于近4年 9.07%
+    扣非滚动市盈率: 31.3089 处于近4年 11.44%
+    滚动市盈率: 30.2578 处于近5年 15.58%
+    扣非滚动市盈率: 31.3089 处于近5年 22.92%
+    滚动市盈率: 30.2578 处于近7年 11.48%
+    扣非滚动市盈率: 31.3089 处于近7年 16.72%
+    滚动市盈率: 30.2578 处于近10年 21.8%
+    扣非滚动市盈率: 31.3089 处于近10年 24.97%
+    
+    2023-05-12 中证银行(399986)
+    市净率: 0.6362 处于近3年 5.65%
+    扣非市净率: 0.6389 处于近3年 5.51%
+    市净率: 0.6362 处于近4年 4.23%
+    扣非市净率: 0.6389 处于近4年 4.12%
+    市净率: 0.6362 处于近5年 3.38%
+    扣非市净率: 0.6389 处于近5年 3.3%
+    市净率: 0.6362 处于近7年 2.41%
+    扣非市净率: 0.6389 处于近7年 2.35%
+    市净率: 0.6362 处于近10年 1.69%
+    扣非市净率: 0.6389 处于近10年 1.65%
     """
     def generate_msg(self):
         # 将会生成的信息
         msg = ""
         # 生成所有指数在过去X年估值信息字典
         valuation_method_result_dict = self.generate_historical_percentage_estimation_info()
+        # 上一个指数代码
         index_code_last = None
+        # 估值中文名称
+        valuation_method_name = None
+        # 估值的值
+        estimation_value = None
         for valuation_method in valuation_method_result_dict:
             for unit in valuation_method_result_dict[valuation_method]:
                 # 如果信息不为空
@@ -97,29 +126,27 @@ class FundStrategyAfterTradingEstimationReport:
                     percentage = unit["percentage"]
                     # 与过去X年的数据对比
                     previous_years = unit["previous_year_num"]
-                    valuation_method = None
-                    estimation_value = None
                     # 当前是哪一种估值方式
                     if("pe_ttm_effective" in unit):
-                        valuation_method = "滚动市盈率"
+                        valuation_method_name = "滚动市盈率"
                         estimation_value = unit['pe_ttm_effective']
                     elif ("pe_ttm_nonrecurring_effective" in unit):
-                        valuation_method = "扣非滚动市盈率"
+                        valuation_method_name = "扣非滚动市盈率"
                         estimation_value = unit["pe_ttm_nonrecurring_effective"]
                     elif ("pb_effective" in unit):
-                        valuation_method = "市净率"
+                        valuation_method_name = "市净率"
                         estimation_value = unit["pb_effective"]
                     elif ("pb_wo_gw_effective" in unit):
-                        valuation_method = "扣非市净率"
+                        valuation_method_name = "扣非市净率"
                         estimation_value = unit["pb_wo_gw_effective"]
                     elif (unit["ps_ttm_effective"] != None):
-                        valuation_method = "滚动市销率"
+                        valuation_method_name = "滚动市销率"
                         estimation_value = unit["ps_ttm_effective"]
                     elif (unit["pcf_ttm_effective"] != None):
-                        valuation_method = "滚动市现率"
+                        valuation_method_name = "滚动市现率"
                         estimation_value = unit["pcf_ttm_effective"]
                     elif (unit["dividend_yield_effective"] != None):
-                        valuation_method = "股息率"
+                        valuation_method_name = "股息率"
                         estimation_value = unit["dividend_yield_effective"]
                     # 如果当前指数代码与上一个不一致，说明已执行到新的指数
                     if(index_code_last != index_code):
@@ -128,7 +155,7 @@ class FundStrategyAfterTradingEstimationReport:
                     # 记录上一行的指数代码
                     index_code_last = index_code
                     # 记录估值信息
-                    msg += valuation_method + ": " + str(decimal.Decimal(estimation_value)) + " 处于近" + previous_years + "年 "+ str(percentage) + "%" + "\n"
+                    msg += valuation_method_name + ": " + str(decimal.Decimal(estimation_value)) + " 处于近" + previous_years + "年 "+ str(percentage) + "%" + "\n"
         # 日志记录，报告信息
         custom_logger.CustomLogger().log_writter(msg, 'info')
 

@@ -59,7 +59,7 @@ class NotificationPlanAfterTrading:
         title = '标的指数 ' + today + ' 盘后估值'
 
         # 标的指数在盘后的估值情况
-        index_estimation_historical_percentage_msg = fund_strategy_after_trading_estimation_report.FundStrategyAfterTradingEstimationReport().generate_msg()
+        index_estimation_historical_percentage_msg = fund_strategy_after_trading_estimation_report.FundStrategyAfterTradingEstimationReport().generate_form_msg()
 
         if index_estimation_historical_percentage_msg !=None:
             # 邮件发送所有估值信息
@@ -94,7 +94,7 @@ class NotificationPlanAfterTrading:
         title = '标的股票 ' + today + ' 盘后估值'
 
         # 标的股票在盘后的估值情况
-        stock_estimation_historical_percentage_msg = stock_strategy_after_trading_estimation_report.StockStrategyAfterTradingEstimationReport().generate_msg()
+        stock_estimation_historical_percentage_msg = stock_strategy_after_trading_estimation_report.StockStrategyAfterTradingEstimationReport().generate_form_msg()
 
         if stock_estimation_historical_percentage_msg != None:
             # 邮件发送所有估值信息
@@ -127,7 +127,7 @@ if __name__ == '__main__':
     time_start = time.time()
     go = NotificationPlanAfterTrading()
     #go.equity_bond_yield_strategy_estimation_notification()
-    #go.index_strategy_estimation_notification()
-    go.stock_strategy_estimation_notification()
+    go.index_strategy_estimation_notification()
+    #go.stock_strategy_estimation_notification()
     time_end = time.time()
     print(time_end - time_start)

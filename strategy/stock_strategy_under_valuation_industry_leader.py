@@ -295,3 +295,46 @@ stock_code	stock_name	p_day
 
 
 """
+
+
+
+"""
+-- 沪深300指数，当前最新市盈率估值，在过去X年中，处于什么百分比
+select raw.index_code, raw.index_name, raw.trading_date, raw.pe, raw.row_num, record.total_record, raw.percent_num from 
+(select index_code, index_name, trading_date, pe,
+row_number() OVER (partition by index_code ORDER BY pe asc) AS row_num,  
+percent_rank() OVER (partition by index_code ORDER BY pe asc) AS percent_num
+from stock_bond_ratio_di
+where index_code = "000300"
+and `trading_date` > SUBDATE(NOW(),INTERVAL 5 YEAR)) raw
+left join 
+(select index_code, count(1) as total_record from stock_bond_ratio_di where index_code = "000300" and `trading_date` > SUBDATE(NOW(),INTERVAL 5 YEAR) group by index_code) as record
+on raw.index_code = record.index_code
+where raw.trading_date = (select max(trading_date) from stock_bond_ratio_di)
+order by raw.percent_num asc;
+
+index_code	index_name	trading_date	pe	row_num	total_record	percent_num
+000300	沪深300	2023-05-15	12.26202317396409700	591	1214	0.48639736191261335
+"""
+
+
+
+"""
+-- 沪深300指数，某个日期市盈率估值，在过去X年中，处于什么百分比
+select raw.index_code, raw.index_name, raw.trading_date, raw.pe, raw.row_num, record.total_record, raw.percent_num from 
+(select index_code, index_name, trading_date, pe,
+row_number() OVER (partition by index_code ORDER BY pe asc) AS row_num,  
+percent_rank() OVER (partition by index_code ORDER BY pe asc) AS percent_num
+from stock_bond_ratio_di
+where index_code = "000300"
+and `trading_date` > SUBDATE("2022-10-31",INTERVAL 3 YEAR)) raw
+left join 
+(select index_code, count(1) as total_record from stock_bond_ratio_di where index_code = "000300" and `trading_date` > SUBDATE("2022-10-31",INTERVAL 3 YEAR) group by index_code) as record
+on raw.index_code = record.index_code
+where raw.trading_date = "2022-10-31"
+order by raw.percent_num asc;
+
+index_code	index_name	trading_date	pe	row_num	total_record	percent_num
+000300	沪深300	2022-10-31	10.28601833898130200	1	857	0
+
+"""

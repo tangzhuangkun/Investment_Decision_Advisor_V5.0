@@ -83,11 +83,11 @@ class FundStrategyAfterTradingEstimationReport:
                     index_estimation_info["index_code_with_init"] = index_unit["index_code_with_init"]
                     valuation_method_result_dict[valuation_method].append(index_estimation_info)
 
-            # 获取评估的时间长度
-            for year in self._PREVIOUS_YEARS_LIST:
-                # 获取沪深300指数滚动市盈率估值在过去X年的百分比信息
-                index_estimation_info = data_miner_common_index_operator.DataMinerCommonIndexOperator().get_hz_three_hundred_index_latest_estimation_percentile_in_history('000300', "pe_ttm", year)
-                valuation_method_result_dict["pe_ttm"].append(index_estimation_info)
+        # 获取评估的时间长度
+        for year in self._PREVIOUS_YEARS_LIST:
+            # 获取沪深300指数滚动市盈率估值在过去X年的百分比信息
+            index_estimation_info = data_miner_common_index_operator.DataMinerCommonIndexOperator().get_hz_three_hundred_index_latest_estimation_percentile_in_history('000300', "pe_ttm", year)
+            valuation_method_result_dict["pe_ttm"].append(index_estimation_info)
         return valuation_method_result_dict
 
     """
@@ -314,8 +314,8 @@ if __name__ == '__main__':
     time_start = time.time()
     go = FundStrategyAfterTradingEstimationReport()
     #result = go.generate_msg()
-    result = go.generate_form_msg()
-    #result = go.generate_historical_percentage_estimation_info()
+    #result = go.generate_form_msg()
+    result = go.generate_historical_percentage_estimation_info()
     time_end = time.time()
     print(result)
     print('time:')

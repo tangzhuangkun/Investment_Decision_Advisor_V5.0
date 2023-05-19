@@ -147,7 +147,10 @@ class FundStrategyAfterTradingEstimationReport:
                     change = get_target_real_time_indicator_from_interfaces.GetTargetRealTimeIndicatorFromInterfaces().get_single_target_real_time_indicator(
                         index_code_with_init, "change")
                     # 当前是哪一种估值方式
-                    if("pe_ttm_effective" in unit):
+                    if ("pe_ttm" in unit):
+                        valuation_method_name = "滚动市盈率"
+                        estimation_value = unit["pe_ttm"]
+                    elif("pe_ttm_effective" in unit):
                         valuation_method_name = "滚动市盈率"
                         estimation_value = unit['pe_ttm_effective']
                     elif ("pe_ttm_nonrecurring_effective" in unit):
@@ -232,7 +235,10 @@ class FundStrategyAfterTradingEstimationReport:
                     change = get_target_real_time_indicator_from_interfaces.GetTargetRealTimeIndicatorFromInterfaces().get_single_target_real_time_indicator(
                         index_code_with_init, "change")
                     # 当前是哪一种估值方式
-                    if ("pe_ttm_effective" in unit):
+                    if ("pe_ttm" in unit):
+                        valuation_method_name = "滚动市盈率"
+                        estimation_value = unit["pe_ttm"]
+                    elif ("pe_ttm_effective" in unit):
                         valuation_method_name = "滚动市盈率"
                         estimation_value = unit['pe_ttm_effective']
                     elif ("pe_ttm_nonrecurring_effective" in unit):
@@ -313,9 +319,9 @@ class FundStrategyAfterTradingEstimationReport:
 if __name__ == '__main__':
     time_start = time.time()
     go = FundStrategyAfterTradingEstimationReport()
-    #result = go.generate_msg()
+    result = go.generate_msg()
     #result = go.generate_form_msg()
-    result = go.generate_historical_percentage_estimation_info()
+    #result = go.generate_historical_percentage_estimation_info()
     time_end = time.time()
     print(result)
     print('time:')

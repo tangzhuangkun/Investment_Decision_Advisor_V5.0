@@ -15,6 +15,7 @@ import data_collector.get_target_real_time_indicator_from_interfaces as get_targ
 
 """
 跟踪标的池中指数基金标的在盘后的估值情况，并生成报告
+执行频率：每个交易日，盘后
 """
 
 

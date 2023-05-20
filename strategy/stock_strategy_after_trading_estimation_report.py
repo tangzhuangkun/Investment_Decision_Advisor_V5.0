@@ -14,6 +14,7 @@ import data_miner.data_miner_common_stock_operator as data_miner_common_stock_op
 
 """
 跟踪标的池中股票标的在盘后的估值情况，并生成报告
+执行频率：每个交易日，盘后
 """
 
 

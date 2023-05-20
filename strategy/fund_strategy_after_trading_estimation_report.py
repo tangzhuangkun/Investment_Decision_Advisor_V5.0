@@ -107,15 +107,15 @@ class FundStrategyAfterTradingEstimationReport:
     
     2023-05-12 中证银行(399986) -0.75%
     市净率: 0.6362 处于近3年 5.66%
-    扣非市净率: 0.6389 处于近3年 5.52%
+    扣商誉市净率: 0.6389 处于近3年 5.52%
     市净率: 0.6362 处于近4年 4.24%
-    扣非市净率: 0.6389 处于近4年 4.14%
+    扣商誉市净率: 0.6389 处于近4年 4.14%
     市净率: 0.6362 处于近5年 3.39%
-    扣非市净率: 0.6389 处于近5年 3.31%
+    扣商誉市净率: 0.6389 处于近5年 3.31%
     市净率: 0.6362 处于近8年 2.11%
-    扣非市净率: 0.6389 处于近8年 2.06%
+    扣商誉市净率: 0.6389 处于近8年 2.06%
     市净率: 0.6362 处于近10年 1.69%
-    扣非市净率: 0.6389 处于近10年 1.65%
+    扣商誉市净率: 0.6389 处于近10年 1.65%
     """
     def generate_msg(self):
         # 将会生成的信息
@@ -156,18 +156,27 @@ class FundStrategyAfterTradingEstimationReport:
                     elif ("pe_ttm_nonrecurring_effective" in unit):
                         valuation_method_name = "扣非滚动市盈率"
                         estimation_value = unit["pe_ttm_nonrecurring_effective"]
+                    elif ("pb" in unit):
+                        valuation_method_name = "市净率"
+                        estimation_value = unit["pb"]
                     elif ("pb_effective" in unit):
                         valuation_method_name = "市净率"
                         estimation_value = unit["pb_effective"]
                     elif ("pb_wo_gw_effective" in unit):
-                        valuation_method_name = "扣非市净率"
+                        valuation_method_name = "扣商誉市净率"
                         estimation_value = unit["pb_wo_gw_effective"]
+                    elif ("ps_ttm" in unit):
+                        valuation_method_name = "滚动市销率"
+                        estimation_value = unit["ps_ttm"]
                     elif ("ps_ttm_effective" in unit):
                         valuation_method_name = "滚动市销率"
                         estimation_value = unit["ps_ttm_effective"]
                     elif ("pcf_ttm_effective" in unit):
                         valuation_method_name = "滚动市现率"
                         estimation_value = unit["pcf_ttm_effective"]
+                    elif ("dividend_yield" in unit):
+                        valuation_method_name = "股息率"
+                        estimation_value = unit["dividend_yield"]
                     elif ("dividend_yield_effective" in unit):
                         valuation_method_name = "股息率"
                         estimation_value = unit["dividend_yield_effective"]
@@ -198,7 +207,7 @@ class FundStrategyAfterTradingEstimationReport:
     2023-05-12 中证银行(399986) -0.75%
     估值方式 | 值 | 3年 | 4年 | 5年 | 8年 | 10年 
     市净率 | 0.6362 | 5.66% | 4.24% | 3.39% | 2.11% | 1.69% | 
-    扣非市净率 | 0.6389 | 5.52% | 4.14% | 3.31% | 2.06% | 1.65% | 
+    扣商誉市净率 | 0.6389 | 5.52% | 4.14% | 3.31% | 2.06% | 1.65% | 
      
      """
 
@@ -244,18 +253,27 @@ class FundStrategyAfterTradingEstimationReport:
                     elif ("pe_ttm_nonrecurring_effective" in unit):
                         valuation_method_name = "扣非滚动市盈率"
                         estimation_value = unit["pe_ttm_nonrecurring_effective"]
+                    elif ("pb" in unit):
+                        valuation_method_name = "市净率"
+                        estimation_value = unit["pb"]
                     elif ("pb_effective" in unit):
                         valuation_method_name = "市净率"
                         estimation_value = unit["pb_effective"]
                     elif ("pb_wo_gw_effective" in unit):
-                        valuation_method_name = "扣非市净率"
+                        valuation_method_name = "扣商誉市净率"
                         estimation_value = unit["pb_wo_gw_effective"]
+                    elif ("ps_ttm" in unit):
+                        valuation_method_name = "滚动市销率"
+                        estimation_value = unit["ps_ttm"]
                     elif ("ps_ttm_effective" in unit):
                         valuation_method_name = "滚动市销率"
                         estimation_value = unit["ps_ttm_effective"]
                     elif ("pcf_ttm_effective" in unit):
                         valuation_method_name = "滚动市现率"
                         estimation_value = unit["pcf_ttm_effective"]
+                    elif ("dividend_yield" in unit):
+                        valuation_method_name = "股息率"
+                        estimation_value = unit["dividend_yield"]
                     elif ("dividend_yield_effective" in unit):
                         valuation_method_name = "股息率"
                         estimation_value = unit["dividend_yield_effective"]

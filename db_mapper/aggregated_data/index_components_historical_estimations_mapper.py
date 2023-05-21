@@ -9,7 +9,7 @@ import sys
 
 sys.path.append("..")
 import database.db_operator as db_operator
-
+import log.custom_logger as custom_logger
 
 """
 数据表，index_components_historical_estimations 的映射
@@ -74,9 +74,16 @@ class IndexComponentsHistoricalEstimationMapper:
 
         # 其它
         else:
+            # 日志记录
+            log_msg = '无法获取 ' + index_code+ '在 '+ p_day + '的估值 ' + valuation_method + '，失败'
+            custom_logger.CustomLogger().log_writter(log_msg, 'error')
             return None
 
+        # 查询
         index_estiamtion_info = db_operator.DBOperator().select_one("aggregated_data", selecting_sql)
+        # 日志记录
+        log_msg = '获取 ' + index_code + '在 ' + p_day + '的估值 ' + valuation_method + '，成功'
+        custom_logger.CustomLogger().log_writter(log_msg, 'debug')
         return index_estiamtion_info
 
     """
@@ -149,14 +156,21 @@ class IndexComponentsHistoricalEstimationMapper:
 
         # 其它
         else:
+            # 日志记录
+            log_msg = '无法获取 ' + index_code + '在 ' + p_day + '之前' + str(years) + '年的估值 ' + valuation_method + '列表，失败'
+            custom_logger.CustomLogger().log_writter(log_msg, 'error')
             return None
 
         index_estiamtion_info = db_operator.DBOperator().select_all("aggregated_data", selecting_sql)
+        # 日志记录
+        log_msg = '获取 ' + index_code + '在 ' + p_day + '之前' + str(years) + '年的估值 ' + valuation_method + '列表，成功'
+        custom_logger.CustomLogger().log_writter(log_msg, 'debug')
         return index_estiamtion_info
 
 if __name__ == '__main__':
     time_start = time.time()
     go = IndexComponentsHistoricalEstimationMapper()
+    #result = go.get_index_historical_date_estimation("399997", "pe_ttm", "2023-05-12")
     result = go.get_index_a_period_estimation("399997", "pe_ttm", "2023-05-12", 5)
     print(result)
     time_end = time.time()

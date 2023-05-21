@@ -39,7 +39,8 @@ class CustomLogger:
 		# 如果logger.handlers列表为空,则先创建日志文件，然后再写入日志
 		if not logger.handlers:
 			# 创建handler
-			fh = logging.FileHandler("../log/daily_log/"+self.today+".log",encoding="utf-8")
+			#fh = logging.FileHandler("../log/daily_log/"+self.today+".log",encoding="utf-8")
+			fh = logging.FileHandler(working_dir + "/daily_log/" + self.today + ".log", encoding="utf-8")
 			ch = logging.StreamHandler()
 			
 			# 设置输出日志格式
@@ -93,11 +94,13 @@ class CustomLogger:
 		# 日志级别：debug<info<warning<error<critical 
 		# 只有info, warning，error，critical才会写入日志文件
 		# 输出：会在log文件夹中，按日期生成日志文件
-		
-		
-		current_working_dir = os.path.realpath(sys.argv[0])
+
+		current_working_dir = os.path.abspath(os.path.dirname(__file__))
+		#print(project_path)
+
+		#current_working_dir = os.path.realpath(sys.argv[0])
 		func_name = inspect.stack()[1][3]
-		self.my_logger('\''+current_working_dir+'/'+func_name+'()\'',msg,lev)
+		self.my_logger(current_working_dir, func_name + msg,lev)
 
 	def daily_log_creator(self):
 		# 创建日级日志文件

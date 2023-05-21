@@ -15,6 +15,15 @@ class DataMinerCommonStockOperator:
     def __init__(self):
         pass
 
+
+    """
+    获取股票最新某估值在过去X年的百分比
+    # param: index_code 指数代码，如 600900
+    # param: valuation_method 估值方式，如 pe_ttm--滚动市盈率, pe_ttm_nonrecurring--扣非滚动市盈率, pb--市净率, pb_wo_gw--扣非市净率, ps_ttm--滚动市销率, pcf_ttm--滚动市现率, dividend_yield--股息率,
+    # param: years 年数，如 10
+    # 返回： 
+    # 如 {'stock_code': '600900', 'stock_name': '长江电力', 'latest_date': datetime.date(2023, 5, 12), 'dividend_yield': Decimal('0.0372'), 'row_num': 645, 'total_record': 1198, 'percentage': 53.8, 'previous_year_num': '5'}
+    """
     def get_stock_latest_estimation_percentile_in_history(self, stock_code, valuation_method, years):
         selecting_sql = ""
 

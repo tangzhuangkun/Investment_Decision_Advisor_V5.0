@@ -57,7 +57,9 @@ class CustomLogger:
 			logger.addHandler(fh)
 			logger.addHandler(ch)
 
-			if lev=='info':
+			if lev=='debug':
+				logger.info("	DEBUG  "+working_dir+"  "+msg+"\n")
+			elif lev=='info':
 				logger.info("	INFO  "+working_dir+"  "+msg+"\n")
 			elif lev=='warning':
 				logger.warning("	WARNING  "+working_dir+"  "+msg+"\n")
@@ -72,8 +74,7 @@ class CustomLogger:
 			# 输出不同级别的log,严重级别依次递增
 			if lev=='debug':
 				# 如果级别为debug，略过
-				#logger.debug("	DEBUG  "+working_dir+"  "+msg+"\n")
-				pass
+				logger.debug("	DEBUG  "+working_dir+"  "+msg+"\n")
 			elif lev=='info':
 				logger.info("	INFO  "+working_dir+"  "+msg+"\n")
 			elif lev=='warning':

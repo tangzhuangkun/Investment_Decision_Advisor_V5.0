@@ -75,7 +75,7 @@ class IndexComponentsHistoricalEstimationMapper:
         # 其它
         else:
             # 日志记录
-            log_msg = '无法获取 ' + index_code+ '在 '+ p_day + '的估值 ' + valuation_method + '，失败'
+            log_msg = '估值方式错误，无法获取 ' + index_code+ '在 '+ p_day + '的估值 ' + valuation_method + '，失败'
             custom_logger.CustomLogger().log_writter(log_msg, 'error')
             return None
 
@@ -157,7 +157,7 @@ class IndexComponentsHistoricalEstimationMapper:
         # 其它
         else:
             # 日志记录
-            log_msg = '无法获取 ' + index_code + '在 ' + p_day + '之前' + str(years) + '年的估值 ' + valuation_method + '列表，失败'
+            log_msg = '估值方式错误，无法获取 ' + index_code + '在 ' + p_day + '之前' + str(years) + '年的估值 ' + valuation_method + '列表，失败'
             custom_logger.CustomLogger().log_writter(log_msg, 'error')
             return None
 

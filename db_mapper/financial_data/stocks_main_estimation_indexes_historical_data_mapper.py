@@ -10,6 +10,7 @@ import sys
 
 sys.path.append("..")
 import database.db_operator as db_operator
+import log.custom_logger as custom_logger
 
 
 
@@ -79,15 +80,21 @@ class StocksMainEstimationIndexesHistoricalDataMapper:
 
         # 其它
         else:
+            # 日志记录
+            log_msg = '估值方式错误，获取 ' + stock_code + '在 ' + p_day + '的' + valuation_method + '估值 ' + '，失败'
+            custom_logger.CustomLogger().log_writter(log_msg, 'error')
             return None
         stock_estiamtion_info = db_operator.DBOperator().select_one("financial_data", selecting_sql)
+        # 日志记录
+        log_msg = '获取 ' + stock_code + '在 ' + p_day + '的' + valuation_method + '估值 ' + '，成功'
+        custom_logger.CustomLogger().log_writter(log_msg, 'debug')
         return stock_estiamtion_info
 
 
 if __name__ == '__main__':
     time_start = time.time()
     go = StocksMainEstimationIndexesHistoricalDataMapper()
-    result = go.get_stock_historical_date_estimation("600900", "dividend_yield", "2023-05-12")
+    result = go.get_stock_historical_date_estimation("600900", "pe_ttm", "2023-05-12")
     print(result)
     time_end = time.time()
     print('time:')

@@ -157,7 +157,7 @@ class IndexComponentsHistoricalEstimationMapper:
 if __name__ == '__main__':
     time_start = time.time()
     go = IndexComponentsHistoricalEstimationMapper()
-    result = go.get_index_a_period_estimation("399997", "dividend_yield", "2023-05-12", 5)
+    result = go.get_index_a_period_estimation("399997", "pe_ttm", "2023-05-12", 5)
     print(result)
     time_end = time.time()
     print('time:')

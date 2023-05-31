@@ -15,6 +15,8 @@ import log.custom_logger as custom_logger
 数据表，index_components_historical_estimations 的映射
 以该表为主的数据操作，均在此完成
 """
+
+
 class IndexComponentsHistoricalEstimationMapper:
 
     def __init__(self):
@@ -28,6 +30,7 @@ class IndexComponentsHistoricalEstimationMapper:
     # return： 
     # 如  {'index_code': '399997', 'index_name': '中证白酒', 'p_day': datetime.date(2023, 5, 12), 'pe_ttm': Decimal('30.257822604')}
     """
+
     def get_index_historical_date_estimation(self, index_code, valuation_method, p_day):
         selecting_sql = ""
         # 滚动市盈率
@@ -75,7 +78,7 @@ class IndexComponentsHistoricalEstimationMapper:
         # 其它
         else:
             # 日志记录
-            log_msg = '估值方式错误，无法获取 ' + index_code+ '在 '+ p_day + '的估值 ' + valuation_method + '，失败'
+            log_msg = '估值方式错误，无法获取 ' + index_code + '在 ' + p_day + '的估值 ' + valuation_method + '，失败'
             custom_logger.CustomLogger().log_writter(log_msg, 'error')
             return None
 
@@ -87,7 +90,7 @@ class IndexComponentsHistoricalEstimationMapper:
         return index_estiamtion_info
 
     """
-    根据指数当前的构成成分，获取过去一段时间X年的，XX估值方式，全部估值信息
+    根据指数当前的构成成分，获取过去一段时间X年的，XX估值方式，全部估值信息, 从小到大排序
     # param: index_code 指数代码，如 399997
     # param: valuation_method 估值方式，如 pe_ttm--滚动市盈率, pe_ttm_nonrecurring--扣非滚动市盈率, pb--市净率, pb_wo_gw--扣非市净率, ps_ttm--滚动市销率, pcf_ttm--滚动市现率, dividend_yield--股息率
     # param: p_day, 业务日期，从这个日期往前x年，如 2023-05-17
@@ -96,6 +99,7 @@ class IndexComponentsHistoricalEstimationMapper:
     # 如  [{'index_code': '399997', 'index_name': '中证白酒', 'pe_ttm': Decimal('21.825887910'), 'p_day': datetime.date(2018, 10, 30)}, 
             {'index_code': '399997', 'index_name': '中证白酒', 'pe_ttm': Decimal('22.049658433'), 'p_day': datetime.date(2018, 10, 29)}, ,,,]
     """
+
     def get_index_a_period_estimation(self, index_code, valuation_method, p_day, years):
         selecting_sql = ""
         # 滚动市盈率
@@ -157,7 +161,8 @@ class IndexComponentsHistoricalEstimationMapper:
         # 其它
         else:
             # 日志记录
-            log_msg = '估值方式错误，无法获取 ' + index_code + '在 ' + p_day + '之前' + str(years) + '年的估值 ' + valuation_method + '列表，失败'
+            log_msg = '估值方式错误，无法获取 ' + index_code + '在 ' + p_day + '之前' + str(
+                years) + '年的估值 ' + valuation_method + '列表，失败'
             custom_logger.CustomLogger().log_writter(log_msg, 'error')
             return None
 
@@ -167,11 +172,34 @@ class IndexComponentsHistoricalEstimationMapper:
         custom_logger.CustomLogger().log_writter(log_msg, 'debug')
         return index_estiamtion_info
 
+    """
+    获取当前指数上一个交易日的扣非市盈率
+    # param: index_code 指数代码，如 399997
+    # param: p_day 业务日期，如 2023-05-31
+    # param: last_trading_date 上一个交易日期，如 2023-05-30
+    # return: 31.308918575
+    """
+    def get_last_trading_date_pe_ttm_nonrecurring(self, index_code, p_day, last_trading_date):
+        selecting_sql = """ select (pe_ttm_nonrecurring * 100 /pe_ttm_nonrecurring_effective_weight) as pe_ttm_nonrecurring 
+                            from index_components_historical_estimations 
+                            where index_code = '%s' 
+                            and historical_date = '%s' """ % (index_code, last_trading_date)
+        pe_ttm_nonrecurring_info = db_operator.DBOperator().select_one("aggregated_data", selecting_sql)
+        # 如果pe_info不为空
+        if pe_ttm_nonrecurring_info is not None:
+            return pe_ttm_nonrecurring_info["pe_ttm_nonrecurring"]
+        else:
+            # 日志记录
+            log_msg = "无法获取日期 " + p_day + " 的上一个交易日 " + last_trading_date + " 的扣非市盈率数据"
+            custom_logger.CustomLogger().log_writter(log_msg, 'error')
+            return 100000
+
 if __name__ == '__main__':
     time_start = time.time()
     go = IndexComponentsHistoricalEstimationMapper()
-    #result = go.get_index_historical_date_estimation("399997", "pe_ttm", "2023-05-12")
-    result = go.get_index_a_period_estimation("399997", "pe_ttm", "2023-05-12", 5)
+    # result = go.get_index_historical_date_estimation("399997", "pe_ttm", "2023-05-12")
+    # result = go.get_index_a_period_estimation("399997", "pe_ttm", "2023-05-12", 5)
+    result = go.get_last_trading_date_pe_ttm_nonrecurring("399997", "2023-05-30", "2023-05-12")
     print(result)
     time_end = time.time()
     print('time:')

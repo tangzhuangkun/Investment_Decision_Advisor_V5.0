@@ -13,6 +13,9 @@ import log.custom_logger as custom_logger
 import db_mapper.target_pool.investment_target_mapper as investment_target_mapper
 import db_mapper.financial_data.mix_top10_with_bottom_no_repeat_mapper as mix_top10_with_bottom_no_repeat_mapper
 import data_collector.get_target_real_time_indicator_from_interfaces as get_target_real_time_indicator_from_interfaces
+import db_mapper.aggregated_data.index_components_historical_estimations_mapper as index_components_historical_estimations_mapper
+import db_mapper.financial_data.trading_days_mapper as trading_days_mapper
+
 
 """
 指数估值策略，市盈率估值法
@@ -118,6 +121,49 @@ class IndexStrategyPEEstimation:
         return round(index_real_time_effective_pe_ttm, 5)
 
     """
+    获取当前指数上一个交易日的扣非市盈率
+    :param, index_code, 指数代码,如 399997
+    :return, 37.876627951
+    """
+    def get_last_trading_day_pe_ttm_nonrecurring(self, index_code):
+        # 获取当前日期
+        today = time.strftime("%Y-%m-%d", time.localtime())
+        # 上一个交易日日期, 如 2022-08-03
+        the_last_trading_date = trading_days_mapper.TradingDaysMapper().get_the_lastest_trading_date(today)
+        # 获取当前指数上一个交易日的扣非市盈率
+        last_trading_date_pe_ttm_nonrecurring = index_components_historical_estimations_mapper.IndexComponentsHistoricalEstimationMapper().get_last_trading_date_pe_ttm_nonrecurring(index_code, today,  the_last_trading_date)
+        return last_trading_date_pe_ttm_nonrecurring
+
+
+    """
+    计算当前实时滚动市盈率和预估扣非市盈率在历史上的百分位
+    :param, index_code, 指数代码,如 399997
+    :param, index_code_with_init，指数代码及上市地,如 sz399997
+    :param, index_name, 指数名称,如 中证白酒
+    :return, 
+    
+    """
+    def cal_the_pe_percentile_in_history(self, index_code, index_code_with_init, index_name):
+
+        # 获取当前日期
+        today = time.strftime("%Y-%m-%d", time.localtime())
+        # 指数实时pe_ttm
+        index_real_time_pe_ttm = self.calculate_real_time_index_pe_ttm_multiple_threads(index_code, index_name)
+        # 指数上个交易日的扣非市盈率
+        index_last_trading_day_pe_ttm_nonrecurring = self.get_last_trading_day_pe_ttm_nonrecurring(index_code)
+        # 指数最新实时涨跌幅
+        change_rate = get_target_real_time_indicator_from_interfaces.GetTargetRealTimeIndicatorFromInterfaces().get_single_target_real_time_indicator(index_code_with_init,"change")
+        # 指数当前预估扣非市盈率
+        index_estimated_pe_ttm_nonrecurring = index_last_trading_day_pe_ttm_nonrecurring * (100+decimal.Decimal(change_rate)) / 100
+
+        # TODO 计算不同历史阶段的百分位
+        for year in self._PREVIOUS_YEARS_LIST:
+            index_a_period_pe_ttm = index_components_historical_estimations_mapper.IndexComponentsHistoricalEstimationMapper().get_index_a_period_estimation(index_code, "pe_ttm", today, year)
+            index_a_period_pe_ttm_nonrecurring = index_components_historical_estimations_mapper.IndexComponentsHistoricalEstimationMapper().get_index_a_period_estimation(index_code, "pe_ttm_nonrecurring", today, year)
+            pass
+
+
+    """
     """
     def generate_index_PE_strategy_msg(self):
 
@@ -132,7 +178,9 @@ if __name__ == '__main__':
     time_start = time.time()
     go = IndexStrategyPEEstimation()
     #result = go.generate_index_PE_strategy_msg()
-    result = go.calculate_real_time_index_pe_ttm_multiple_threads("399997", "中证白酒")
+    #result = go.calculate_real_time_index_pe_ttm_multiple_threads("399997", "中证白酒")
+    #result = go.get_last_trading_day_pe_ttm_nonrecurring("399997")
+    result = go.cal_the_pe_percentile_in_history("399997", "sz399997", "中证白酒")
     print(result)
     time_end = time.time()
     print('time:')

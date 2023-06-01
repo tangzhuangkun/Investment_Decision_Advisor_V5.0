@@ -6,4 +6,3 @@ xlrd~=1.2.0
 APScheduler~=3.6.3
 Flask~=2.0.2
 akshare~=1.4.78
-pandas==1.0.5

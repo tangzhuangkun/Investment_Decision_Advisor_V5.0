@@ -221,13 +221,13 @@ class IndexStrategyPEEstimation:
     :return ,
     中证800消费(000932) 0.57%
     估值方式 | 值 | 3年 | 4年 | 5年 | 8年 | 10年
-    pe_ttm|29.68|0.27%|0.21%|7.49%|14.84%|23.51%
-    pe_ttm_non|36.57|1.1%|1.13%|14.49%|24.44%|30.58%
+    实时滚动市盈率 | 29.68 | 0.27% | 0.21% | 7.49% | 14.84% | 23.51%
+    预估扣非滚动市盈率 | 36.57 | 1.1% | 1.13% | 14.49% | 24.44% | 30.58%
     
     中证白酒(399997) 0.62%
     估值方式 | 值 | 3年 | 4年 | 5年 | 8年 | 10年
-    pe_ttm|28.14|0.68%|2.16%|5.68%|3.54%|15.58%
-    pe_ttm_non|29.30|0.96%|2.57%|13.99%|8.73%|19.73%
+    实时滚动市盈率 | 28.14 | 0.68% | 2.16% | 5.68% | 3.54% | 15.58%
+    预估扣非滚动市盈率 | 29.30 | 0.96% | 2.57% | 13.99% | 8.73% | 19.73%
     """
     def generate_index_PE_strategy_msg(self):
 
@@ -254,12 +254,12 @@ class IndexStrategyPEEstimation:
                 msg += " | " + str(year_num) + "年"
             msg += "\n"
             # 展示滚动市盈率具体值,各年份百分位
-            msg += "滚动市盈率"
+            msg += "实时滚动市盈率"
             for estimation_value in  index_result_dict["pe_ttm"]:
                 msg += " | " + estimation_value
             msg += "\n"
             # 展示扣非滚动市盈率具体值,各年份百分位
-            msg += "扣非滚动市盈率"
+            msg += "预估扣非滚动市盈率"
             for estimation_value in index_result_dict["pe_ttm_nonrecurring"]:
                 msg += " | " + estimation_value
             msg += "\n"

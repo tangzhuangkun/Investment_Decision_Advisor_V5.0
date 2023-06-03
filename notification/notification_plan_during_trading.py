@@ -3,8 +3,8 @@ import time
 import sys
 
 sys.path.append('..')
+import strategy.index_strategy_PB_estimation as index_strategy_PB_estimation
 import strategy.index_strategy_PE_estimation as index_strategy_PE_estimation
-import strategy.fund_strategy_PB_estimation as fund_strategy_PB_estimation
 import strategy.stock_strategy_monitoring_estimation as stock_strategy_monitoring_estimation
 import log.custom_logger as custom_logger
 import notification.email_notification as email_notification
@@ -25,10 +25,10 @@ class NotificationPlanDuringTrading:
         # 计算指数的动态市盈率
         indexes_and_real_time_PE_msg = index_strategy_PE_estimation.IndexStrategyPEEstimation().main()
         # 计算指数的市净率
-        indexes_and_real_time_PB_msg = fund_strategy_PB_estimation.FundStrategyPBEstimation().generate_PB_strategy_msg()
+        indexes_and_real_time_PB_msg = index_strategy_PB_estimation.IndexStrategyPBEstimation().main()
 
         # 估值信息汇总
-        estimation_msg = indexes_and_real_time_PE_msg + '\n\n' + indexes_and_real_time_PB_msg
+        estimation_msg = indexes_and_real_time_PE_msg + '\n|||||||||||\n' + indexes_and_real_time_PB_msg
 
         # 获取当前时间
         today = time.strftime("%Y-%m-%d", time.localtime())

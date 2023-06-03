@@ -28,7 +28,7 @@ class NotificationPlanDuringTrading:
         indexes_and_real_time_PB_msg = index_strategy_PB_estimation.IndexStrategyPBEstimation().main()
 
         # 估值信息汇总
-        estimation_msg = indexes_and_real_time_PE_msg + '\n|||||||||||\n' + indexes_and_real_time_PB_msg
+        estimation_msg = indexes_and_real_time_PE_msg + '\n\n' + indexes_and_real_time_PB_msg
 
         # 获取当前时间
         today = time.strftime("%Y-%m-%d", time.localtime())

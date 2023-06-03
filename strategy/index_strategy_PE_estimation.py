@@ -269,7 +269,7 @@ class IndexStrategyPEEstimation:
         custom_logger.CustomLogger().log_writter(msg, 'info')
 
         # 日志记录
-        log_msg = '标的指数盘中估值报表生成完毕'
+        log_msg = '标的指数盘中市盈率估值报表生成完毕'
         custom_logger.CustomLogger().log_writter(log_msg, 'info')
         return msg
 

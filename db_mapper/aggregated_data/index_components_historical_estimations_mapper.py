@@ -194,12 +194,36 @@ class IndexComponentsHistoricalEstimationMapper:
             custom_logger.CustomLogger().log_writter(log_msg, 'error')
             return 100000
 
+
+    """
+    获取当前指数上一个交易日的扣商誉市净率
+    # param: index_code 指数代码，如 399986
+    # param: p_day 业务日期，如 2023-05-31
+    # param: last_trading_date 上一个交易日期，如 2023-05-30
+    # return: 0.614472774
+    """
+    def get_last_trading_date_pb_wo_gw(self, index_code, p_day, last_trading_date):
+        selecting_sql = """ select (pb_wo_gw * 100 /pb_wo_gw_effective_weight) as pb_wo_gw 
+                            from index_components_historical_estimations 
+                            where index_code = '%s' 
+                            and historical_date = '%s' """ % (index_code, last_trading_date)
+        pb_wo_gw_info = db_operator.DBOperator().select_one("aggregated_data", selecting_sql)
+        # 如果pb_wo_gw_info不为空
+        if pb_wo_gw_info is not None:
+            return pb_wo_gw_info["pb_wo_gw"]
+        else:
+            # 日志记录
+            log_msg = "无法获取日期 " + p_day + " 的上一个交易日 " + last_trading_date + " 的扣商誉市净率"
+            custom_logger.CustomLogger().log_writter(log_msg, 'error')
+            return 100000
+
 if __name__ == '__main__':
     time_start = time.time()
     go = IndexComponentsHistoricalEstimationMapper()
     # result = go.get_index_historical_date_estimation("399997", "pe_ttm", "2023-05-12")
     # result = go.get_index_a_period_estimation("399997", "pe_ttm", "2023-05-12", 5)
-    result = go.get_last_trading_date_pe_ttm_nonrecurring("399997", "2023-05-30", "2023-05-12")
+    #result = go.get_last_trading_date_pe_ttm_nonrecurring("399997", "2023-05-30", "2023-05-12")
+    result = go.get_last_trading_date_pb_wo_gw("399986", "2023-06-03", "2023-06-02")
     print(result)
     time_end = time.time()
     print('time:')

@@ -10,8 +10,9 @@ import collections
 sys.path.append("..")
 import log.custom_logger as custom_logger
 import data_miner.data_miner_common_target_index_operator as data_miner_common_target_index_operator
-import data_miner.data_miner_common_index_operator as data_miner_common_index_operator
 import data_collector.get_target_real_time_indicator_from_interfaces as get_target_real_time_indicator_from_interfaces
+import db_mapper.aggregated_data.index_components_historical_estimations_mapper as index_components_historical_estimations_mapper
+import db_mapper.financial_data.index_estimation_from_lxr_di_mapper as index_estimation_from_lxr_di_mapper
 
 """
 跟踪标的池中指数基金标的在盘后的估值情况，并生成报告
@@ -62,7 +63,7 @@ class FundStrategyAfterTradingEstimationReport:
             # 获取评估的时间长度
             for year in self._PREVIOUS_YEARS_LIST:
                 # 获取当前指数估值在过去X年的百分比信息
-                index_estimation_info = data_miner_common_index_operator.DataMinerCommonIndexOperator().get_index_latest_estimation_percentile_in_history(index_code, valuation_method, year)
+                index_estimation_info = index_components_historical_estimations_mapper.IndexComponentsHistoricalEstimationMapper().get_index_latest_estimation_percentile_in_history(index_code, valuation_method, year)
                 # 添加上市地+指数代码， 如，sz399997
                 index_estimation_info["index_code_with_init"] = index_unit["index_code_with_init"]
                 # 汇总在估值信息字典
@@ -70,7 +71,7 @@ class FundStrategyAfterTradingEstimationReport:
                 # 如果遇到滚动市盈率，就把扣非滚动市盈率也算一遍
                 if(valuation_method=="pe_ttm"):
                     valuation_method_extra = "pe_ttm_nonrecurring"
-                    index_estimation_info = data_miner_common_index_operator.DataMinerCommonIndexOperator().get_index_latest_estimation_percentile_in_history(
+                    index_estimation_info = index_components_historical_estimations_mapper.IndexComponentsHistoricalEstimationMapper().get_index_latest_estimation_percentile_in_history(
                         index_code, valuation_method_extra, year)
                     # 添加上市地+指数代码， 如，sz399997
                     index_estimation_info["index_code_with_init"] = index_unit["index_code_with_init"]
@@ -78,7 +79,7 @@ class FundStrategyAfterTradingEstimationReport:
                 # 如果遇到市净率，就把扣非滚动市净率也算一遍
                 elif (valuation_method=="pb"):
                     valuation_method_extra = "pb_wo_gw"
-                    index_estimation_info = data_miner_common_index_operator.DataMinerCommonIndexOperator().get_index_latest_estimation_percentile_in_history(
+                    index_estimation_info = index_components_historical_estimations_mapper.IndexComponentsHistoricalEstimationMapper().get_index_latest_estimation_percentile_in_history(
                         index_code, valuation_method_extra, year)
                     # 添加上市地+指数代码， 如，sz399997
                     index_estimation_info["index_code_with_init"] = index_unit["index_code_with_init"]
@@ -87,7 +88,7 @@ class FundStrategyAfterTradingEstimationReport:
         # 获取评估的时间长度
         for year in self._PREVIOUS_YEARS_LIST:
             # 获取沪深300指数滚动市盈率估值在过去X年的百分比信息
-            index_estimation_info = data_miner_common_index_operator.DataMinerCommonIndexOperator().get_hz_three_hundred_index_latest_estimation_percentile_in_history('000300', "pe_ttm", year)
+            index_estimation_info = index_estimation_from_lxr_di_mapper.IndexEstimationFromLXRDiMapper().get_hz_three_hundred_index_latest_estimation_percentile_in_history('000300', "pe_ttm", year)
             valuation_method_result_dict["pe_ttm"].append(index_estimation_info)
         return valuation_method_result_dict
 
@@ -338,8 +339,8 @@ class FundStrategyAfterTradingEstimationReport:
 if __name__ == '__main__':
     time_start = time.time()
     go = FundStrategyAfterTradingEstimationReport()
-    result = go.generate_msg()
-    #result = go.generate_form_msg()
+    #result = go.generate_msg()
+    result = go.generate_form_msg()
     #result = go.generate_historical_percentage_estimation_info()
     time_end = time.time()
     print(result)

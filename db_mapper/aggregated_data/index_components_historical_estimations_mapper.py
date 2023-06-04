@@ -217,6 +217,123 @@ class IndexComponentsHistoricalEstimationMapper:
             custom_logger.CustomLogger().log_writter(log_msg, 'error')
             return 100000
 
+
+    """
+    获取指数最新某估值在过去X年的百分比
+    # param: index_code 指数代码，如 399997
+    # param: valuation_method 估值方式，如 pe_ttm--滚动市盈率, pe_ttm_nonrecurring--扣非滚动市盈率, pb--市净率, pb_wo_gw--扣非市净率, ps_ttm--滚动市销率, pcf_ttm--滚动市现率, dividend_yield--股息率,
+    # param: years 年数，如 10
+    # 返回： 
+    # 如 {'index_code': '399997', 'index_name': '中证白酒', 'latest_date': datetime.date(2022, 4, 8), 'pe_ttm_effective': Decimal('46.437202040'), 'row_num': 1757, 'total_num': 2169, 'percentage': 81.0}
+    """
+    def get_index_latest_estimation_percentile_in_history(self, index_code, valuation_method, years):
+        selecting_sql = ""
+        # 滚动市盈率
+        if (valuation_method == "pe_ttm"):
+            selecting_sql = """  select raw.index_code, raw.index_name, raw.latest_date, round(raw.pe_ttm_effective, 4) as pe_ttm_effective, raw.row_num, record.total_num, round(raw.percent_num*100, 2) as percentage, '%s' as previous_year_num from 
+                                (select index_code, index_name, historical_date as latest_date, pe_ttm*100/pe_ttm_effective_weight as pe_ttm_effective,
+                                row_number() OVER (partition by index_code ORDER BY pe_ttm*100/pe_ttm_effective_weight asc) AS row_num,  
+                                percent_rank() OVER (partition by index_code ORDER BY pe_ttm*100/pe_ttm_effective_weight asc) AS percent_num
+                                from aggregated_data.index_components_historical_estimations
+                                where index_code = '%s'
+                                and historical_date > SUBDATE(NOW(),INTERVAL '%s' YEAR)) raw
+                                left join 
+                                (select index_code, count(1) as total_num from aggregated_data.index_components_historical_estimations where index_code = '%s' and historical_date > SUBDATE(NOW(),INTERVAL '%s' YEAR) group by index_code) as record
+                                on raw.index_code = record.index_code
+                                where raw.latest_date = (select max(historical_date) from aggregated_data.index_components_historical_estimations)
+                                order by raw.percent_num asc """ % (years, index_code, years, index_code, years)
+        # 扣非滚动市盈率
+        elif (valuation_method == "pe_ttm_nonrecurring"):
+            selecting_sql = """  select raw.index_code, raw.index_name, raw.latest_date, round(raw.pe_ttm_nonrecurring_effective, 4) as pe_ttm_nonrecurring_effective, raw.row_num, record.total_num, round(raw.percent_num*100, 2) as percentage, '%s' as previous_year_num  from 
+                					(select index_code, index_name, historical_date as latest_date, pe_ttm_nonrecurring*100/pe_ttm_nonrecurring_effective_weight as pe_ttm_nonrecurring_effective,
+                					row_number() OVER (partition by index_code ORDER BY pe_ttm_nonrecurring*100/pe_ttm_nonrecurring_effective_weight asc) AS row_num,  
+                					percent_rank() OVER (partition by index_code ORDER BY pe_ttm_nonrecurring*100/pe_ttm_nonrecurring_effective_weight asc) AS percent_num
+                					from aggregated_data.index_components_historical_estimations
+                					where index_code = '%s'
+                					and historical_date > SUBDATE(NOW(),INTERVAL '%s' YEAR)) raw
+                					left join 
+                					(select index_code, count(1) as total_num from aggregated_data.index_components_historical_estimations where index_code = '%s' and historical_date > SUBDATE(NOW(),INTERVAL '%s' YEAR) group by index_code) as record
+                					on raw.index_code = record.index_code
+                					where raw.latest_date = (select max(historical_date) from aggregated_data.index_components_historical_estimations)
+                					order by raw.percent_num asc """ % (years, index_code, years, index_code, years)
+        # 市净率
+        elif (valuation_method == "pb"):
+            selecting_sql = """  select raw.index_code, raw.index_name, raw.latest_date, round(raw.pb_effective, 4) as pb_effective, raw.row_num, record.total_num, round(raw.percent_num*100, 2) as percentage, '%s' as previous_year_num  from 
+                					(select index_code, index_name, historical_date as latest_date, pb*100/pb_effective_weight as pb_effective,
+                					row_number() OVER (partition by index_code ORDER BY pb*100/pb_effective_weight asc) AS row_num,  
+                					percent_rank() OVER (partition by index_code ORDER BY pb*100/pb_effective_weight asc) AS percent_num
+                					from aggregated_data.index_components_historical_estimations
+                					where index_code = '%s'
+                					and historical_date > SUBDATE(NOW(),INTERVAL '%s' YEAR)) raw
+                					left join 
+                					(select index_code, count(1) as total_num from aggregated_data.index_components_historical_estimations where index_code = '%s' and historical_date > SUBDATE(NOW(),INTERVAL '%s' YEAR) group by index_code) as record
+                					on raw.index_code = record.index_code
+                					where raw.latest_date = (select max(historical_date) from aggregated_data.index_components_historical_estimations)
+                					order by raw.percent_num asc """ % (years, index_code, years, index_code, years)
+        # 扣商誉市净率
+        elif (valuation_method == "pb_wo_gw"):
+            selecting_sql = """  select raw.index_code, raw.index_name, raw.latest_date, round(raw.pb_wo_gw_effective, 4) as pb_wo_gw_effective, raw.row_num, record.total_num, round(raw.percent_num*100, 2) as percentage, '%s' as previous_year_num  from 
+                					(select index_code, index_name, historical_date as latest_date, pb_wo_gw*100/pb_wo_gw_effective_weight as pb_wo_gw_effective,
+                					row_number() OVER (partition by index_code ORDER BY pb_wo_gw*100/pb_wo_gw_effective_weight asc) AS row_num,  
+                					percent_rank() OVER (partition by index_code ORDER BY pb_wo_gw*100/pb_wo_gw_effective_weight asc) AS percent_num
+                					from aggregated_data.index_components_historical_estimations
+                					where index_code = '%s'
+                					and historical_date > SUBDATE(NOW(),INTERVAL '%s' YEAR)) raw
+                					left join 
+                					(select index_code, count(1) as total_num from aggregated_data.index_components_historical_estimations where index_code = '%s' and historical_date > SUBDATE(NOW(),INTERVAL '%s' YEAR) group by index_code) as record
+                					on raw.index_code = record.index_code
+                					where raw.latest_date = (select max(historical_date) from aggregated_data.index_components_historical_estimations)
+                					order by raw.percent_num asc """ % (years, index_code, years, index_code, years)
+        # 滚动市销率
+        elif (valuation_method == "ps_ttm"):
+            selecting_sql = """  select raw.index_code, raw.index_name, raw.latest_date, round(raw.ps_ttm_effective, 4) as ps_ttm_effective, raw.row_num, record.total_num, round(raw.percent_num*100, 2) as percentage, '%s' as previous_year_num  from 
+                					(select index_code, index_name, historical_date as latest_date, ps_ttm*100/ps_ttm_effective_weight as ps_ttm_effective,
+                					row_number() OVER (partition by index_code ORDER BY ps_ttm*100/ps_ttm_effective_weight asc) AS row_num,  
+                					percent_rank() OVER (partition by index_code ORDER BY ps_ttm*100/ps_ttm_effective_weight asc) AS percent_num
+                					from aggregated_data.index_components_historical_estimations
+                					where index_code = '%s'
+                					and historical_date > SUBDATE(NOW(),INTERVAL '%s' YEAR)) raw
+                					left join 
+                					(select index_code, count(1) as total_num from aggregated_data.index_components_historical_estimations where index_code = '%s' and historical_date > SUBDATE(NOW(),INTERVAL '%s' YEAR) group by index_code) as record
+                					on raw.index_code = record.index_code
+                					where raw.latest_date = (select max(historical_date) from aggregated_data.index_components_historical_estimations)
+                					order by raw.percent_num asc """ % (years, index_code, years, index_code, years)
+
+        # 滚动市销率
+        elif (valuation_method == "pcf_ttm"):
+            selecting_sql = """  select raw.index_code, raw.index_name, raw.latest_date, round(raw.pcf_ttm_effective, 4) as pcf_ttm_effective, raw.row_num, record.total_num, round(raw.percent_num*100, 2) as percentage, '%s' as previous_year_num  from 
+                					(select index_code, index_name, historical_date as latest_date, pcf_ttm*100/pcf_ttm_effective_weight as pcf_ttm_effective,
+                					row_number() OVER (partition by index_code ORDER BY pcf_ttm*100/pcf_ttm_effective_weight asc) AS row_num,  
+                					percent_rank() OVER (partition by index_code ORDER BY pcf_ttm*100/pcf_ttm_effective_weight asc) AS percent_num
+                					from aggregated_data.index_components_historical_estimations
+                					where index_code = '%s'
+                					and historical_date > SUBDATE(NOW(),INTERVAL '%s' YEAR)) raw
+                					left join 
+                					(select index_code, count(1) as total_num from aggregated_data.index_components_historical_estimations where index_code = '%s' and historical_date > SUBDATE(NOW(),INTERVAL '%s' YEAR) group by index_code) as record
+                					on raw.index_code = record.index_code
+                					where raw.latest_date = (select max(historical_date) from aggregated_data.index_components_historical_estimations)
+                					order by raw.percent_num asc """ % (years, index_code, years, index_code, years)
+
+        # 股息率
+        elif (valuation_method == "dividend_yield"):
+            selecting_sql = """  select raw.index_code, raw.index_name, raw.latest_date, round(raw.dividend_yield_effective, 4) as dividend_yield_effective, raw.row_num, record.total_num, round(raw.percent_num*100, 2) as percentage, '%s' as previous_year_num  from 
+                					(select index_code, index_name, historical_date as latest_date, dividend_yield*100/dividend_yield_effective_weight as dividend_yield_effective,
+                					row_number() OVER (partition by index_code ORDER BY dividend_yield*100/dividend_yield_effective_weight asc) AS row_num,  
+                					percent_rank() OVER (partition by index_code ORDER BY dividend_yield*100/dividend_yield_effective_weight asc) AS percent_num
+                					from aggregated_data.index_components_historical_estimations
+                					where index_code = '%s'
+                					and historical_date > SUBDATE(NOW(),INTERVAL '%s' YEAR)) raw
+                					left join 
+                					(select index_code, count(1) as total_num from aggregated_data.index_components_historical_estimations where index_code = '%s' and historical_date > SUBDATE(NOW(),INTERVAL '%s' YEAR) group by index_code) as record
+                					on raw.index_code = record.index_code
+                					where raw.latest_date = (select max(historical_date) from aggregated_data.index_components_historical_estimations)
+                					order by raw.percent_num asc """ % (years, index_code, years, index_code, years)
+        # 其它
+        else:
+            return None
+        index_estiamtion_info = db_operator.DBOperator().select_one("aggregated_data", selecting_sql)
+        return index_estiamtion_info
+
 if __name__ == '__main__':
     time_start = time.time()
     go = IndexComponentsHistoricalEstimationMapper()

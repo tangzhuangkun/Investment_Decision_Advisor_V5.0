@@ -50,7 +50,6 @@ class InvestmentTargetMapper:
         selecting_result = db_operator.DBOperator().select_all("target_pool", selecting_sql)
         return selecting_result
 
-
     """
     查询标的池中各标的估值方式
     :param target_type, 标的类型，index--指数，stock--股票， stock_bond--股债
@@ -62,6 +61,7 @@ class InvestmentTargetMapper:
     {'target_code': '399986', 'target_name': '中证银行', 'target_code_with_init': 'sz399986', 'target_code_with_market_code': '399986.XSHE', 'valuation_method': 'pb'}, 
     {'target_code': '399997', 'target_name': '中证白酒', 'target_code_with_init': 'sz399997', 'target_code_with_market_code': '399997.XSHE', 'valuation_method': 'pe_ttm'}]
     """
+
     def get_target_valuation_method(self, target_type, status, trade_direction):
 
         # 查询SQL
@@ -77,12 +77,55 @@ class InvestmentTargetMapper:
         selecting_result = db_operator.DBOperator().select_all("target_pool", selecting_sql)
         return selecting_result
 
+    """
+    # 获取标的策略触发阈值
+    :param target_type, 标的类型，index--指数，stock--股票， stock_bond--股债
+    :param target_code，标的代码
+    :param status, 当前处于激活还是停用状态，active--启用，inactive--停用，suspend--暂停
+    :param valuation_method 估值方式，pe_ttm--滚动市盈率, pe_ttm_nonrecurring--扣非滚动市盈率, pb--市净率, 
+                                    pb_wo_gw--扣非市净率, ps_ttm--滚动市销率, pcf_ttm--滚动市现率, 
+                                    dividend_yield--股息率，equity_bond_yield--股债收益率
+    :trade_direction, 交易方向，buy--买入，sell--卖出
+    :return, 
+    例1：{'target_type': 'index', 'target_code': '399997', 'target_name': '中证白酒', 'valuation_method': 'pe_ttm', 
+    'target_code_with_init': 'sz399997', 'target_code_with_market_code': '399997.XSHE', 
+    'trigger_value': Decimal('25.00'), 'trigger_percent': Decimal('30.00')}
+    
+    例2： {'target_type': 'stock_bond', 'target_code': 'diy_000300_cn10yr', 'target_name': '股债收益率', 
+    'valuation_method': 'equity_bond_yield', 'target_code_with_init': 'shdiy_000300_cn10yr', 
+    'target_code_with_market_code': 'diy_000300_cn10yr.XSHG', 'trigger_value': Decimal('3.00'), 
+    'trigger_percent': Decimal('95.00')}
+    """
+
+    def get_given_index_trigger_info(self, target_type, target_code, status, valuation_method, trade_direction):
+
+        # 查询SQL
+        selecting_sql = """select target_type, target_code, target_name, valuation_method,
+                            concat(exchange_location,target_code) as target_code_with_init, 
+                            concat(target_code,'.',exchange_location_mic) as target_code_with_market_code, trigger_value, trigger_percent 
+                            from target_pool.investment_target where target_type = '%s' 
+                            and status = '%s' and trade = '%s' and target_code = '%s'  and valuation_method = '%s' """ \
+                        % (target_type, status, trade_direction, target_code, valuation_method)
+
+        # 查询
+        selecting_result = db_operator.DBOperator().select_one("target_pool", selecting_sql)
+        # 如果存在返回
+        if selecting_result:
+            # 返回 如
+            # {'trigger_value': Decimal('3.00'), 'trigger_percent': Decimal('95.00')}
+            return selecting_result
+        # 如果无任何返回，如 因为状态为 未激活
+        else:
+            return None
+
 
 if __name__ == '__main__':
     time_start = time.time()
     go = InvestmentTargetMapper()
-    #result = go.get_target_valuated_by_method("stock_bond", "equity_bond_yield", "active", "buy")
-    result = go.get_target_valuation_method("index","active", "buy")
+    # result = go.get_target_valuated_by_method("stock_bond", "equity_bond_yield", "active", "buy")
+    result = go.get_given_index_trigger_info("stock_bond", "diy_000300_cn10yr", "active", "equity_bond_yield", "buy")
+    #result = go.get_given_index_trigger_info("index", "399997", "active", "pe_ttm", "buy")
+    # result = go.get_target_valuation_method("index","active", "buy")
     print(result)
     time_end = time.time()
     print('time:')

@@ -10,16 +10,16 @@ sys.path.append("..")
 import database.db_operator as db_operator
 import data_collector.get_target_real_time_indicator_from_interfaces as get_target_real_time_indicator_from_interfaces
 import data_miner.data_miner_common_db_operator as data_miner_common_db_operator
-import data_miner.data_miner_common_target_index_operator as data_miner_common_target_index_operator
 import data_collector.collect_chn_gov_bonds_rates as collect_chn_gov_bonds_rates
 import data_collector.collect_index_estimation_from_lxr as collect_index_estimation_from_lxr
 import data_miner.calculate_stock_bond_ratio as calculate_stock_bond_ratio
+import db_mapper.target_pool.investment_target_mapper as investment_target_mapper
 
 class TimeStrategyEquityBondYield:
     # 择时策略，估算实时股债收益率
     # 沪深300指数市值加权估值PE/十年国债收益率
     # 用于判断股市收益率与无风险收益之间的比值
-    # 频率：每个交易日，盘中及盘后
+    # 频率：每个交易日，盘中
 
     def __init__(self):
         pass
@@ -148,6 +148,9 @@ class TimeStrategyEquityBondYield:
 
         return msg
 
+
+    """
+    # 可废弃，2023-06-23， 无需在盘中高频监控
     def generate_realtime_investment_notification_msg(self):
         # 触发阈值时，实时生成基于统计数据的投资决策通知信息
 
@@ -156,7 +159,8 @@ class TimeStrategyEquityBondYield:
 
         # 获取触发值信息
         # 如 {'trigger_value': Decimal('3.00'), 'trigger_percent': Decimal('95.00')}
-        trigger_info = data_miner_common_target_index_operator.DataMinerCommonTargetIndexOperator().get_given_index_trigger_info("diy_000300_cn10yr","equity_bond_yield")
+        #trigger_info = data_miner_common_target_index_operator.DataMinerCommonTargetIndexOperator().get_given_index_trigger_info("diy_000300_cn10yr","equity_bond_yield")
+        trigger_info = investment_target_mapper.InvestmentTargetMapper().get_given_index_trigger_info("stock_bond", "diy_000300_cn10yr", "active", "equity_bond_yield", "buy")
         # 如果无任何触发值信息
         if trigger_info==None:
             return None
@@ -214,14 +218,15 @@ class TimeStrategyEquityBondYield:
         # 是否 实时生成基于统计数据的投资决策通知信息
 
         # 是否存在需要执行的股债收益比策略
-        is_exist_equity_bond_yield_strategy = data_miner_common_target_index_operator.DataMinerCommonTargetIndexOperator().index_valuated_by_method("equity_bond_yield")
+        #is_exist_equity_bond_yield_strategy = data_miner_common_target_index_operator.DataMinerCommonTargetIndexOperator().index_valuated_by_method("equity_bond_yield")
+        is_exist_equity_bond_yield_strategy = investment_target_mapper.InvestmentTargetMapper().get_target_valuated_by_method("stock_bond", "equity_bond_yield", "active", "buy")
         # 如果存在需要执行的策略
         if(is_exist_equity_bond_yield_strategy):
             return self.generate_realtime_investment_notification_msg()
         # 如果不存在需要执行的策略
         else:
             return None
-
+    """
 
 if __name__ == '__main__':
     time_start = time.time()

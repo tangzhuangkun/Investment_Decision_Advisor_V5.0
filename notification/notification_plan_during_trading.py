@@ -108,6 +108,9 @@ class NotificationPlanDuringTrading:
                     log_msg = '失败, ' + current_minute + stock_name + '股票的触发信息微信推送失败 ' + str(e)
                     custom_logger.CustomLogger().log_writter(log_msg, 'error')
 
+
+    """
+    # 可废弃，2023-06-23， 无需在盘中高频监控
     def minutely_equity_bond_yield_notification(self):
         # 通知 预估的实时股债收益比信息, 邮件通知，微信通知，目前只针对 股债收益比
         # 频率：分钟级
@@ -143,6 +146,8 @@ class NotificationPlanDuringTrading:
                 # 日志记录
                 log_msg = '失败, ' + current_time + ' 的预估实时股债收益率数据微信推送失败 ' + str(e)
                 custom_logger.CustomLogger().log_writter(log_msg, 'error')
+    """
+
 
 
 if __name__ == '__main__':

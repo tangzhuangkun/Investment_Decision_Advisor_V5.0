@@ -54,18 +54,6 @@ class Scheduler:
 			# 抛错
 			custom_logger.CustomLogger().log_writter(e, 'error')
 
-
-		try:
-			# 每分钟执行一次股债收益比的监控策略
-			scheduler.add_job(func=notification_plan_during_trading.NotificationPlanDuringTrading().minutely_equity_bond_yield_notification,
-							  trigger='cron',
-							  hour='9,10,11,13,14,15,16',minute='0-59',second='30',day_of_week='mon,tue,wed,thu,fri',
-							  id='tradingdaymonitorequitybondyield')
-		except Exception as e:
-			# 抛错
-			custom_logger.CustomLogger().log_writter(e, 'error')
-
-
 		try:
 			# 每个交易日14：49计算并通过邮件/微信发送指数的动态估值信息
 			scheduler.add_job(func=notification_plan_during_trading.NotificationPlanDuringTrading().
@@ -76,18 +64,6 @@ class Scheduler:
 		except Exception as e:
 			# 抛错
 			custom_logger.CustomLogger().log_writter(e, 'error')
-
-
-		try:
-			# 每个交易日14：50执行一次股债收益比的监控策略
-			scheduler.add_job(func=notification_plan_during_trading.NotificationPlanDuringTrading().minutely_equity_bond_yield_notification,
-							  trigger='cron',
-							  month='1-12', day_of_week='mon,tue,wed,thu,fri', hour=14, minute=50,
-							  id='tradingDayMonitorEquityBondYieldTwo')
-		except Exception as e:
-			# 抛错
-			custom_logger.CustomLogger().log_writter(e, 'error')
-
 
 		#########  盘后(15:00-23:59)  #########
 		try:

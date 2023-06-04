@@ -51,7 +51,8 @@ class DataMinerCommonTargetIndexOperator:
         # [{'index_code': '399997', 'index_name': '中证白酒指数', 'index_code_with_init': 'sz399997', 'index_code_with_market_code': '399997.XSHE', 'valuation_method': 'pe_ttm'},，，，]
         #return selecting_result
 
-
+    """
+    # 可废弃，2023-06-04
     def index_valuated_by_method(self, method):
         # 获取通过xx估值法 估值的指数代码及其对应名称
         # 输入：method, 估值方式，目前有 pe_ttm：市盈率估值法； pb:市净率估值法
@@ -67,6 +68,8 @@ class DataMinerCommonTargetIndexOperator:
         # 返回 如
         # [{'index_code': '399965', 'index_name': '中证800地产', 'index_code_with_init': 'sz399965', 'index_code_with_market_code': '399965.XSHE'},,,]
         return selecting_result
+    """
+
 
     def get_given_index_company_index(self, company_name):
         # 获取特定指数公司开发的指数，指数代码及指数名称
@@ -104,6 +107,10 @@ class DataMinerCommonTargetIndexOperator:
         return selecting_result
     '''
 
+
+
+    """
+    # 可废弃，2023-06-04
     def get_given_index_trigger_info(self, target_code, method):
         # 获取特定指数，在一定方法下的 策略触发信息
         # 输入：target_code，指数代码
@@ -128,6 +135,9 @@ class DataMinerCommonTargetIndexOperator:
         # 如果无任何返回，如 因为状态为 未激活
         else:
             return None
+    
+    """
+
 
 
 if __name__ == '__main__':

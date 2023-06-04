@@ -30,23 +30,27 @@ class DataMinerCommonTargetIndexOperator:
         return selecting_result
     '''
 
-    def get_index_valuation_method(self):
+
+        # 废弃使用，2023-06-04
+        #def get_index_valuation_method(self):
         # 获取标的池中跟踪关注指数的估值方式
         # 输入：无
         # 输出：获取标的池中跟踪关注指数的指数代码，中文名称, 地点缩写+指数代码，指数代码+证券市场代码，估值方式
         # 如 [{'index_code': '399997', 'index_name': '中证白酒指数', 'index_code_with_init': 'sz399997', 'index_code_with_market_code': '399997.XSHE', 'valuation_method': 'pe_ttm'},，，，]
 
         # 查询SQL
-        selecting_sql = """select target_code as index_code, target_name as index_name, 
-        concat(exchange_location,target_code) as index_code_with_init, 
-        concat(target_code,'.',exchange_location_mic) as index_code_with_market_code, 
-        valuation_method from investment_target where target_type = 'index' and status = 'active' and trade='buy' """
+        #selecting_sql = """
+        #select target_code as index_code, target_name as index_name,
+        #concat(exchange_location,target_code) as index_code_with_init,
+        #concat(target_code,'.',exchange_location_mic) as index_code_with_market_code,
+        #valuation_method from investment_target where target_type = 'index' and status = 'active' and trade='buy' """
 
         # 查询
-        selecting_result = db_operator.DBOperator().select_all("target_pool", selecting_sql)
+        #selecting_result = db_operator.DBOperator().select_all("target_pool", selecting_sql)
         # 返回 如
         # [{'index_code': '399997', 'index_name': '中证白酒指数', 'index_code_with_init': 'sz399997', 'index_code_with_market_code': '399997.XSHE', 'valuation_method': 'pe_ttm'},，，，]
-        return selecting_result
+        #return selecting_result
+
 
     def index_valuated_by_method(self, method):
         # 获取通过xx估值法 估值的指数代码及其对应名称

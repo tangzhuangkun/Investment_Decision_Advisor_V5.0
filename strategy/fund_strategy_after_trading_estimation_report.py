@@ -9,10 +9,10 @@ import collections
 
 sys.path.append("..")
 import log.custom_logger as custom_logger
-import data_miner.data_miner_common_target_index_operator as data_miner_common_target_index_operator
 import data_collector.get_target_real_time_indicator_from_interfaces as get_target_real_time_indicator_from_interfaces
 import db_mapper.aggregated_data.index_components_historical_estimations_mapper as index_components_historical_estimations_mapper
 import db_mapper.financial_data.index_estimation_from_lxr_di_mapper as index_estimation_from_lxr_di_mapper
+import db_mapper.target_pool.investment_target_mapper as investment_target_mapper
 
 """
 跟踪标的池中指数基金标的在盘后的估值情况，并生成报告
@@ -24,8 +24,8 @@ class FundStrategyAfterTradingEstimationReport:
 
     def __init__(self):
         # 获取标的池中跟踪关注指数的指数代码，中文名称, 地点缩写+指数代码，指数代码+证券市场代码，估值方式
-        #  如 [{'index_code': '399997', 'index_name': '中证白酒指数', 'index_code_with_init': 'sz399997', 'index_code_with_market_code': '399997.XSHE', 'valuation_method': 'pe_ttm'},，，，]
-        self.tracking_indexes_valuation_method_and_trigger_dict = data_miner_common_target_index_operator.DataMinerCommonTargetIndexOperator().get_index_valuation_method()
+        #  如 [{'target_code': '000932', 'target_name': '中证800消费', 'target_code_with_init': 'sh000932', 'target_code_with_market_code': '000932.XSHE', 'valuation_method': 'pe_ttm'}, ,，，，]
+        self.tracking_indexes_valuation_method_and_trigger_dict = investment_target_mapper.InvestmentTargetMapper().get_target_valuation_method("index","active", "buy")
         # 需要关注的过去x年的数据
         self._PREVIOUS_YEARS_LIST = [3,4,5,8,10]
 
@@ -55,7 +55,7 @@ class FundStrategyAfterTradingEstimationReport:
 
         # 获取标的池中跟踪关注指数的指数代码，估值方式
         for index_unit in self.tracking_indexes_valuation_method_and_trigger_dict:
-            index_code = index_unit["index_code"]
+            index_code = index_unit["target_code"]
             valuation_method = index_unit["valuation_method"]
             # 如果该指数方式还未存入估值信息字典
             if valuation_method not in valuation_method_result_dict:
@@ -65,7 +65,7 @@ class FundStrategyAfterTradingEstimationReport:
                 # 获取当前指数估值在过去X年的百分比信息
                 index_estimation_info = index_components_historical_estimations_mapper.IndexComponentsHistoricalEstimationMapper().get_index_latest_estimation_percentile_in_history(index_code, valuation_method, year)
                 # 添加上市地+指数代码， 如，sz399997
-                index_estimation_info["index_code_with_init"] = index_unit["index_code_with_init"]
+                index_estimation_info["index_code_with_init"] = index_unit["target_code_with_init"]
                 # 汇总在估值信息字典
                 valuation_method_result_dict[valuation_method].append(index_estimation_info)
                 # 如果遇到滚动市盈率，就把扣非滚动市盈率也算一遍
@@ -74,7 +74,7 @@ class FundStrategyAfterTradingEstimationReport:
                     index_estimation_info = index_components_historical_estimations_mapper.IndexComponentsHistoricalEstimationMapper().get_index_latest_estimation_percentile_in_history(
                         index_code, valuation_method_extra, year)
                     # 添加上市地+指数代码， 如，sz399997
-                    index_estimation_info["index_code_with_init"] = index_unit["index_code_with_init"]
+                    index_estimation_info["index_code_with_init"] = index_unit["target_code_with_init"]
                     valuation_method_result_dict[valuation_method].append(index_estimation_info)
                 # 如果遇到市净率，就把扣非滚动市净率也算一遍
                 elif (valuation_method=="pb"):
@@ -82,7 +82,7 @@ class FundStrategyAfterTradingEstimationReport:
                     index_estimation_info = index_components_historical_estimations_mapper.IndexComponentsHistoricalEstimationMapper().get_index_latest_estimation_percentile_in_history(
                         index_code, valuation_method_extra, year)
                     # 添加上市地+指数代码， 如，sz399997
-                    index_estimation_info["index_code_with_init"] = index_unit["index_code_with_init"]
+                    index_estimation_info["index_code_with_init"] = index_unit["target_code_with_init"]
                     valuation_method_result_dict[valuation_method].append(index_estimation_info)
 
         # 获取评估的时间长度

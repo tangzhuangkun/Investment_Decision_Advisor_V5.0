@@ -162,16 +162,6 @@ class Scheduler:
 			custom_logger.CustomLogger().log_writter(e, 'error')
 
 		try:
-			# 每个交易日18：10通过邮件/微信发送标的指数估值报告
-			scheduler.add_job(func=notification_plan_after_trading.NotificationPlanAfterTrading().index_strategy_estimation_notification,
-							  trigger='cron',
-							  month='1-12', day_of_week='mon,tue,wed,thu,fri', hour=18, minute=10,
-							  id='weekdayTargetIndexEstimationReport')
-		except Exception as e:
-			# 抛错
-			custom_logger.CustomLogger().log_writter(e, 'error')
-
-		try:
 			# 每个交易日18:10:30通过邮件/微信发送标的股票估值报告
 			scheduler.add_job(func=notification_plan_after_trading.NotificationPlanAfterTrading().stock_strategy_estimation_notification,
 							  trigger='cron',
@@ -182,11 +172,21 @@ class Scheduler:
 			custom_logger.CustomLogger().log_writter(e, 'error')
 
 		try:
-			# 每个交易日18：45计算并通过邮件/微信发送股当日债收益比
+			# 每个交易日18：15，收集沪深300指数/沪深A股估值，国债收益，计算并通过邮件/微信发送股当日债收益比
 			scheduler.add_job(func=notification_plan_after_trading.NotificationPlanAfterTrading().equity_bond_yield_strategy_estimation_notification,
 							  trigger='cron',
-							  month='1-12', day_of_week='mon,tue,wed,thu,fri', hour=18, minute=45,
+							  month='1-12', day_of_week='mon,tue,wed,thu,fri', hour=18, minute=15,
 							  id='weekdayAfterTradingNotification')
+		except Exception as e:
+			# 抛错
+			custom_logger.CustomLogger().log_writter(e, 'error')
+
+		try:
+			# 每个交易日18：17通过邮件/微信发送标的指数估值报告
+			scheduler.add_job(func=notification_plan_after_trading.NotificationPlanAfterTrading().index_strategy_estimation_notification,
+							  trigger='cron',
+							  month='1-12', day_of_week='mon,tue,wed,thu,fri', hour=18, minute=17,
+							  id='weekdayTargetIndexEstimationReport')
 		except Exception as e:
 			# 抛错
 			custom_logger.CustomLogger().log_writter(e, 'error')

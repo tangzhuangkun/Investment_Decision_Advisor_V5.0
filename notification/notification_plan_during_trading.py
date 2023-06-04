@@ -9,7 +9,6 @@ import strategy.stock_strategy_monitoring_estimation as stock_strategy_monitorin
 import log.custom_logger as custom_logger
 import notification.email_notification as email_notification
 import notification.wechat_notification as wechat_notification
-import strategy.time_strategy_equity_bond_yield as time_strategy_equity_bond_yield
 
 
 class NotificationPlanDuringTrading:

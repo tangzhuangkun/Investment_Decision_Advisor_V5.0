@@ -13,7 +13,7 @@ sys.path.append("..")
 import parsers.disguise as disguise
 import log.custom_logger as custom_logger
 import database.db_operator as db_operator
-import data_miner.data_miner_common_target_index_operator as target_index_operator
+import db_mapper.target_pool.investment_target_mapper as investment_target_mapper
 
 
 class CollectCSIndexTop10StocksWeightDaily:
@@ -121,8 +121,7 @@ class CollectCSIndexTop10StocksWeightDaily:
 
         # [{'index_code': '399965', 'index_name': '中证800地产', 'index_code_with_init': 'sz399965',
         # 'index_code_with_market_code': '399965.XSHE'},，，]
-        target_cs_index_info_list = target_index_operator.DataMinerCommonTargetIndexOperator().get_given_index_company_index(
-            "中证")
+        target_cs_index_info_list = investment_target_mapper.InvestmentTargetMapper().get_given_index_company_index("index", "active", "buy", "中证")
         for info in target_cs_index_info_list:
             target_cs_index_dict[info["index_code"]] = info["index_name"]
         return target_cs_index_dict
@@ -296,6 +295,8 @@ if __name__ == '__main__':
     # go.get_single_index_latest_constituent_stock_and_weight('399997')
     # real_time_pe_ttm = go.get_single_index_latest_constituent_stock_and_weight('399997')
     # print(real_time_pe_ttm)
-    go.main()
+    result = go.get_cs_index_from_index_target()
+    print(result)
+    #go.main()
     time_end = time.time()
     print('Time Cost: ' + str(time_end - time_start))

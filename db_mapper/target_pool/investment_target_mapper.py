@@ -118,14 +118,41 @@ class InvestmentTargetMapper:
         else:
             return None
 
+    """
+    获取特定指数公司开发的指数，指数代码及指数名称
+    :param target_type, 标的类型，index--指数，stock--股票， stock_bond--股债
+    :param status, 当前处于激活还是停用状态，active--启用，inactive--停用，suspend--暂停
+    :param trade_direction, 交易方向，buy--买入，sell--卖出
+    :param company_name，指数公司名称, 如 中证，国证
+    :return, 
+    如，
+    [{'index_code': '000932', 'index_name': '中证800消费', 'index_code_with_init': 'sh000932', 'index_code_with_market_code': '000932.XSHE'}, 
+    {'index_code': '399965', 'index_name': '中证800地产', 'index_code_with_init': 'sz399965', 'index_code_with_market_code': '399965.XSHE'}, 
+    {'index_code': '399986', 'index_name': '中证银行', 'index_code_with_init': 'sz399986', 'index_code_with_market_code': '399986.XSHE'}, 
+    {'index_code': '399997', 'index_name': '中证白酒', 'index_code_with_init': 'sz399997', 'index_code_with_market_code': '399997.XSHE'}]
+    """
+    def get_given_index_company_index(self, target_type, status, trade_direction, company_name):
+        # 查询SQL
+        selecting_sql = """select target_code as index_code, target_name as index_name, 
+                            concat(exchange_location,target_code) as index_code_with_init, 
+                            concat(target_code,'.',exchange_location_mic) as index_code_with_market_code 
+                            from investment_target 
+                            where target_type = '%s' and status = '%s' and trade= '%s' 
+                            and index_company = '%s'  """ % (target_type, status, trade_direction, company_name)
+
+        # 查询
+        selecting_result = db_operator.DBOperator().select_all("target_pool", selecting_sql)
+        return selecting_result
+
 
 if __name__ == '__main__':
     time_start = time.time()
     go = InvestmentTargetMapper()
     # result = go.get_target_valuated_by_method("stock_bond", "equity_bond_yield", "active", "buy")
-    result = go.get_given_index_trigger_info("stock_bond", "diy_000300_cn10yr", "active", "equity_bond_yield", "buy")
+    #result = go.get_given_index_trigger_info("stock_bond", "diy_000300_cn10yr", "active", "equity_bond_yield", "buy")
     #result = go.get_given_index_trigger_info("index", "399997", "active", "pe_ttm", "buy")
     # result = go.get_target_valuation_method("index","active", "buy")
+    result = go.get_given_index_company_index("index", "active", "buy", "中证")
     print(result)
     time_end = time.time()
     print('time:')

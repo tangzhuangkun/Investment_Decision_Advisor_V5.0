@@ -10,9 +10,9 @@ import xlrd
 import sys
 sys.path.append("..")
 import parsers.disguise as disguise
-import data_miner.data_miner_common_target_index_operator as target_index_operator
 import log.custom_logger as custom_logger
 import database.db_operator as db_operator
+import db_mapper.target_pool.investment_target_mapper as investment_target_mapper
 
 class CollectIndexWeightFromCSIndexFile:
     # 从中证官网获取指数成分股及权重文件，并收集信息
@@ -144,7 +144,7 @@ class CollectIndexWeightFromCSIndexFile:
 
         #[{'index_code': '399965', 'index_name': '中证800地产', 'index_code_with_init': 'sz399965',
         # 'index_code_with_market_code': '399965.XSHE'},，，]
-        target_cs_index_info_list =  target_index_operator.DataMinerCommonTargetIndexOperator().get_given_index_company_index("中证")
+        target_cs_index_info_list =  investment_target_mapper.InvestmentTargetMapper().get_given_index_company_index("index", "active", "buy", "中证")
         for info in target_cs_index_info_list:
             target_cs_index_dict[info["index_code"]] = info["index_name"]
         return target_cs_index_dict
@@ -384,7 +384,7 @@ class CollectIndexWeightFromCSIndexFile:
 if __name__ == '__main__':
     time_start = time.time()
     go = CollectIndexWeightFromCSIndexFile()
-    go.main()
+    #go.main()
     #result = go.check_if_saved_before('399997', file_content_list)
     #print(result)
     #go.download_all_target_cs_index_weight_multi_threads()
@@ -392,5 +392,7 @@ if __name__ == '__main__':
     #result = go.read_single_file_content('399997_中证白酒_2021-12-18.xls')
     #result = go.the_sample_file_names_that_expected_to_be_collected()
     #print(result)
+    result = go.get_cs_index_from_index_target()
+    print(result)
     time_end = time.time()
     print('Time Cost: ' + str(time_end - time_start))

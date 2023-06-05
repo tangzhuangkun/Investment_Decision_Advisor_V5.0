@@ -12,10 +12,9 @@ import sys
 sys.path.append("..")
 import parsers.disguise as disguise
 import log.custom_logger as custom_logger
-import data_miner.data_miner_common_target_index_operator as target_index_operator
 import database.db_operator as db_operator
 import data_collector.collector_tool_to_distinguish_stock_market as collector_tool_to_distinguish_stock_market
-
+import db_mapper.target_pool.investment_target_mapper as investment_target_mapper
 
 class CollectIndexWeightFromCNIndexInterface:
     # 从国证指数官网获取指数成分股及其权重
@@ -157,7 +156,7 @@ class CollectIndexWeightFromCNIndexInterface:
         target_cn_index_dict = dict()
 
         #[{'index_code': '399396', 'index_name': '国证食品饮料行业', 'index_code_with_init': 'sz399396', 'index_code_with_market_code': '399396.XSHE'},,,]
-        target_cs_index_info_list =  target_index_operator.DataMinerCommonTargetIndexOperator().get_given_index_company_index("国证")
+        target_cs_index_info_list =  investment_target_mapper.InvestmentTargetMapper().get_given_index_company_index("index", "active", "buy", "国证")
         for info in target_cs_index_info_list:
             target_cn_index_dict[info["index_code"]] = info["index_name"]
         return target_cn_index_dict
@@ -311,10 +310,11 @@ class CollectIndexWeightFromCNIndexInterface:
 if __name__ == '__main__':
     time_start = time.time()
     go = CollectIndexWeightFromCNIndexInterface()
-    go.main()
+    #go.main()
     #go.collect_cn_index()
     #result = go.get_single_index_latest_constituent_stock_and_weight('399396')
     #result = go.collect_all_target_cn_index_weight_single_thread()
-    #print(result)
+    result = go.get_cn_index_from_index_target()
+    print(result)
     time_end = time.time()
     print('Time Cost: ' + str(time_end - time_start))

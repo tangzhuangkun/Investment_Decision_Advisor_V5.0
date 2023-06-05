@@ -83,7 +83,7 @@ class StockBondStrategyEquityBondYield:
         return msg
 
     def main(self):
-        self.generate_latest_notification_msg()
+        return self.generate_latest_notification_msg()
 
 if __name__ == '__main__':
     time_start = time.time()

@@ -149,10 +149,10 @@ class Scheduler:
 
 		try:
 			# 每个交易日18：15，收集沪深300指数/沪深A股估值，国债收益，计算并通过邮件/微信发送股当日债收益比
-			scheduler.add_job(func=notification_plan_after_trading.NotificationPlanAfterTrading().equity_bond_yield_strategy_estimation_notification,
+			scheduler.add_job(func=notification_plan_after_trading.NotificationPlanAfterTrading().stock_bond_yield_strategy_estimation_notification,
 							  trigger='cron',
 							  month='1-12', day_of_week='mon,tue,wed,thu,fri', hour=18, minute=15,
-							  id='weekdayAfterTradingNotification')
+							  id='weekdayStockBondYieldNotification')
 		except Exception as e:
 			# 抛错
 			custom_logger.CustomLogger().log_writter(e, 'error')

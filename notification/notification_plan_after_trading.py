@@ -5,7 +5,7 @@ sys.path.append('..')
 import log.custom_logger as custom_logger
 import notification.email_notification as email_notification
 import notification.wechat_notification as wechat_notification
-import strategy.time_strategy_equity_bond_yield as time_strategy_equity_bond_yield
+import strategy.stock_bond_strategy_equity_bond_yield as stock_bond_strategy_equity_bond_yield
 import strategy.fund_strategy_after_trading_estimation_report as fund_strategy_after_trading_estimation_report
 import strategy.stock_strategy_after_trading_estimation_report as stock_strategy_after_trading_estimation_report
 
@@ -15,7 +15,7 @@ class NotificationPlanAfterTrading:
     def __init__(self):
         pass
 
-    def equity_bond_yield_strategy_estimation_notification(self):
+    def stock_bond_yield_strategy_estimation_notification(self):
         # 择时策略, 股债收益率, 邮件通知，微信通知
 
         # 获取当前时间
@@ -24,7 +24,7 @@ class NotificationPlanAfterTrading:
         title = today+' 股债收益率'
 
         # 股债收益率
-        today_equity_bond_yield_msg = time_strategy_equity_bond_yield.TimeStrategyEquityBondYield().generate_today_notification_msg()
+        today_equity_bond_yield_msg = stock_bond_strategy_equity_bond_yield.StockBondStrategyEquityBondYield().main()
         if today_equity_bond_yield_msg !=None:
 
             # 邮件发送所有估值信息
@@ -126,8 +126,8 @@ class NotificationPlanAfterTrading:
 if __name__ == '__main__':
     time_start = time.time()
     go = NotificationPlanAfterTrading()
-    #go.equity_bond_yield_strategy_estimation_notification()
-    go.index_strategy_estimation_notification()
+    go.stock_bond_yield_strategy_estimation_notification()
+    #go.index_strategy_estimation_notification()
     #go.stock_strategy_estimation_notification()
     time_end = time.time()
     print(time_end - time_start)

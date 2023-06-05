@@ -17,6 +17,9 @@ import data_collector.collect_index_weight_from_csindex_file as collect_index_we
 import data_collector.collect_index_weight_from_cnindex_interface as collect_index_weight_from_cnindex_interface
 import data_miner.gather_all_tracking_stocks as gather_all_tracking_stocks
 import web_service.web_service_impl as web_service_impl
+import data_collector.collect_chn_gov_bonds_rates as collect_chn_gov_bonds_rates
+import data_collector.collect_index_estimation_from_lxr as collect_index_estimation_from_lxr
+import data_miner.calculate_stock_bond_ratio as calculate_stock_bond_ratio
 
 class Scheduler:
 	# 任务调度器，根据时间安排工作
@@ -148,6 +151,36 @@ class Scheduler:
 			custom_logger.CustomLogger().log_writter(e, 'error')
 
 		try:
+			# 每个交易日18:10:45, 收集最新国债收益率
+			scheduler.add_job(func=collect_chn_gov_bonds_rates.CollectCHNGovBondsRates().main,
+							  trigger='cron',
+							  month='1-12', day_of_week='mon,tue,wed,thu,fri', hour=18, minute=10, second=45,
+							  id='weekdayCollectCHNGovBondsRates')
+		except Exception as e:
+			# 抛错
+			custom_logger.CustomLogger().log_writter(e, 'error')
+
+		try:
+			# 每个交易日18:10:50, 收集最新沪深300指数市值加权估值
+			scheduler.add_job(func=collect_index_estimation_from_lxr.CollectIndexEstimationFromLXR().main,
+							  trigger='cron',
+							  month='1-12', day_of_week='mon,tue,wed,thu,fri', hour=18, minute=10, second=50,
+							  id='weekdayCollectIndexEstimationFromLXR')
+		except Exception as e:
+			# 抛错
+			custom_logger.CustomLogger().log_writter(e, 'error')
+
+		try:
+			# 每个交易日18:10:58, 运行mysql脚本，计算股债收益率
+			scheduler.add_job(func=calculate_stock_bond_ratio.CalculateStockBondRatio().main,
+							  trigger='cron',
+							  month='1-12', day_of_week='mon,tue,wed,thu,fri', hour=18, minute=10, second=58,
+							  id='weekdayCalculateStockBondRatio')
+		except Exception as e:
+			# 抛错
+			custom_logger.CustomLogger().log_writter(e, 'error')
+
+		try:
 			# 每个交易日18：15，收集沪深300指数/沪深A股估值，国债收益，计算并通过邮件/微信发送股当日债收益比
 			scheduler.add_job(func=notification_plan_after_trading.NotificationPlanAfterTrading().stock_bond_yield_strategy_estimation_notification,
 							  trigger='cron',
@@ -158,10 +191,10 @@ class Scheduler:
 			custom_logger.CustomLogger().log_writter(e, 'error')
 
 		try:
-			# 每个交易日18：17通过邮件/微信发送标的指数估值报告
+			# 每个交易日18:15:30 通过邮件/微信发送标的指数估值报告
 			scheduler.add_job(func=notification_plan_after_trading.NotificationPlanAfterTrading().index_strategy_estimation_notification,
 							  trigger='cron',
-							  month='1-12', day_of_week='mon,tue,wed,thu,fri', hour=18, minute=17,
+							  month='1-12', day_of_week='mon,tue,wed,thu,fri', hour=18, minute=15, second=30,
 							  id='weekdayTargetIndexEstimationReport')
 		except Exception as e:
 			# 抛错

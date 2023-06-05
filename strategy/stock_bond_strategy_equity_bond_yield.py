@@ -7,9 +7,6 @@ import time
 
 sys.path.append("..")
 import log.custom_logger as custom_logger
-import data_collector.collect_chn_gov_bonds_rates as collect_chn_gov_bonds_rates
-import data_collector.collect_index_estimation_from_lxr as collect_index_estimation_from_lxr
-import data_miner.calculate_stock_bond_ratio as calculate_stock_bond_ratio
 import db_mapper.aggregated_data.stock_bond_ratio_di_mapper as stock_bond_ratio_di_mapper
 import db_mapper.financial_data.trading_days_mapper as trading_days_mapper
 
@@ -24,19 +21,6 @@ class StockBondStrategyEquityBondYield:
         self._PREVIOUS_YEARS_LIST = [3, 4, 5, 8, 10]
         # 沪深300指数代码
         self.index_code = "000300"
-
-    def prepare_index_estimation_bond_rate_and_cal_yield(self):
-        # 准备数据，收集最新沪深300指数市值加权估值和国债利率,
-        # 并计算当日收盘后的真实股债收益率
-        # 盘后执行
-
-        # TODO 拆分为独立的采集任务
-        # 收集最新国债收益率
-        collect_chn_gov_bonds_rates.CollectCHNGovBondsRates().main()
-        # 收集最新沪深300指数市值加权估值
-        collect_index_estimation_from_lxr.CollectIndexEstimationFromLXR().main()
-        # 运行mysql脚本，计算股债收益率
-        calculate_stock_bond_ratio.CalculateStockBondRatio().main()
 
     """
     生成关于股债收益率统计数据的通知信息
@@ -53,8 +37,6 @@ class StockBondStrategyEquityBondYield:
     近10年历史排位： 94.28 % 
     """
     def generate_latest_notification_msg(self):
-        # 准备数据
-        self.prepare_index_estimation_bond_rate_and_cal_yield()
 
         # 各跟踪年份的股债收益率
         all_tracking_year_stock_bond_ratio_list = list()

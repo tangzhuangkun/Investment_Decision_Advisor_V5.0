@@ -10,7 +10,7 @@ import collections
 sys.path.append("..")
 import log.custom_logger as custom_logger
 import data_miner.data_miner_common_target_stock_operator as data_miner_common_target_stock_operator
-import data_miner.data_miner_common_stock_operator as data_miner_common_stock_operator
+import db_mapper.financial_data.stocks_main_estimation_indexes_historical_data_mapper as stocks_main_estimation_indexes_historical_data_mapper
 
 """
 跟踪标的池中股票标的在盘后的估值情况，并生成报告
@@ -69,19 +69,19 @@ class StockStrategyAfterTradingEstimationReport:
             # 获取评估的时间长度
             for year in self._PREVIOUS_YEARS_LIST:
                 # 获取当前股票估值在过去X年的百分比信息
-                stock_estimation_info = data_miner_common_stock_operator.DataMinerCommonStockOperator().get_stock_latest_estimation_percentile_in_history(stock_code, valuation_method, year)
+                stock_estimation_info = stocks_main_estimation_indexes_historical_data_mapper.StocksMainEstimationIndexesHistoricalDataMapper().get_stock_latest_estimation_percentile_in_history(stock_code, valuation_method, year)
                 # 汇总在估值信息字典
                 valuation_method_result_dict[valuation_method].append(stock_estimation_info)
                 # 如果遇到滚动市盈率，就把扣非滚动市盈率也算一遍
                 if(valuation_method=="pe_ttm"):
                     valuation_method_extra = "pe_ttm_nonrecurring"
-                    stock_estimation_info = data_miner_common_stock_operator.DataMinerCommonStockOperator().get_stock_latest_estimation_percentile_in_history(
+                    stock_estimation_info = stocks_main_estimation_indexes_historical_data_mapper.StocksMainEstimationIndexesHistoricalDataMapper().get_stock_latest_estimation_percentile_in_history(
                         stock_code, valuation_method_extra, year)
                     valuation_method_result_dict[valuation_method].append(stock_estimation_info)
                 # 如果遇到市净率，就把扣非滚动市净率也算一遍
                 elif (valuation_method=="pb"):
                     valuation_method_extra = "pb_wo_gw"
-                    stock_estimation_info = data_miner_common_stock_operator.DataMinerCommonStockOperator().get_stock_latest_estimation_percentile_in_history(
+                    stock_estimation_info = stocks_main_estimation_indexes_historical_data_mapper.StocksMainEstimationIndexesHistoricalDataMapper().get_stock_latest_estimation_percentile_in_history(
                         stock_code, valuation_method_extra, year)
                     valuation_method_result_dict[valuation_method].append(stock_estimation_info)
         return valuation_method_result_dict

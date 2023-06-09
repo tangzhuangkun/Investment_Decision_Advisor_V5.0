@@ -70,6 +70,8 @@ class DataMinerCommonDBOperator:
 
         return selecting_result["token"]
     """
+
+    """
     def get_all_channel_users(self,channel):
         # 获取某个推送渠道的全部用户
         # channel: 渠道代码，如 email,wechat 等
@@ -86,6 +88,7 @@ class DataMinerCommonDBOperator:
         for user_unit in selecting_result:
             user_list.append(user_unit['contact_id'])
         return user_list
+    """
 
 if __name__ == '__main__':
     time_start = time.time()

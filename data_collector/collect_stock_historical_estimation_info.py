@@ -13,7 +13,6 @@ import requests
 sys.path.append("..")
 import database.db_operator as db_operator
 import log.custom_logger as custom_logger
-import data_miner.data_miner_common_db_operator as data_miner_common_db_operator
 import db_mapper.parser_component.token_record_mapper as token_record_mapper
 
 

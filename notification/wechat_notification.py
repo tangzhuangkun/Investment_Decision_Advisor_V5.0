@@ -8,7 +8,7 @@ import requests
 
 sys.path.append("..")
 import log.custom_logger as custom_logger
-import data_miner.data_miner_common_db_operator as data_miner_common_db_operator
+import db_mapper.target_pool.target_users_mapper as target_users_mapper
 
 class WechatNotification:
     # 发送微信通知
@@ -55,7 +55,7 @@ class WechatNotification:
         # param: send_content, 自定义的内容
 
         # 获取token，决定需要推送给哪些人
-        users_list = data_miner_common_db_operator.DataMinerCommonDBOperator().get_all_channel_users("wechat")
+        users_list = target_users_mapper.TargetUsersMapper().get_all_channel_users("wechat")
         # 需要发送的文本中，每个换行符都替换成两个
         replaced_send_content = self.replace_one_enter_key_with_two(send_content)
         # 推送给所有人

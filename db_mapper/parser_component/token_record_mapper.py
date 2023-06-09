@@ -9,7 +9,6 @@ import sys
 
 sys.path.append("..")
 import database.db_operator as db_operator
-import log.custom_logger as custom_logger
 
 """
 数据表，token_record 的映射

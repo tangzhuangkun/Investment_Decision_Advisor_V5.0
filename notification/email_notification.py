@@ -9,7 +9,7 @@ import sys
 sys.path.append("..")
 import log.custom_logger as custom_logger
 import conf
-import data_miner.data_miner_common_db_operator as data_miner_common_db_operator
+import db_mapper.target_pool.target_users_mapper as target_users_mapper
 
 class EmailNotification:
 	# 通过邮件发送提醒
@@ -25,7 +25,7 @@ class EmailNotification:
 		# 发件人账号
 		self.email_sender = conf.email_sender
 		# 接收邮件的账号
-		self.email_receivers = data_miner_common_db_operator.DataMinerCommonDBOperator().get_all_channel_users("email")
+		self.email_receivers = target_users_mapper.TargetUsersMapper().get_all_channel_users("email")
 		# 获取当前时间
 		self.today= time.strftime("%Y-%m-%d", time.localtime())
 		# 设置邮件主题

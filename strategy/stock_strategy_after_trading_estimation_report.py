@@ -9,8 +9,8 @@ import collections
 
 sys.path.append("..")
 import log.custom_logger as custom_logger
-import data_miner.data_miner_common_target_stock_operator as data_miner_common_target_stock_operator
 import db_mapper.financial_data.stocks_main_estimation_indexes_historical_data_mapper as stocks_main_estimation_indexes_historical_data_mapper
+import db_mapper.target_pool.investment_target_mapper as investment_target_mapper
 
 """
 跟踪标的池中股票标的在盘后的估值情况，并生成报告
@@ -25,7 +25,7 @@ class StockStrategyAfterTradingEstimationReport:
         # 如，[{'stock_code': '000002', 'stock_name': '万科A', 'stock_code_with_init': 'sz000002', 'stock_code_with_market_code': '000002.XSHE', 'valuation_method': 'pb', 'trigger_value': Decimal('0.95'), 'trigger_percent': Decimal('0.50')},
         # {'stock_code': '600048', 'stock_name': '保利发展', 'stock_code_with_init': 'sh600048', 'stock_code_with_market_code': '600048.XSHG', 'valuation_method': 'pb', 'trigger_value': Decimal('0.89'), 'trigger_percent': Decimal('10.00')},
         # {'stock_code': '000002', 'stock_name': '万科A', 'stock_code_with_init': 'sz000002', 'stock_code_with_market_code': '000002.XSHE', 'valuation_method': 'pe_ttm', 'trigger_value': Decimal('6.00'), 'trigger_percent': Decimal('5.00')}]
-        self.tracking_stocks_valuation_method_and_trigger_dict = data_miner_common_target_stock_operator.DataMinerCommonTargetStockOperator().get_stocks_valuation_method_and_trigger()
+        self.tracking_stocks_valuation_method_and_trigger_dict = investment_target_mapper.InvestmentTargetMapper().get_stocks_valuation_method_and_trigger("stock", "active", "buy")
         # 需要关注的过去x年的数据
         self._PREVIOUS_YEARS_LIST = [3, 4, 5, 7, 10]
 

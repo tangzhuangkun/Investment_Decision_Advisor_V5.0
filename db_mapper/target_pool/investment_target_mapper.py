@@ -144,6 +144,38 @@ class InvestmentTargetMapper:
         selecting_result = db_operator.DBOperator().select_all("target_pool", selecting_sql)
         return selecting_result
 
+    """
+    获取标的池中跟踪关注股票及对应的估值方式和触发条件
+    :param target_type, 标的类型，index--指数，stock--股票， stock_bond--股债
+    :param status, 当前处于激活还是停用状态，active--启用，inactive--停用，suspend--暂停
+    :param trade_direction, 交易方向，buy--买入，sell--卖出
+    :param frequency, 监控频率，如，secondly, minutely, hourly, daily, weekly, monthly, seasonally, yearly, periodically
+    :return,  股票代码，股票名称， 地点缩写+指数代码，指数代码+证券市场代码, 估值方式，触发值，触发历史百分位
+    [
+    [{'stock_code': '000002', 'stock_name': '万科A', 'stock_code_with_init': 'sz000002', 'stock_code_with_market_code': '000002.XSHE', 'valuation_method': 'pb', 'trigger_value': Decimal('0.85'), 'trigger_percent': Decimal('0.10')}, ,,
+     ]
+    """
+    def get_stocks_valuation_method_and_trigger(self, target_type, status, trade_direction, frequency=None):
+        # 查询SQL
+        selecting_sql = ""
+        if frequency:
+            selecting_sql = """select target_code as stock_code, target_name as stock_name, 
+            concat(exchange_location,target_code) as stock_code_with_init, 
+            concat(target_code,'.',exchange_location_mic) as stock_code_with_market_code, 
+            valuation_method, trigger_value, trigger_percent from investment_target 
+            where target_type = '%s' and status = '%s'  and trade = '%s'  and monitoring_frequency = '%s' """ \
+                            % (target_type, status, trade_direction, frequency)
+        else:
+            selecting_sql = """select target_code as stock_code, target_name as stock_name, 
+                        concat(exchange_location,target_code) as stock_code_with_init, 
+                        concat(target_code,'.',exchange_location_mic) as stock_code_with_market_code, 
+                        valuation_method, trigger_value, trigger_percent from investment_target 
+                        where target_type = '%s' and status = '%s'  and trade = '%s' """ \
+                            % (target_type, status, trade_direction)
+        # 查询
+        selecting_result = db_operator.DBOperator().select_all("target_pool", selecting_sql)
+        return selecting_result
+
 
 if __name__ == '__main__':
     time_start = time.time()
@@ -152,7 +184,8 @@ if __name__ == '__main__':
     #result = go.get_given_index_trigger_info("stock_bond", "diy_000300_cn10yr", "active", "equity_bond_yield", "buy")
     #result = go.get_given_index_trigger_info("index", "399997", "active", "pe_ttm", "buy")
     # result = go.get_target_valuation_method("index","active", "buy")
-    result = go.get_given_index_company_index("index", "active", "buy", "中证")
+    #result = go.get_given_index_company_index("index", "active", "buy", "中证")
+    result = go.get_stocks_valuation_method_and_trigger("stock", "active", "buy")
     print(result)
     time_end = time.time()
     print('time:')

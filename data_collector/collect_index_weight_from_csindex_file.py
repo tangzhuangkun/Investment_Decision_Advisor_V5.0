@@ -384,7 +384,7 @@ class CollectIndexWeightFromCSIndexFile:
 if __name__ == '__main__':
     time_start = time.time()
     go = CollectIndexWeightFromCSIndexFile()
-    #go.main()
+    go.main()
     #result = go.check_if_saved_before('399997', file_content_list)
     #print(result)
     #go.download_all_target_cs_index_weight_multi_threads()
@@ -392,7 +392,7 @@ if __name__ == '__main__':
     #result = go.read_single_file_content('399997_中证白酒_2021-12-18.xls')
     #result = go.the_sample_file_names_that_expected_to_be_collected()
     #print(result)
-    result = go.get_cs_index_from_index_target()
-    print(result)
+    #result = go.get_cs_index_from_index_target()
+    #print(result)
     time_end = time.time()
     print('Time Cost: ' + str(time_end - time_start))

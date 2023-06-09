@@ -58,7 +58,7 @@ class DataMinerCommonDBOperator:
             token_list.append(token_unit['token'])
         return token_list
 
-
+    """
     def get_one_token(self,platform_code):
         # 随机获取某个平台的一个令牌
         # platform_code: 平台代码，如 理杏仁的代码为 lxr
@@ -69,7 +69,7 @@ class DataMinerCommonDBOperator:
         selecting_result = db_operator.DBOperator().select_one("parser_component", selecting_sql)
 
         return selecting_result["token"]
-
+    """
     def get_all_channel_users(self,channel):
         # 获取某个推送渠道的全部用户
         # channel: 渠道代码，如 email,wechat 等

@@ -14,6 +14,7 @@ sys.path.append("..")
 import database.db_operator as db_operator
 import log.custom_logger as custom_logger
 import data_miner.data_miner_common_db_operator as data_miner_common_db_operator
+import db_mapper.parser_component.token_record_mapper as token_record_mapper
 
 
 
@@ -244,14 +245,6 @@ class CollectStockHistoricalEstimationInfo:
             stock_code_name_dict[stock_code] = stock_info_dicts.get(stock_code).get('stock_name')
         return stock_code_name_dict
 
-    """
-        def get_lxr_token(self):
-        # 随机获取一个理杏仁的token
-        # 输出：理杏仁的token
-        return data_miner_common_db_operator.DataMinerCommonDBOperator().get_one_token("lxr")
-    """
-
-
     def tell_exchange_market_and_determine_url(self, exchange_location_mic):
         '''
         # 判断股票属于哪个交易市场，并决定使用哪个基本面数据URL
@@ -368,69 +361,6 @@ class CollectStockHistoricalEstimationInfo:
                     date_list.append(str(end_date))
                     return date_list
 
-    """
-        def collect_a_period_time_estimation(self, stock_code, stock_info_dict, start_date, end_date, exchange_location_mic):
-        # 调取理杏仁接口，获取单个股票一段时间范围内，该股票估值数据, 并储存
-        # param: stock_code, 股票代码, 如 000001
-        # param:  stock_info_dict 股票代码,名称,上市地 字典, 只能1支股票，
-        #         如  {'000001': {'stock_code': '000001', 'stock_name': '平安银行', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}}
-        # param:  start_date, 开始时间，如 2020-11-12
-        # param:  end_date, 结束时间，默认为空，如 2020-11-13
-        # :param exchange_location_mic: 交易所MIC码（如XSHG, XSHE，XHKG）均可， 大小写均可
-        # 输出： 将获取到股票估值数据存入数据库
-
-        # 上市地代码或mic码，转为大写
-        exchange_location_mic = exchange_location_mic.upper()
-        # 判断股票属于哪个交易市场，并决定使用理杏仁哪个获取基本面数据URL
-        # 理杏仁 获取基本面数据 接口
-        url = self.tell_exchange_market_and_determine_url(exchange_location_mic)
-        # 判断股票属于哪个交易市场，并决定需要获取哪些指标
-        estimations_list = self.tell_exchange_market_and_determine_what_estimations_need_to_get(exchange_location_mic)
-
-        # 随机获取一个token
-        token = data_miner_common_db_operator.DataMinerCommonDBOperator().get_one_token("lxr")
-        # 理杏仁要求 在请求的headers里面设置Content-Type为application/json。
-        headers = {'Content-Type': 'application/json'}
-
-        parms = {"token": token,
-                 "startDate": start_date,
-                 "endDate": end_date,
-                 "stockCodes":
-                     [stock_code],
-                 "metricsList": estimations_list}
-        # 日志记录
-        #msg = '向理杏仁请求的接口参数 ' + str(parms)
-        #custom_logger.CustomLogger().log_writter(msg, 'info')
-        values = json.dumps(parms)
-        # 调用理杏仁接口
-        req = requests.post(url, data=values, headers=headers)
-        content = req.json()
-
-        # 日志记录
-        #msg = '理杏仁接口返回 ' + str(content)
-        #custom_logger.CustomLogger().log_writter(msg, 'info')
-
-        # content 如 {'code': 0, 'message': 'success', 'data': [{'date': '2020-11-13T00:00:00+08:00', 'pe_ttm': 48.04573277785343, 'd_pe_ttm': 47.83511443886097, 'pb': 14.42765025023379, 'pb_wo_gw': 14.42765025023379, 'ps_ttm': 22.564315310000808, 'pcf_ttm': 49.80250701327664, 'ev_ebit_r': 33.88432187818624, 'ey': 0.029323867066169462, 'dyr': 0.00998533724340176, 'sp': 1705, 'tv': 2815500, 'shn': 114300, 'mc': 2141817249000, 'cmc': 2141817249000, 'ecmc': 899670265725, 'ecmc_psh': 7871131, 'ha_shm': 173164289265, 'fb': 17366179363, 'sb': 2329851810, 'fc_rights': 1705, 'bc_rights': 1705, 'lxr_fc_rights': 1705, 'stockCode': '600519'}, {'date': '2020-11-12T00:00:00+08:00', 'pe_ttm': 48.88519458398379, 'd_pe_ttm': 48.67089629172529, 'pb': 14.679732186277464, 'pb_wo_gw': 14.679732186277464, 'ps_ttm': 22.95856220330575, 'pcf_ttm': 50.672663426136175, 'ev_ebit_r': 34.47543387050795, 'ey': 0.028824017925678805, 'dyr': 0.009813867960963575, 'sp': 1734.79, 'tv': 2347300, 'shn': 114300, 'mc': 2179239381462, 'cmc': 2179239381462, 'ecmc': 915389431248, 'ecmc_psh': 8008656, 'ha_shm': 176618263840, 'fb': 17207679699, 'sb': 2426239128, 'fc_rights': 1734.79, 'bc_rights': 1734.79, 'lxr_fc_rights': 1734.79, 'stockCode': '600519'}]}
-
-
-        if 'error' in content and content.get('error').get('message') == "Illegal token.":
-            # 日志记录失败
-            msg = '使用无效TOKEN ' + token + ' ' + '执行函数collect_a_period_time_estimation获取股票代码 ' + \
-                  stock_code + ' ' +str(stock_info_dict.get(stock_code).get('stock_name')) + ' ' + start_date + ' ' + end_date + ' 失败'
-            custom_logger.CustomLogger().log_writter(msg, 'error')
-            return self.collect_a_period_time_estimation(stock_code, stock_info_dict, start_date, end_date,exchange_location_mic)
-
-        try:
-            # 数据存入数据库
-            self.save_content_into_db(content, stock_info_dict, "period")
-            # 日志记录
-            msg = "收集了 "+ exchange_location_mic +"."+stock_code + " 从" + start_date+" 至 "+end_date +" 的估值数据"
-            custom_logger.CustomLogger().log_writter(msg, 'info')
-        except Exception as e:
-            # 日志记录失败
-            msg = '数据存入数据库失败。 ' + '理杏仁接口返回为 '+str(content) + '。 抛错为 '+ str(e) + ' 使用的Token为' + token
-            custom_logger.CustomLogger().log_writter(msg, 'error')
-    """
     def collect_a_period_time_estimation(self, stock_code, stock_info_dict, start_date, end_date, exchange_location_mic):
         # 调取理杏仁接口，获取单个股票一段时间范围内，该股票估值数据, 并储存
         # param: stock_code, 股票代码, 如 000001
@@ -450,7 +380,7 @@ class CollectStockHistoricalEstimationInfo:
         estimations_list = self.tell_exchange_market_and_determine_what_estimations_need_to_get(exchange_location_mic)
 
         # 随机获取一个token
-        token = data_miner_common_db_operator.DataMinerCommonDBOperator().get_one_token("lxr")
+        token = token_record_mapper.TokenRecordMapper().get_one_token("lxr")
         # 理杏仁要求 在请求的headers里面设置Content-Type为application/json。
         headers = {'Content-Type': 'application/json'}
 
@@ -522,7 +452,7 @@ class CollectStockHistoricalEstimationInfo:
         estimations_list = self.tell_exchange_market_and_determine_what_estimations_need_to_get(exchange_location_mic)
 
         # 随机获取一个token
-        token = data_miner_common_db_operator.DataMinerCommonDBOperator().get_one_token("lxr")
+        token = token_record_mapper.TokenRecordMapper().get_one_token("lxr")
         #token = "44589fdc-423d-4a31-b82d-83f94d626661"
         # 理杏仁要求 在请求的headers里面设置Content-Type为application/json。
         headers = {'Content-Type': 'application/json'}
@@ -820,7 +750,6 @@ if __name__ == "__main__":
     time_start = time.time()
     go = CollectStockHistoricalEstimationInfo()
     #result = go.get_all_exchange_locaiton_mics()
-    #result = go.data_miner_common_db_operator.DataMinerCommonDBOperator().get_one_token("lxr")
     #print(result)
     #result = go.all_tracking_stocks("XHKG")
     #print(stock_codes_names_dict)

@@ -22,18 +22,18 @@ class TradingDaysMapper:
     def __init__(self):
         pass
 
+    """
+    获取传入日期参数最近的交易日期, 即上一个交易日;
+    如果今天有交易，是收盘后调取，则获取的是，今天的交易日期
+    仅限于A股
+    :param, p_day: 交易日期，如 2021-06-09
+    :return, 如果存在最近的交易日期，则返回日期
+            如果不存在，则返回 0000-00-00
+    """
     def get_the_lastest_trading_date(self,p_day):
-        # 获取传入日期参数最近的交易日期, 即上一个交易日;
-        # 如果今天有交易，是收盘后调取，则获取的是，今天的交易日期
-        # 仅限于A股
-        # day: 交易日期，如 2021-06-09
-        # return: 如果存在最近的交易日期，则返回日期
-        #         如果不存在，则返回 0000-00-00
-
         # 查询SQL
-        selecting_sql = "SELECT trading_date as p_day FROM trading_days WHERE trading_date <= '%s' ORDER BY " \
-                        "ABS(DATEDIFF(trading_date, '%s')) ASC LIMIT 1" % (p_day,p_day)
-
+        selecting_sql = """SELECT trading_date as p_day FROM trading_days WHERE trading_date <= '%s' 
+        ORDER BY ABS(DATEDIFF(trading_date, '%s')) LIMIT 1 """ % (p_day,p_day)
         # 查询
         selecting_result = db_operator.DBOperator().select_one("financial_data", selecting_sql)
 

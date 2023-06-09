@@ -6,7 +6,7 @@ import log.custom_logger as custom_logger
 import notification.email_notification as email_notification
 import notification.wechat_notification as wechat_notification
 import strategy.stock_bond_strategy_equity_bond_yield as stock_bond_strategy_equity_bond_yield
-import strategy.fund_strategy_after_trading_estimation_report as fund_strategy_after_trading_estimation_report
+import strategy.index_strategy_after_trading_estimation_report as index_strategy_after_trading_estimation_report
 import strategy.stock_strategy_after_trading_estimation_report as stock_strategy_after_trading_estimation_report
 
 class NotificationPlanAfterTrading:
@@ -59,7 +59,7 @@ class NotificationPlanAfterTrading:
         title = '标的指数 ' + today + ' 盘后估值'
 
         # 标的指数在盘后的估值情况
-        index_estimation_historical_percentage_msg = fund_strategy_after_trading_estimation_report.FundStrategyAfterTradingEstimationReport().generate_form_msg()
+        index_estimation_historical_percentage_msg = index_strategy_after_trading_estimation_report.IndexStrategyAfterTradingEstimationReport().generate_form_msg()
 
         if index_estimation_historical_percentage_msg !=None:
             # 邮件发送所有估值信息

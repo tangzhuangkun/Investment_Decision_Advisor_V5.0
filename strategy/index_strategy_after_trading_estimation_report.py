@@ -20,7 +20,7 @@ import db_mapper.target_pool.investment_target_mapper as investment_target_mappe
 """
 
 
-class FundStrategyAfterTradingEstimationReport:
+class IndexStrategyAfterTradingEstimationReport:
 
     def __init__(self):
         # 获取标的池中跟踪关注指数的指数代码，中文名称, 地点缩写+指数代码，指数代码+证券市场代码，估值方式
@@ -338,7 +338,7 @@ class FundStrategyAfterTradingEstimationReport:
 
 if __name__ == '__main__':
     time_start = time.time()
-    go = FundStrategyAfterTradingEstimationReport()
+    go = IndexStrategyAfterTradingEstimationReport()
     #result = go.generate_msg()
     result = go.generate_form_msg()
     #result = go.generate_historical_percentage_estimation_info()

@@ -14,6 +14,7 @@ import parsers.disguise as disguise
 import log.custom_logger as custom_logger
 import database.db_operator as db_operator
 import conf
+import db_mapper.financial_data.index_excellent_performance_indices_di_mapper as index_excellent_performance_indices_di_mapper
 
 """
 从中证指数官网接口收集过去几年表现优异的指数
@@ -231,12 +232,7 @@ class CollectExcellentIndexFromCSIndex:
         '''
 
         # 获取所有指数的代码
-        #index_code_list = self.call_interface_to_get_all_index_code_name_from_cs_index()
-        index_code_list = ['000935', '000989', '000991', '000992', '000993', '399701',
-         '399702', '399707', '399802', '399803', '399804', '399806', '399807', '399808', '399809', '399811', '399812',
-         '399814', '399959', '399965', '399966', '399967', '399970', '399971', '399973', '399974', '399975', '399976',
-         '399983', '399986', '399987', '399989', '399990', '399991', '399992', '399993', '399994', '399995', '399996',
-         '399997']
+        index_code_list = self.call_interface_to_get_all_index_code_name_from_cs_index()
         # 满足条件的指数
         satisfied_index_list = []
 
@@ -372,14 +368,9 @@ class CollectExcellentIndexFromCSIndex:
                     # 基金名称
                     relative_fund_name = fund.get(relative_fund_code)
                     try:
-                        # 插入的SQL
-                        inserting_sql = "INSERT INTO index_excellent_performance_indices_di(index_code,index_name," \
-                                        "index_company,three_year_yield_rate,five_year_yield_rate,relative_fund_code," \
-                                        "relative_fund_name,p_day)" \
-                                        "VALUES ('%s','%s','%s','%s','%s','%s','%s','%s')" % (
-                                            index_code,index_name, '中证', three_year_yield_rate,five_year_yield_rate,
+                        # 将优秀的指数信息及其相关基金产品存入数据库
+                        index_excellent_performance_indices_di_mapper.IndexExcellentPerformanceIndicesDiMapper().insert_excellent_indexes(index_code,index_name, '中证', three_year_yield_rate,five_year_yield_rate,
                                             relative_fund_code,relative_fund_name,p_day)
-                        db_operator.DBOperator().operate("insert", "financial_data", inserting_sql)
                         # 日志记录
                         msg = '将从中证官网接口获取的优异指数 ' + p_day +" "+index_code + " "+index_name + ' 存入数据库时成功'
                         custom_logger.CustomLogger().log_writter(msg, 'info')

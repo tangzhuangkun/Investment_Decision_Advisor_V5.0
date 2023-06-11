@@ -12,7 +12,6 @@ import sys
 sys.path.append("..")
 import parsers.disguise as disguise
 import log.custom_logger as custom_logger
-import database.db_operator as db_operator
 import conf
 import db_mapper.financial_data.index_excellent_performance_indices_di_mapper as index_excellent_performance_indices_di_mapper
 
@@ -31,13 +30,15 @@ class CollectExcellentIndexFromCSIndex:
         # 5年年化收益率
         self.five_year_yield_rate_standard = 15
         # 最大线程数
-        self.max_thread_num = 10
+        self.max_thread_num = 15
         # 同时获取x个IP和5x个UA
         self.IP_UA_num = 5
         # 将中证所有指数代码分成多个区块，每个区块最多拥有多少个指数代码
-        self.max_index_codes = 20
+        self.max_index_codes = 30
         # 每个区块执行的时间
-        self.sleep_time = 10
+        self.sleep_time = 7
+        # 链接超时时间限制
+        self.timeout_limit = 2
 
 
     """
@@ -79,7 +80,7 @@ class CollectExcellentIndexFromCSIndex:
             requests.packages.urllib3.disable_warnings()
             # 得到页面的信息
             raw_page = requests.post(interface_url, headers=header, proxies=proxy, verify=False, stream=False,json=body,
-                                    timeout=5).text
+                                    timeout=self.timeout_limit).text
             # 转换成字典数据
             data_json = json.loads(raw_page)["data"]
 
@@ -143,7 +144,7 @@ class CollectExcellentIndexFromCSIndex:
             requests.packages.urllib3.disable_warnings()
             # 得到页面的信息
             raw_page = requests.get(interface_url, headers=header, proxies=proxy, verify=False, stream=False,
-                                    timeout=5).text
+                                    timeout=self.timeout_limit ).text
 
             # 转换成字典数据
             raw_data = json.loads(raw_page)
@@ -292,7 +293,7 @@ class CollectExcellentIndexFromCSIndex:
             requests.packages.urllib3.disable_warnings()
             # 得到页面的信息
             raw_page = requests.get(interface_url, headers=header, proxies=proxy, verify=False, stream=False,
-                                    timeout=5).text
+                                    timeout=self.timeout_limit ).text
             # 转换成字典数据
             raw_data = json.loads(raw_page)
 

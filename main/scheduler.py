@@ -20,6 +20,7 @@ import web_service.web_service_impl as web_service_impl
 import data_collector.collect_chn_gov_bonds_rates as collect_chn_gov_bonds_rates
 import data_collector.collect_index_estimation_from_lxr as collect_index_estimation_from_lxr
 import data_miner.calculate_stock_bond_ratio as calculate_stock_bond_ratio
+import data_collector.collect_excellent_index_from_cs_index as collect_excellent_index_from_cs_index
 
 class Scheduler:
 	# 任务调度器，根据时间安排工作
@@ -212,6 +213,16 @@ class Scheduler:
 
 
 		#####################      每周运行    ###################################################
+		try:
+			# 每个星期五晚上20:00采集中证表现优异的指数
+			scheduler.add_job(func=collect_excellent_index_from_cs_index.CollectExcellentIndexFromCSIndex().main,
+							  trigger='cron',
+							  month='1-12', day_of_week='sun', hour=20,
+							  id='collectCSExcellentIndexes')
+		except Exception as e:
+			# 抛错
+			custom_logger.CustomLogger().log_writter(e, 'error')
+
 
 		try:
 			# 每个星期天晚上23:00重新生成一批假的user_agent

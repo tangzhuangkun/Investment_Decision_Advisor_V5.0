@@ -15,7 +15,7 @@ import log.custom_logger as custom_logger
 数据表，mix_top10_with_bottom_no_repeat 的映射
 以该表为主的数据操作，均在此完成
 """
-class MixTop10WithBottomNoRepeat:
+class MixTop10WithBottomNoRepeatMapper:
 
     def __init__(self):
         pass

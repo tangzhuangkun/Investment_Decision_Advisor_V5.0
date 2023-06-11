@@ -81,7 +81,7 @@ class IndexStrategyPEEstimation:
         'weight': Decimal('3.038864036791435500'), 'stock_exchange_location': 'sz', 'stock_market_code': 'XSHE',
         'p_day': datetime.date(2022, 4, 1)}, ,,,]
         """
-        stocks_and_their_weights = mix_top10_with_bottom_no_repeat_mapper.MixTop10WithBottomNoRepeat().get_index_constitute_stocks(index_code)
+        stocks_and_their_weights = mix_top10_with_bottom_no_repeat_mapper.MixTop10WithBottomNoRepeatMapper().get_index_constitute_stocks(index_code)
 
         # 启用多线程
         running_threads = []

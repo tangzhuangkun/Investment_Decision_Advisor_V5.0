@@ -192,10 +192,10 @@ class Scheduler:
 			custom_logger.CustomLogger().log_writter(e, 'error')
 
 		try:
-			# 每个交易日18:50 通过邮件/微信发送标的指数估值报告
+			# 每个交易日18:47 通过邮件/微信发送标的指数估值报告
 			scheduler.add_job(func=notification_plan_after_trading.NotificationPlanAfterTrading().index_strategy_estimation_notification,
 							  trigger='cron',
-							  month='1-12', day_of_week='mon,tue,wed,thu,fri', hour=18, minute=50,
+							  month='1-12', day_of_week='mon,tue,wed,thu,fri', hour=18, minute=47,
 							  id='weekdayTargetIndexEstimationReport')
 		except Exception as e:
 			# 抛错

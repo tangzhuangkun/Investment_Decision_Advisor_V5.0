@@ -15,8 +15,13 @@ import log.custom_logger as custom_logger
 import conf
 import db_mapper.financial_data.index_excellent_performance_indices_di_mapper as index_excellent_performance_indices_di_mapper
 
+"""
+从国证指数官网接口收集过去几年表现优异的指数
+3年年化收益率 或 5年年化收益率 满足要求
+均存入数据库
+"""
+
 class CollectExcellentIndexFromCNIndex:
-    # 从国证指数官网接口收集过去几年表现优异的指数
 
     def __init__(self):
 
@@ -238,7 +243,7 @@ class CollectExcellentIndexFromCNIndex:
                 index_performance_dict["five_year_yield_rate"] = five_year_yield_rate
 
             # 如果3年年化收益率 和 5年年化收益率 满足需求
-            if (three_year_yield_rate > self.three_year_yield_rate_standard and five_year_yield_rate > self.five_year_yield_rate_standard):
+            if (three_year_yield_rate > self.three_year_yield_rate_standard) or (five_year_yield_rate > self.five_year_yield_rate_standard):
                 # 获取跟踪这个指数的基金
                 relative_funds_list = self.get_satisfied_index_relative_funds(index_code)
                 # 如果没有跟踪的指数基金，则没有跟进的意义，放弃获取相关基金产品失败

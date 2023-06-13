@@ -22,9 +22,9 @@ class CollectExcellentIndexFromCNIndex:
 
         # 衡量标准
         # 3年年化收益率
-        self.three_year_yield_rate_standard = 3
+        self.three_year_yield_rate_standard = 10
         # 5年年化收益率
-        self.five_year_yield_rate_standard = 3
+        self.five_year_yield_rate_standard = 15
         # 最大线程数
         self.max_thread_num = 15
         # 同时获取x个IP和5x个UA

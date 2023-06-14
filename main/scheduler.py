@@ -229,7 +229,7 @@ class Scheduler:
 			scheduler.add_job(func=collect_excellent_index_from_cn_index.CollectExcellentIndexFromCNIndex().main,
 							  trigger='cron',
 							  month='1-12', day_of_week='sun', hour=20,
-							  id='collectCSExcellentIndexes')
+							  id='collectCNExcellentIndexes')
 		except Exception as e:
 			# 抛错
 			custom_logger.CustomLogger().log_writter(e, 'error')

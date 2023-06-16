@@ -213,11 +213,41 @@ class StocksMainEstimationIndexesHistoricalDataMapper:
         return stock_estiamtion_info
 
 
+    """
+    获取股票在历史上的全部估值
+    # param: stock_code 股票代码，如 600900
+    # param: valuation_method 估值方式，如 pe_ttm--滚动市盈率, pe_ttm_nonrecurring--扣非滚动市盈率, pb--市净率, pb_wo_gw--扣非市净率, ps_ttm--滚动市销率, pcf_ttm--滚动市现率, dividend_yield--股息率,
+    # return： 
+    # 如  [{'stock_code': '600900', 'stock_name': '长江电力', 'exchange_location': 'sh', 'exchange_location_mic': 'XSHG', 'pb_wo_gw': Decimal('1.1933534324891537000000'), 'p_day': datetime.date(2014, 5, 7)}, 
+            {'stock_code': '600900', 'stock_name': '长江电力', 'exchange_location': 'sh', 'exchange_location_mic': 'XSHG', 'pb_wo_gw': Decimal('1.1954544068421276000000'), 'p_day': datetime.date(2014, 4, 30)},,,,]
+    """
+
+    def get_stock_all_historical_estimation(self, stock_code, valuation_method):
+
+        selecting_sql = """ select stock_code, stock_name, exchange_location, exchange_location_mic, %s, `date` as p_day from 
+            financial_data.stocks_main_estimation_indexes_historical_data  
+            where stock_code = '%s' order by %s  """ % (valuation_method, stock_code, valuation_method)
+        try:
+            stock_estimation_info = db_operator.DBOperator().select_all("financial_data", selecting_sql)
+            # 日志记录
+            # Todo 此日志被多次触发，需要排查
+            log_msg = '获取 ' + stock_code + ' 全部历史 ' + valuation_method + '估值 ' + '，成功'
+            custom_logger.CustomLogger().log_writter(log_msg, 'debug')
+            return stock_estimation_info
+        except Exception as e:
+            # 日志记录
+            log_msg = '估值方式错误，获取 ' + stock_code + '的全部历史 ' + valuation_method + '估值 ' + '，失败' + str(e)
+            custom_logger.CustomLogger().log_writter(log_msg, 'error')
+            return None
+
+
+
 if __name__ == '__main__':
     time_start = time.time()
     go = StocksMainEstimationIndexesHistoricalDataMapper()
-    result = go.get_stock_latest_estimation_percentile_in_history("600900", "pe_ttm", 5)
+    #result = go.get_stock_latest_estimation_percentile_in_history("600900", "pe_ttm", 5)
     #result = go.get_stock_historical_date_estimation("600900", "pe_ttm", "2023-05-12")
+    result = go.get_stock_all_historical_estimation("600900", "pb_wo_gw")
     print(result)
     time_end = time.time()
     print('time:')

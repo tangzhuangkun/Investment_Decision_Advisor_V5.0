@@ -7,6 +7,7 @@ import database.db_operator as db_operator
 import log.custom_logger as custom_logger
 import data_collector.get_target_real_time_indicator_from_interfaces as get_stock_real_time_indicator_from_interfaces
 import db_mapper.target_pool.investment_target_mapper as investment_target_mapper
+import db_mapper.financial_data.stocks_main_estimation_indexes_historical_data_mapper as stocks_main_estimation_indexes_historical_data_mapper
 
 
 class StockStrategyMonitoringEstimation:
@@ -15,17 +16,6 @@ class StockStrategyMonitoringEstimation:
 
     def __init__(self):
         pass
-
-    def get_stock_historical_estimation_from_db(self, stock_code, estimation_method):
-        # 从数据库获取该股票的历史估值数据列表
-        # stock_code, 股票代码，如 000002
-        # estimation_method, 估值方式，目前限，pe_ttm 和 pb
-        # return [{'pb': Decimal('0.9009277645423478')}, {'pb': Decimal('0.9101209049968616')}, {'pb': Decimal('0.9218676955776292')}, {'pb': Decimal('0.9223784256028800')}, ，，，]
-
-        selecting_sql = "SELECT %s FROM stocks_main_estimation_indexes_historical_data where stock_code = '%s' order by %s " % (
-        estimation_method, stock_code, estimation_method)
-        historical_estimation_list = db_operator.DBOperator().select_all("financial_data", selecting_sql)
-        return  historical_estimation_list
 
 
     def get_tracking_stocks_realtime_indicators_trigger_result_single_thread(self):
@@ -111,7 +101,8 @@ class StockStrategyMonitoringEstimation:
         # 从数据库获取该股票的历史估值数据
         # 如 [{'pb': Decimal('0.9009277645423478')}, {'pb': Decimal('0.9101209049968616')}, ，，，]
         # 或者 [{'pe_ttm': Decimal('0.9009277645423478')}, {'pe_ttm': Decimal('0.9101209049968616')},, ，，，]
-        historical_estimation_list = self.get_stock_historical_estimation_from_db(stock_code, estimation_method)
+        #historical_estimation_list = self.get_stock_historical_estimation_from_db(stock_code, estimation_method)
+        historical_estimation_list = stocks_main_estimation_indexes_historical_data_mapper.StocksMainEstimationIndexesHistoricalDataMapper().get_stock_all_historical_estimation(stock_code, estimation_method)
         # 如果实时估值小于历史最小值
         if (realtime_estimation <= float(historical_estimation_list[0][estimation_method])):
             # 返回 股票上市地的代码, 中文名称, 估值方式, 估值, 提示信息
@@ -203,6 +194,7 @@ class StockStrategyMonitoringEstimation:
             # 如果有返回信息
         if len(triggered_stocks_info_dict) != 0:
             # 日志记录
+            # Todo 此日志被多次触发，需要排查
             log_msg = '获取所有跟踪股票的实时指标的对预设条件的触发结果为' + str(triggered_stocks_info_dict)
             custom_logger.CustomLogger().log_writter(log_msg, 'info')
 

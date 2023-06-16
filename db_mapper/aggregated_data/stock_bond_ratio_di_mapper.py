@@ -30,7 +30,7 @@ class StockBondRatioDiMapper:
     def get_a_specific_day_stock_bond_ratio_info(self, index_code, p_day):
         selecting_sql = """select index_code, index_name, trading_date as p_day, index_cpc as index_change_rate, 
                             pe as index_pe, stock_yield_rate, 10y_bond_rate, ratio 
-                            from stock_bond_ratio_di 
+                            from aggregated_data.stock_bond_ratio_di 
                             where index_code = '%s' and trading_date = '%s' """ % (index_code, p_day)
         # 查询
         selecting_result = db_operator.DBOperator().select_one("aggregated_data", selecting_sql)
@@ -57,6 +57,20 @@ class StockBondRatioDiMapper:
         # 查询
         selecting_result = db_operator.DBOperator().select_one("aggregated_data", selecting_sql)
         return selecting_result
+
+
+    """
+    清空已计算好的股债比信息表
+    """
+    def truncate_table(self):
+        truncating_sql = 'truncate table aggregated_data.stock_bond_ratio_di'
+        try:
+            db_operator.DBOperator().operate("update", "aggregated_data", truncating_sql)
+
+        except Exception as e:
+            # 日志记录
+            msg = '失败，无法清空 aggregated_data数据库中的stock_bond_ratio_di表' + '  ' + str(e)
+            custom_logger.CustomLogger().log_writter(msg, 'error')
 
 
 if __name__ == '__main__':

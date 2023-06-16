@@ -334,6 +334,21 @@ class IndexComponentsHistoricalEstimationMapper:
         index_estiamtion_info = db_operator.DBOperator().select_one("aggregated_data", selecting_sql)
         return index_estiamtion_info
 
+
+    """
+    清空已计算好的估值信息表
+    """
+    def truncate_table(self):
+        truncating_sql = 'truncate table aggregated_data.index_components_historical_estimations'
+        try:
+            db_operator.DBOperator().operate("update", "aggregated_data", truncating_sql)
+        except Exception as e:
+            # 日志记录
+            msg = '失败，无法清空 aggregated_data数据库中的index_components_historical_estimations表' + '  ' + str(e)
+            custom_logger.CustomLogger().log_writter(msg, 'error')
+
+
+
 if __name__ == '__main__':
     time_start = time.time()
     go = IndexComponentsHistoricalEstimationMapper()

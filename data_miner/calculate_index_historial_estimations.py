@@ -4,6 +4,7 @@ import sys
 sys.path.append("..")
 import database.db_operator as db_operator
 import log.custom_logger as custom_logger
+import db_mapper.aggregated_data.index_components_historical_estimations_mapper as index_components_historical_estimations_mapper
 
 
 class CalculateIndexHistoricalEstimations:
@@ -12,21 +13,6 @@ class CalculateIndexHistoricalEstimations:
 
     def __init__(self):
         pass
-
-
-    def truncate_table(self):
-        # 清空已计算好的估值信息表
-        # 插入数据之前，先进行清空操作
-        truncating_sql = 'truncate table aggregated_data.index_components_historical_estimations'
-
-        try:
-            db_operator.DBOperator().operate("update", "aggregated_data", truncating_sql)
-
-        except Exception as e:
-            # 日志记录
-            msg = '失败，无法清空 aggregated_data数据库中的index_components_historical_estimations表' + '  ' + str(e)
-            custom_logger.CustomLogger().log_writter(msg, 'error')
-
 
     def run_file_to_predict_index_latest_component(self):
         # 读取并运行mysql脚本,预测指数的最新构成成分
@@ -90,7 +76,8 @@ class CalculateIndexHistoricalEstimations:
                     custom_logger.CustomLogger().log_writter(msg, 'error')
 
     def main(self):
-        self.truncate_table()
+        # 先清空已计算好的估值信息表
+        index_components_historical_estimations_mapper.IndexComponentsHistoricalEstimationMapper().truncate_table()
         self.run_file_to_predict_index_latest_component()
         self.run_file_to_cal_index_his_estimation()
 

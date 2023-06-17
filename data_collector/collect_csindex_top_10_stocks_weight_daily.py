@@ -12,8 +12,8 @@ import requests
 sys.path.append("..")
 import parsers.disguise as disguise
 import log.custom_logger as custom_logger
-import database.db_operator as db_operator
 import db_mapper.target_pool.investment_target_mapper as investment_target_mapper
+import db_mapper.financial_data.index_constituent_stocks_weight_mapper as index_constituent_stocks_weight_mapper
 
 
 class CollectCSIndexTop10StocksWeightDaily:
@@ -143,14 +143,7 @@ class CollectCSIndexTop10StocksWeightDaily:
         # stocks_detail_info_list, 成分股的信息， [['600809', '山西汾酒', 'sh','16.766190846153634'], ['600519', '贵州茅台', 'sh','13.277568906087126'],,,,,])
         # 返回：如果存储过，则返回True; 未储存过，则返回False
 
-        # 查询sql
-        selecting_sql = "select index_code, index_name, stock_code, stock_name, weight, p_day from " \
-                        "index_constituent_stocks_weight where p_day = (select max(p_day) as max_day from " \
-                        "index_constituent_stocks_weight where index_code = '%s' and source = '%s') and " \
-                        "index_code = '%s' and source = '%s' order by stock_code desc" % (
-                            index_code, '中证官网', index_code, '中证官网')
-        db_index_content = db_operator.DBOperator().select_all("financial_data", selecting_sql)
-
+        db_index_content = index_constituent_stocks_weight_mapper.IndexConstituentStocksWeightMapper().get_db_index_company_index_latest_component_stocks('中证官网', index_code)
         # 成分股个数
         file_content_len = len(stocks_detail_info_list)
         # 数据库中的指数成分股个数
@@ -197,16 +190,9 @@ class CollectCSIndexTop10StocksWeightDaily:
                 stock_market_code = 'UNKNOWN'
 
             try:
-                # 插入的SQL
-                inserting_sql = "INSERT INTO index_constituent_stocks_weight(index_code,index_name," \
-                                "stock_code,stock_name,stock_exchange_location,stock_market_code," \
-                                "weight,source,index_company,p_day)" \
-                                "VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')" % (
-                                    index_code, index_name, stock_code, stock_name, stock_exchange_location,
+                # 将指数的信息存入数据库
+                index_constituent_stocks_weight_mapper.IndexConstituentStocksWeightMapper().save_index_info(index_code, index_name, stock_code, stock_name, stock_exchange_location,
                                     stock_market_code, weight, '中证官网', '中证', p_day)
-
-                db_operator.DBOperator().operate("insert", "financial_data", inserting_sql)
-
             except Exception as e:
                 # 日志记录
                 msg = '将从中证官网获取的' + p_day + index_code + index_name + '的前十大权重股存入数据库时错误  ' + str(e)

@@ -8,9 +8,9 @@ import time
 
 import sys
 sys.path.append("..")
-import database.db_operator as db_operator
 import log.custom_logger as custom_logger
 import conf
+import db_mapper.parser_component.fake_user_agent_mapper as fake_user_agent_mapper
 
 class Disguise:
 	# 获取代理IP和头文件 以隐匿
@@ -51,8 +51,7 @@ class Disguise:
 			return self.get_one_IP_UA()
 
 		# 获取UA
-		ua_sql = "SELECT ua FROM fake_user_agent ORDER BY RAND() LIMIT 1"
-		ua = db_operator.DBOperator().select_one('parser_component',ua_sql)
+		ua = fake_user_agent_mapper.FakeUserAgentMapper().get_ua()[0]
 		
 		return ip_address,ua
 
@@ -109,21 +108,20 @@ class Disguise:
 			custom_logger.CustomLogger().log_writter(msg, lev='warning')
 			return self.get_one_IP_UA()
 		
-		# 获取多个UA
-		ua_sql = "SELECT ua FROM fake_user_agent LIMIT %s" %(str(num*5))
-		ua_dict_list = db_operator.DBOperator().select_all('parser_component',ua_sql)
-		
+		# 获取X个IP和5X个UA
+		ua_dict_list = fake_user_agent_mapper.FakeUserAgentMapper().get_ua(num*5)
+
 		return ip_address_dict_list,ua_dict_list
 
 
 if __name__ == "__main__":
 	time_start = time.time()
 	go = Disguise()
-	header, proxy = go.assemble_header_proxy()
-	print(header,proxy)
-	#result =go.get_multi_IP_UA(10)
+	#header, proxy = go.assemble_header_proxy()
+	#print(header,proxy)
+	result =go.get_multi_IP_UA(10)
 	#result = go.get_one_IP_UA()
-	#print(result)
+	print(result)
 	time_end = time.time()
 	print('time:')
 	print(time_end - time_start)

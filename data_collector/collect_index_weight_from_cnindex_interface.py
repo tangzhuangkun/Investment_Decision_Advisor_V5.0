@@ -12,9 +12,9 @@ import sys
 sys.path.append("..")
 import parsers.disguise as disguise
 import log.custom_logger as custom_logger
-import database.db_operator as db_operator
 import data_collector.collector_tool_to_distinguish_stock_market as collector_tool_to_distinguish_stock_market
 import db_mapper.target_pool.investment_target_mapper as investment_target_mapper
+import db_mapper.financial_data.index_constituent_stocks_weight_mapper as index_constituent_stocks_weight_mapper
 
 class CollectIndexWeightFromCNIndexInterface:
     # 从国证指数官网获取指数成分股及其权重
@@ -171,15 +171,9 @@ class CollectIndexWeightFromCNIndexInterface:
         # 返回：存入数据库
 
         for stock_info in stocks_detail_info_list:
-            # 插入的SQL
-            inserting_sql = "INSERT INTO index_constituent_stocks_weight(index_code,index_name," \
-                            "stock_code,stock_name,stock_exchange_location,stock_market_code," \
-                            "weight,source,index_company,p_day)" \
-                            "VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')" % (
-                                index_code, index_name, stock_info[0], stock_info[1], stock_info[2], stock_info[3], stock_info[4],
+            # 存储指数的最新数据
+            index_constituent_stocks_weight_mapper.IndexConstituentStocksWeightMapper().save_index_info(index_code, index_name, stock_info[0], stock_info[1], stock_info[2], stock_info[3], stock_info[4],
                                  '国证官网', '国证', update_date)
-            db_operator.DBOperator().operate("insert", "financial_data", inserting_sql)
-
 
     def check_if_saved_before(self, index_code, update_date, stocks_detail_info_list):
         # 与数据库的内容对比，是否已存过
@@ -188,13 +182,8 @@ class CollectIndexWeightFromCNIndexInterface:
         # stocks_detail_info_list, 成分股的信息， [['600519', '贵州茅台','sh','XSHG',15.19'], ['600887', '伊利股份','sh','XSHG',10.37']，，，]
         # 返回：如果存储过，则返回True; 未储存过，则返回False
 
-        # 查询sql
-        selecting_sql = "select index_code, index_name, stock_code, stock_name, weight, p_day from " \
-                        "index_constituent_stocks_weight where p_day = (select max(p_day) as max_day from " \
-                        "index_constituent_stocks_weight where index_code = '%s' and source = '%s') and " \
-                        "index_code = '%s' and source = '%s' order by stock_code desc" % (
-                        index_code, '国证官网', index_code, '国证官网')
-        db_index_content = db_operator.DBOperator().select_all("financial_data", selecting_sql)
+        # 查询sql, 某指数的最新构成
+        db_index_content = index_constituent_stocks_weight_mapper.IndexConstituentStocksWeightMapper().get_db_index_company_index_latest_component_stocks('国证官网', index_code)
 
         # 成分股个数
         file_content_len = len(stocks_detail_info_list)

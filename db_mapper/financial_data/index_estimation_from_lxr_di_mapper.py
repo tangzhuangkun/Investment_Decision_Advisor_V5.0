@@ -101,6 +101,69 @@ class IndexEstimationFromLXRDiMapper:
         return index_estiamtion_info
 
 
+    """
+    统计总行数
+    """
+    def count_rows(self):
+        # 查询sql
+        selecting_sql = """SELECT COUNT(*) as total_rows FROM financial_data.index_estimation_from_lxr_di"""
+        # 查询
+        result = db_operator.DBOperator().select_one("financial_data", selecting_sql)
+        return result
+
+
+    """
+    最新的日期
+    """
+    def max_date(self):
+        # 查询sql
+        selecting_max_date_sql = """SELECT max(trading_date) as max_day FROM financial_data.index_estimation_from_lxr_di"""
+        # 查询
+        max_date = db_operator.DBOperator().select_one("financial_data", selecting_max_date_sql)
+        return max_date
+
+
+    """
+    将指数估值信息存入数据库
+    :param, index_code -- 指数代码, 如 000300
+    :param, index_name -- 指数名称, 如 沪深300
+    :param, trading_date -- 交易日期,如 2023-06-16
+    :param, tv -- 成交量,
+    :param, ta -- 成交金额,
+    :param, cp -- 收盘点位,
+    :param, cpc -- 涨跌幅,
+    :param, pe_ttm_mcw -- 滚动市盈率市值加权,
+    :param, pe_ttm_ew -- 滚动市盈率等权,
+    :param, pe_ttm_ewpvo -- 滚动市盈率正数等权,
+    :param, pe_ttm_avg -- 滚动市盈率平均值,
+    :param, pe_ttm_median -- 滚动市盈率中位数,
+    :param, pb_mcw -- 市净率市值加权,
+    :param, pb_ew -- 市净率等权,
+    :param, pb_ewpvo -- 市净率正数等权,
+    :param, pb_avg -- 市净率平均值,
+    :param, pb_median -- 市净率中位数,
+    :param, ps_ttm_mcw -- 市销率市值加权,
+    :param, ps_ttm_ew -- 市销率等权,
+    :param, ps_ttm_ewpvo -- 市销率正数等权,
+    :param, ps_ttm_avg -- 市销率平均值,
+    :param, ps_ttm_median -- 市销率中位数,
+    :param, dyr_mcw -- 股息率市值加权,
+    :param, dyr_ew -- 股息率等权,
+    :param, dyr_ewpvo -- 股息率正数等权,
+    :param, dyr_avg -- 股息率平均值,
+    :param, dyr_median -- 股息率中位数,
+    :param, source -- 数据来源, 如 理杏仁
+    :param, submission_date -- 提交的日期, 如 2023-06-16
+    """
+    def save_index_estimation(self, index_code,index_name,trading_date,tv,ta,cp,cpc,pe_ttm_mcw,pe_ttm_ew,pe_ttm_ewpvo,pe_ttm_avg,pe_ttm_median,pb_mcw,pb_ew,pb_ewpvo,pb_avg,pb_median,ps_ttm_mcw,ps_ttm_ew,ps_ttm_ewpvo,ps_ttm_avg,ps_ttm_median,dyr_mcw,dyr_ew,dyr_ewpvo,dyr_avg,dyr_median,source,submission_date):
+
+        # 存入数据库
+        inserting_sql = "INSERT INTO index_estimation_from_lxr_di (index_code, index_name, trading_date,tv,ta,cp,cpc,pe_ttm_mcw,pe_ttm_ew,pe_ttm_ewpvo,pe_ttm_avg,pe_ttm_median,pb_mcw,pb_ew,pb_ewpvo,pb_avg,pb_median,ps_ttm_mcw,ps_ttm_ew,ps_ttm_ewpvo,ps_ttm_avg,ps_ttm_median,dyr_mcw,dyr_ew,dyr_ewpvo,dyr_avg,dyr_median,source,submission_date) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s' )" % (
+        index_code, index_name, trading_date, tv, ta, cp, cpc, pe_ttm_mcw, pe_ttm_ew, pe_ttm_ewpvo, pe_ttm_avg,
+        pe_ttm_median, pb_mcw, pb_ew, pb_ewpvo, pb_avg, pb_median, ps_ttm_mcw, ps_ttm_ew, ps_ttm_ewpvo, ps_ttm_avg,
+        ps_ttm_median, dyr_mcw, dyr_ew, dyr_ewpvo, dyr_avg, dyr_median, source, submission_date)
+        db_operator.DBOperator().operate("insert", "financial_data", inserting_sql)
+
 if __name__ == '__main__':
     time_start = time.time()
     go = IndexEstimationFromLXRDiMapper()
@@ -111,7 +174,9 @@ if __name__ == '__main__':
     # result = go.get_today_updated_index_info()
     # print(result)
     #result = go.get_index_latest_estimation_percentile_in_history("399986", "pb_wo_gw", 5)
-    result = go.get_hz_three_hundred_index_latest_estimation_percentile_in_history("000300", "pe_ttm", 8)
+    #result = go.get_hz_three_hundred_index_latest_estimation_percentile_in_history("000300", "pe_ttm", 8)
+    #result = go.count_rows()
+    result = go.max_date()
     print(result)
     time_end = time.time()
     print('time:')

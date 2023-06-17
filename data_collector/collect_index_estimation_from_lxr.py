@@ -10,9 +10,9 @@ import time
 import requests
 
 sys.path.append("..")
-import database.db_operator as db_operator
 import log.custom_logger as custom_logger
 import db_mapper.parser_component.token_record_mapper as token_record_mapper
+import db_mapper.financial_data.index_estimation_from_lxr_di_mapper as index_estimation_from_lxr_di_mapper
 
 class CollectIndexEstimationFromLXR:
     # 从理杏仁收集指数估值信息
@@ -282,18 +282,13 @@ class CollectIndexEstimationFromLXR:
             dyr_median = piece['dyr']['median']
 
             # 存入数据库
-            inserting_sql = "INSERT INTO index_estimation_from_lxr_di (index_code, index_name, trading_date,tv,ta,cp,cpc,pe_ttm_mcw,pe_ttm_ew,pe_ttm_ewpvo,pe_ttm_avg,pe_ttm_median,pb_mcw,pb_ew,pb_ewpvo,pb_avg,pb_median,ps_ttm_mcw,ps_ttm_ew,ps_ttm_ewpvo,ps_ttm_avg,ps_ttm_median,dyr_mcw,dyr_ew,dyr_ewpvo,dyr_avg,dyr_median,source,submission_date) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s' )" % (index_code,index_name,trading_date,tv,ta,cp,cpc,pe_ttm_mcw,pe_ttm_ew,pe_ttm_ewpvo,pe_ttm_avg,pe_ttm_median,pb_mcw,pb_ew,pb_ewpvo,pb_avg,pb_median,ps_ttm_mcw,ps_ttm_ew,ps_ttm_ewpvo,ps_ttm_avg,ps_ttm_median,dyr_mcw,dyr_ew,dyr_ewpvo,dyr_avg,dyr_median,'理杏仁',self.today)
-            db_operator.DBOperator().operate("insert", "financial_data", inserting_sql)
+            index_estimation_from_lxr_di_mapper.IndexEstimationFromLXRDiMapper().save_index_estimation(index_code,index_name,trading_date,tv,ta,cp,cpc,pe_ttm_mcw,pe_ttm_ew,pe_ttm_ewpvo,pe_ttm_avg,pe_ttm_median,pb_mcw,pb_ew,pb_ewpvo,pb_avg,pb_median,ps_ttm_mcw,ps_ttm_ew,ps_ttm_ewpvo,ps_ttm_avg,ps_ttm_median,dyr_mcw,dyr_ew,dyr_ewpvo,dyr_avg,dyr_median,'理杏仁',self.today)
 
 
     def main(self):
-
-
         try:
-            # 查询sql
-            selecting_sql = "SELECT COUNT(*) as total_rows FROM index_estimation_from_lxr_di"
-            # 查询
-            selecting_result = db_operator.DBOperator().select_one("financial_data", selecting_sql)
+            # 查询总行数
+            selecting_result = index_estimation_from_lxr_di_mapper.IndexEstimationFromLXRDiMapper().count_rows()
 
         except Exception as e:
             # 日志记录
@@ -309,11 +304,8 @@ class CollectIndexEstimationFromLXR:
         else:
             # 获取 理杏仁的指数估值信息表 index_estimation_from_lxr_di 已收集的最新交易日
             try:
-                # 查询sql
-                selecting_max_date_sql = "SELECT max(trading_date) max_day FROM index_estimation_from_lxr_di"
-                # 查询
-                selecting_max_date = db_operator.DBOperator().select_one("financial_data", selecting_max_date_sql)
-
+                # 查询最新日期
+                selecting_max_date = index_estimation_from_lxr_di_mapper.IndexEstimationFromLXRDiMapper().max_date()
                 # 数据库中的已收集的最大日期
                 max_trading_day = selecting_max_date["max_day"]
                 # 今天的日期

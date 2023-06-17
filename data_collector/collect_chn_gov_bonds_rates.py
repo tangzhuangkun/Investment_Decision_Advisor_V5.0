@@ -7,6 +7,7 @@ sys.path.append("..")
 import parsers.disguise as disguise
 import log.custom_logger as custom_logger
 import database.db_operator as db_operator
+import db_mapper.financial_data.chn_gov_bonds_rates_di_mapper as chn_gov_bonds_rates_di_mapper
 
 class CollectCHNGovBondsRates:
     # 从中国债券信息网收集 中国债券到期收益率
@@ -69,11 +70,7 @@ class CollectCHNGovBondsRates:
                     rate = data_json_list[i]["seriesData"][j][1]
                     try:
                         # 插入的SQL
-                        inserting_sql = "INSERT INTO chn_gov_bonds_rates_di (1m,trading_day,source,submission_date)" \
-                                        "VALUES ('%s','%s','%s','%s')" % (
-                                        rate,trading_day,'中国债券信息网',self.today)
-                        db_operator.DBOperator().operate("insert", "financial_data", inserting_sql)
-
+                        chn_gov_bonds_rates_di_mapper.ChnGovBondsRatesDiMapper().collect_bond_rate('1m', rate,trading_day,'中国债券信息网',self.today)
                     except Exception as e:
                         # 日志记录
                         msg = '收集国债到期收益率(1月期)， 插入 '+str(trading_day)+'的数据 失败' + '  ' + str(e)
@@ -104,17 +101,13 @@ class CollectCHNGovBondsRates:
         # 如果不为空，仅 数据库中的已收集的最新交易日至今的国债收益率数据
 
         try:
-            # 查询sql
-            selecting_sql = "SELECT COUNT(*) as total_rows FROM chn_gov_bonds_rates_di"
-            # 查询
-            selecting_result = db_operator.DBOperator().select_one("financial_data", selecting_sql)
-
+            # 获取总行数
+            selecting_result = chn_gov_bonds_rates_di_mapper.ChnGovBondsRatesDiMapper().count_rows()
         except Exception as e:
             # 日志记录
             msg = "无法判断中国国债到期收益率表chn_gov_bonds_rates_di是否为空 " + '  ' + str(e)
             custom_logger.CustomLogger().log_writter(msg, 'error')
             return None
-
 
         # 如果表格为空，收集从 2010-01-01至今的数据
         if selecting_result["total_rows"] == 0:
@@ -122,11 +115,8 @@ class CollectCHNGovBondsRates:
         else:
             # 获取中国国债到期收益率表chn_gov_bonds_rates_di已收集的最新交易日
             try:
-                # 查询sql
-                selecting_max_date_sql = "SELECT max(trading_day) max_day FROM chn_gov_bonds_rates_di"
-                # 查询
-                selecting_max_date = db_operator.DBOperator().select_one("financial_data", selecting_max_date_sql)
-
+                # 最新的日期
+                selecting_max_date = chn_gov_bonds_rates_di_mapper.ChnGovBondsRatesDiMapper().max_date()
                 self.call_bonds_interface_to_collect_all_historical_data(start_day=str(selecting_max_date["max_day"]),
                                                                          end_day=self.today, is_only_today=1)
 

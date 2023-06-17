@@ -11,6 +11,10 @@ sys.path.append("..")
 import database.db_operator as db_operator
 
 
+"""
+数据表，index_estimation_from_lxr_di 的映射
+以该表为主的数据操作，均在此完成
+"""
 
 class IndexEstimationFromLXRDiMapper:
 

@@ -31,6 +31,20 @@ class FakeUserAgentMapper:
         ua = db_operator.DBOperator().select_all('parser_component', ua_sql)
         return ua
 
+    """
+    清空数据表
+    """
+    def truncate_table(self):
+        sql = """truncate table parser_component.fake_user_agent"""
+        db_operator.DBOperator().operate('delete', 'parser_component', sql)
+
+    """
+    数据库中插入新的UA
+    :param, ua, 假UA
+    """
+    def insert_new_ua(self, ua):
+        sql = "INSERT INTO fake_user_agent(ua)VALUES ('%s')" % (ua)
+        db_operator.DBOperator().operate('insert', 'parser_component', sql)
 
 
 if __name__ == '__main__':

@@ -215,6 +215,43 @@ class InvestmentTargetMapper:
         is_inserted_successfully_dict = db_operator.DBOperator().operate("insert", "target_pool", inserting_sql)
         return is_inserted_successfully_dict
 
+
+    """
+    更新标的指数信息
+    :param, dynamic_sql，更新的动态sql语句
+    :param, params_dict，是个dict，标的指数的不变信息和变更信息
+            不变信息包含，target_type -- 跟踪标的类型，如 指数-index
+                        target_code -- 跟踪标的代码，如 399997
+                        exchange_location -- 标的上市地，如 sh,sz,hk
+                        valuation_method -- 估值方法, pb,pe,ps,dr,roe,peg 等
+                        monitoring_frequency -- 监控频率，secondly, minutely, hourly, daily, weekly, monthly, seasonally, yearly, periodically
+                        holder -- 标的持有人
+                        trade -- 交易方向, 买入-buy, 卖出-sell
+                        index_compnay -- 指数开发公司, 如中证，国证
+            变更信息包含，其它
+    params_dict 如，
+    {'today': '2023-06-18', 
+    'target_name': '中证白酒指数', 
+    'target_type': 'index', 
+    'target_code': '399997', 
+    'exchange_location': 'sz', 
+    'valuation_method': 'pe_ttm', 
+    'monitoring_frequency': 'daily', 
+    'holder': 'zhuangkun', 
+    'trade': 'buy', 
+    'index_company': '中证'}
+    """
+    def update_target_index_info(self, dynamic_sql, params_dict):
+
+        updating_sql = " UPDATE investment_target " + dynamic_sql + " WHERE target_type=%(target_type)s AND " \
+                                                                    "target_code=%(target_code)s AND exchange_location=%(exchange_location)s AND " \
+                                                                    "valuation_method=%(valuation_method)s AND monitoring_frequency=%(monitoring_frequency)s " \
+                                                                    "AND holder=%(holder)s AND trade=%(trade)s AND index_company=%(index_company)s"
+        # 是否执行成功
+        is_updated_successfully_dict = db_operator.DBOperator().operate("update", "target_pool", updating_sql,
+                                                                        params_dict)
+        return is_updated_successfully_dict
+
     """
     存储标的股票的信息
     :param, target_type, 跟踪标的类型，如 指数-index，股票-stock
@@ -247,6 +284,63 @@ class InvestmentTargetMapper:
         # 是否执行成功
         is_inserted_successfully_dict = db_operator.DBOperator().operate("insert", "target_pool", inserting_sql)
         return is_inserted_successfully_dict
+
+
+
+    """
+    更新标的股票信息
+    :param, dynamic_sql，更新的动态sql语句
+    :param, params_dict，是个dict，标的指数的不变信息和变更信息
+            不变信息包含，target_type -- 跟踪标的类型，如 股票-stock
+                        target_code -- 跟踪标的代码，如 000002
+                        exchange_location -- 标的上市地，如 sh,sz,hk
+                        valuation_method -- 估值方法, pb,pe,ps,dr,roe,peg 等
+                        monitoring_frequency -- 监控频率，secondly, minutely, hourly, daily, weekly, monthly, seasonally, yearly, periodically
+                        holder -- 标的持有人
+                        trade -- 交易方向, 买入-buy, 卖出-sell
+    变更信息包含，其它
+    params_dict 如，
+    {'today': '2023-06-18', 
+    'target_name': '万科A', 
+    'target_type': 'stock', 
+    'target_code': '000002', 
+    'exchange_location': 'sz', 
+    'valuation_method': 'pb', 
+    'monitoring_frequency': 'minutely', 
+    'holder': 'zhuangkun', 
+    'trade': 'buy'}
+    """
+    def update_target_stock_info(self, dynamic_sql, params_dict):
+
+        updating_sql = " UPDATE investment_target " + dynamic_sql + " WHERE target_type=%(target_type)s AND " \
+                                                                    "target_code=%(target_code)s AND exchange_location=%(exchange_location)s AND " \
+                                                                    "valuation_method=%(valuation_method)s AND monitoring_frequency=%(monitoring_frequency)s " \
+                                                                    "AND holder=%(holder)s AND trade=%(trade)s"
+        # 是否执行成功
+        is_updated_successfully_dict = db_operator.DBOperator().operate("update", "target_pool", updating_sql,
+                                                                        params_dict)
+        return is_updated_successfully_dict
+
+    """
+    将所有暂停标的策略重新开启，下一个交易日又可生效
+    """
+    def reactivate_all_targets_status(self):
+        updating_sql = " UPDATE target_pool.investment_target SET status = 'active' WHERE  status = 'inactive' "
+        # 是否执行成功
+        updating_result = db_operator.DBOperator().operate("update", "target_pool", updating_sql)
+        return updating_result
+
+    """
+    暂停标的策略
+    :param, target_type, 跟踪标的类型，如 指数-index，股票-stock
+    :param, target_code, 跟踪标的代码，如 399997
+    """
+    def mute_target(self,target_type, target_code):
+        updating_sql = " UPDATE target_pool.investment_target SET status = 'inactive' WHERE  target_type = '%s' AND target_code = '%s' " \
+                       % (target_type, target_code)
+        # 是否执行成功
+        updating_result = db_operator.DBOperator().operate("update", "target_pool", updating_sql)
+        return updating_result
 
 if __name__ == '__main__':
     time_start = time.time()

@@ -8,7 +8,6 @@ import sys
 
 sys.path.append("..")
 import log.custom_logger as custom_logger
-import database.db_operator as db_operator
 import db_mapper.target_pool.investment_target_mapper as investment_target_mapper
 
 
@@ -368,13 +367,8 @@ class WebServericeImpl:
                     dynamic_sql += ", index_company=%(index_company)s"
                     params_dict["index_company"] = operation_target_params.index_company
 
-                updating_sql = " UPDATE investment_target " + dynamic_sql + " WHERE target_type=%(target_type)s AND " \
-                                                                            "target_code=%(target_code)s AND exchange_location=%(exchange_location)s AND " \
-                                                                            "valuation_method=%(valuation_method)s AND monitoring_frequency=%(monitoring_frequency)s " \
-                                                                            "AND holder=%(holder)s AND trade=%(trade)s"
-                # 是否执行成功
-                is_updated_successfully_dict = db_operator.DBOperator().operate("insert", "target_pool", updating_sql,
-                                                                                params_dict)
+                # 更新标的指数信息
+                is_updated_successfully_dict = investment_target_mapper.InvestmentTargetMapper().update_target_index_info(dynamic_sql, params_dict)
                 # 如果插入成功
                 if (is_updated_successfully_dict.get("status")):
                     # 日志记录
@@ -391,19 +385,21 @@ class WebServericeImpl:
             #####################################    update`stock   ###################################################
             # 如果是更新 股票标的
             elif (operation_target_params.target_type == "stock"):
-                updating_sql = " UPDATE investment_target " + dynamic_sql + " WHERE target_type=%(target_type)s AND " \
-                                                                            "target_code=%(target_code)s AND exchange_location=%(exchange_location)s AND " \
-                                                                            "valuation_method=%(valuation_method)s AND monitoring_frequency=%(monitoring_frequency)s " \
-                                                                            "AND holder=%(holder)s AND trade=%(trade)s"
-                # 是否执行成功
-                is_updated_successfully_dict = db_operator.DBOperator().operate("insert", "target_pool", updating_sql,
-                                                                                params_dict)
-                # 如果插入成功
+                # updating_sql = " UPDATE investment_target " + dynamic_sql + " WHERE target_type=%(target_type)s AND " \
+                #                                                             "target_code=%(target_code)s AND exchange_location=%(exchange_location)s AND " \
+                #                                                             "valuation_method=%(valuation_method)s AND monitoring_frequency=%(monitoring_frequency)s " \
+                #                                                             "AND holder=%(holder)s AND trade=%(trade)s"
+                # # 是否执行成功
+                # is_updated_successfully_dict = db_operator.DBOperator().operate("insert", "target_pool", updating_sql,
+                #                                                                 params_dict)
+
+                is_updated_successfully_dict = investment_target_mapper.InvestmentTargetMapper().update_target_stock_info(dynamic_sql, params_dict)
+                # 如果更新成功
                 if (is_updated_successfully_dict.get("status")):
                     # 日志记录
                     msg = '更新股票标的-' + operation_target_params.target_code + '-成功'
                     return {"msg": msg, "code": 200, "status": "Success"}
-                # 如果插入失败
+                # 如果更新失败
                 else:
                     # 日志记录
                     msg = '更新股票标的-' + operation_target_params.target_code + ' 失败 ' + is_updated_successfully_dict.get(
@@ -419,10 +415,9 @@ class WebServericeImpl:
                         target_code: 标的代码，如 指数代码 399997，股票代码 600519，必选
         :return:
         '''
-        updating_sql = " UPDATE investment_target SET status = 'inactive' WHERE  target_type = '%s' AND target_code = '%s' " \
-                       % (operation_target_params.target_type, operation_target_params.target_code)
+
         # 是否执行成功
-        is_updated_successfully_dict = db_operator.DBOperator().operate("insert", "target_pool", updating_sql)
+        is_updated_successfully_dict = investment_target_mapper.InvestmentTargetMapper().mute_target(operation_target_params.target_type, operation_target_params.target_code)
         # 如果插入成功
         if (is_updated_successfully_dict.get("status")):
             # 日志记录
@@ -442,16 +437,17 @@ class WebServericeImpl:
         将所有暂停标的策略重新开启，下一个交易日又可生效
         :return:
         '''
-        updating_sql = " UPDATE investment_target SET status = 'active' WHERE  status = 'inactive' "
-        # 是否执行成功
-        is_updated_successfully_dict = db_operator.DBOperator().operate("insert", "target_pool", updating_sql)
-        # 如果插入成功
+        # updating_sql = " UPDATE investment_target SET status = 'active' WHERE  status = 'inactive' "
+        # # 是否执行成功
+        # is_updated_successfully_dict = db_operator.DBOperator().operate("insert", "target_pool", updating_sql)
+        is_updated_successfully_dict = investment_target_mapper.InvestmentTargetMapper().reactivate_all_targets_status()
+        # 如果更新成功
         if (is_updated_successfully_dict.get("status")):
             # 日志记录
             msg = '重新跟踪所有被暂停的投资标的-成功'
             custom_logger.CustomLogger().log_writter(msg, 'info')
             return {"msg": msg, "code": 200, "status": "Success"}
-        # 如果插入失败
+        # 如果更新失败
         else:
             # 日志记录
             msg = '重新跟踪所有被暂停的投资标的-失败 ' + is_updated_successfully_dict.get("msg")

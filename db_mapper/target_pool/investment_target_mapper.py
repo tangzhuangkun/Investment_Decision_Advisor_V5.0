@@ -131,12 +131,13 @@ class InvestmentTargetMapper:
     {'index_code': '399986', 'index_name': '中证银行', 'index_code_with_init': 'sz399986', 'index_code_with_market_code': '399986.XSHE'}, 
     {'index_code': '399997', 'index_name': '中证白酒', 'index_code_with_init': 'sz399997', 'index_code_with_market_code': '399997.XSHE'}]
     """
+
     def get_given_index_company_index(self, target_type, status, trade_direction, company_name):
         # 查询SQL
         selecting_sql = """select target_code as index_code, target_name as index_name, 
                             concat(exchange_location,target_code) as index_code_with_init, 
                             concat(target_code,'.',exchange_location_mic) as index_code_with_market_code 
-                            from investment_target 
+                            from target_pool.investment_target 
                             where target_type = '%s' and status = '%s' and trade= '%s' 
                             and index_company = '%s'  """ % (target_type, status, trade_direction, company_name)
 
@@ -155,6 +156,7 @@ class InvestmentTargetMapper:
     [{'stock_code': '000002', 'stock_name': '万科A', 'stock_code_with_init': 'sz000002', 'stock_code_with_market_code': '000002.XSHE', 'valuation_method': 'pb', 'trigger_value': Decimal('0.85'), 'trigger_percent': Decimal('0.10')}, ,,
      ]
     """
+
     def get_stocks_valuation_method_and_trigger(self, target_type, status, trade_direction, frequency=None):
         # 查询SQL
         selecting_sql = ""
@@ -162,29 +164,98 @@ class InvestmentTargetMapper:
             selecting_sql = """select target_code as stock_code, target_name as stock_name, 
             concat(exchange_location,target_code) as stock_code_with_init, 
             concat(target_code,'.',exchange_location_mic) as stock_code_with_market_code, 
-            valuation_method, trigger_value, trigger_percent from investment_target 
+            valuation_method, trigger_value, trigger_percent from target_pool.investment_target 
             where target_type = '%s' and status = '%s'  and trade = '%s'  and monitoring_frequency = '%s' """ \
                             % (target_type, status, trade_direction, frequency)
         else:
             selecting_sql = """select target_code as stock_code, target_name as stock_name, 
                         concat(exchange_location,target_code) as stock_code_with_init, 
                         concat(target_code,'.',exchange_location_mic) as stock_code_with_market_code, 
-                        valuation_method, trigger_value, trigger_percent from investment_target 
+                        valuation_method, trigger_value, trigger_percent from target_pool.investment_target 
                         where target_type = '%s' and status = '%s'  and trade = '%s' """ \
                             % (target_type, status, trade_direction)
         # 查询
         selecting_result = db_operator.DBOperator().select_all("target_pool", selecting_sql)
         return selecting_result
 
+    """
+    存储标的基金的信息
+    :param, target_type, 跟踪标的类型，如 指数-index，股票-stock
+    :param, target_code, 跟踪标的代码，如 399997
+    :param, target_name, 跟踪标的名称，如 中证白酒指数
+    :param, index_company, 指数开发公司, 如中证，国证
+    :param, exchange_location, 标的上市地，如 sh,sz,hk
+    :param, exchange_location_mic, 标的上市地MIC，如 XSHG, XSHE，XHKG 等
+    :param, hold_or_not, 当前是否持有,1为持有，0不持有
+    :param, valuation_method, 估值方法, pb,pe,ps,dr,roe,peg 等
+    :param, trigger_value, 估值触发绝对值值临界点，含等于，看指标具体该大于等于还是小于等于，如 pb估值时，0.95
+    :param, trigger_percent, 估值触发历史百分比临界点，含等于，看指标具体该大于等于还是小于等于，如 10，即10%位置
+    :param, buy_and_hold_strategy, 买入持有策略
+    :param, sell_out_strategy, 卖出策略
+    :param, trade, 交易方向, 买入-buy, 卖出-sell
+    :param, monitoring_frequency, 监控频率，secondly, minutely, hourly, daily, weekly, monthly, seasonally, yearly, periodically
+    :param, holder, 标的持有人
+    :param, status, 标的监控策略状态，active，suspend，inactive
+    :param, p_day, 提交的日期
+    """
+
+    def save_target_index_info(self, target_type, target_code, target_name, index_company, exchange_location,
+                               exchange_location_mic, hold_or_not, valuation_method, trigger_value, trigger_percent,
+                               buy_and_hold_strategy, sell_out_strategy, trade, monitoring_frequency, holder, status,
+                               p_day):
+
+        inserting_sql = """INSERT INTO target_pool.investment_target(target_type, target_code, target_name, 
+                        index_company, exchange_location, exchange_location_mic, hold_or_not, valuation_method, trigger_value, 
+                        trigger_percent, buy_and_hold_strategy, sell_out_strategy, trade, monitoring_frequency, holder, status, p_day) 
+                        VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')""" \
+                        % (target_type, target_code, target_name, index_company, exchange_location,
+                           exchange_location_mic, hold_or_not, valuation_method, trigger_value, trigger_percent,
+                           buy_and_hold_strategy, sell_out_strategy, trade, monitoring_frequency, holder, status, p_day)
+        # 是否执行成功
+        is_inserted_successfully_dict = db_operator.DBOperator().operate("insert", "target_pool", inserting_sql)
+        return is_inserted_successfully_dict
+
+    """
+    存储标的股票的信息
+    :param, target_type, 跟踪标的类型，如 指数-index，股票-stock
+    :param, target_code, 跟踪标的代码，如 399997
+    :param, target_name, 跟踪标的名称，如 中证白酒指数
+    :param, exchange_location, 标的上市地，如 sh,sz,hk
+    :param, exchange_location_mic, 标的上市地MIC，如 XSHG, XSHE，XHKG 等
+    :param, hold_or_not, 当前是否持有,1为持有，0不持有
+    :param, valuation_method, 估值方法, pb,pe,ps,dr,roe,peg 等
+    :param, trigger_value, 估值触发绝对值值临界点，含等于，看指标具体该大于等于还是小于等于，如 pb估值时，0.95
+    :param, trigger_percent, 估值触发历史百分比临界点，含等于，看指标具体该大于等于还是小于等于，如 10，即10%位置
+    :param, buy_and_hold_strategy, 买入持有策略
+    :param, sell_out_strategy, 卖出策略
+    :param, trade, 交易方向, 买入-buy, 卖出-sell
+    :param, monitoring_frequency, 监控频率，secondly, minutely, hourly, daily, weekly, monthly, seasonally, yearly, periodically
+    :param, holder, 标的持有人
+    :param, status, 标的监控策略状态，active，suspend，inactive
+    :param, p_day, 提交的日期
+    """
+    def save_target_stock_info(self, target_type, target_code, target_name, exchange_location, exchange_location_mic,
+                               hold_or_not, valuation_method, trigger_value, trigger_percent, buy_and_hold_strategy,
+                               sell_out_strategy, trade, monitoring_frequency, holder, status, p_day):
+        inserting_sql = """INSERT INTO target_pool.investment_target(target_type, target_code, target_name, 
+                        exchange_location, exchange_location_mic, hold_or_not, valuation_method, trigger_value, 
+                        trigger_percent, buy_and_hold_strategy, sell_out_strategy, trade, monitoring_frequency, holder, status, p_day) 
+                                            VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')""" \
+                        % (target_type, target_code, target_name, exchange_location, exchange_location_mic,
+                           hold_or_not, valuation_method, trigger_value, trigger_percent, buy_and_hold_strategy,
+                           sell_out_strategy, trade, monitoring_frequency, holder, status, p_day)
+        # 是否执行成功
+        is_inserted_successfully_dict = db_operator.DBOperator().operate("insert", "target_pool", inserting_sql)
+        return is_inserted_successfully_dict
 
 if __name__ == '__main__':
     time_start = time.time()
     go = InvestmentTargetMapper()
     # result = go.get_target_valuated_by_method("stock_bond", "equity_bond_yield", "active", "buy")
-    #result = go.get_given_index_trigger_info("stock_bond", "diy_000300_cn10yr", "active", "equity_bond_yield", "buy")
-    #result = go.get_given_index_trigger_info("index", "399997", "active", "pe_ttm", "buy")
+    # result = go.get_given_index_trigger_info("stock_bond", "diy_000300_cn10yr", "active", "equity_bond_yield", "buy")
+    # result = go.get_given_index_trigger_info("index", "399997", "active", "pe_ttm", "buy")
     # result = go.get_target_valuation_method("index","active", "buy")
-    #result = go.get_given_index_company_index("index", "active", "buy", "中证")
+    # result = go.get_given_index_company_index("index", "active", "buy", "中证")
     result = go.get_stocks_valuation_method_and_trigger("stock", "active", "buy")
     print(result)
     time_end = time.time()

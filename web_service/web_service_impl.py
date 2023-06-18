@@ -5,9 +5,12 @@
 import time
 
 import sys
+
 sys.path.append("..")
 import log.custom_logger as custom_logger
 import database.db_operator as db_operator
+import db_mapper.target_pool.investment_target_mapper as investment_target_mapper
+
 
 class WebServericeImpl:
     '''
@@ -17,7 +20,6 @@ class WebServericeImpl:
 
     def __init__(self):
         pass
-
 
     def __check_exchange_location_param(self, exchange_location):
         '''
@@ -51,32 +53,32 @@ class WebServericeImpl:
                 exchange_location_mic = "XASE"
         """
 
-
-    def __check_valuation_method(self,valuation_method):
+    def __check_valuation_method(self, valuation_method):
         '''
         检查估值策略是否正确,
         :param valuation_method:
         :return: boolean，True或者False
         '''
         # 是否为 市净率，市盈率，市销率，股息率，净资产回报率，peg策略
-        if(valuation_method in ["pb","pe_ttm","ps_ttm","dr","roe","peg"]):
+        if (valuation_method in ["pb", "pe_ttm", "ps_ttm", "dr", "roe", "peg"]):
             return True
         else:
             return False
 
-    def __check_monitoring_frequency(self,monitoring_frequency):
+    def __check_monitoring_frequency(self, monitoring_frequency):
         '''
         检查监控频率是否正确
         :param monitoring_frequency:
         :return: boolean，True或者False
         '''
         # 是否为 秒级，分级，时级，日级，周级，月级，季级，年级，周期级
-        if (monitoring_frequency in ["secondly", "minutely", "hourly", "daily", "weekly", "monthly", "seasonally", "yearly", "periodically"]):
+        if (monitoring_frequency in ["secondly", "minutely", "hourly", "daily", "weekly", "monthly", "seasonally",
+                                     "yearly", "periodically"]):
             return True
         else:
             return False
 
-    def __is_a_num(self,num_str):
+    def __is_a_num(self, num_str):
         '''
         检查一个数是否为数字，包含整数，小数
         :param num_str:输入一个为str
@@ -97,7 +99,7 @@ class WebServericeImpl:
         :param status: 标的策略状态，目前仅 active，suspend，inactive 三个状态
         :return:
         '''
-        if status in ("active","suspend","inactive"):
+        if status in ("active", "suspend", "inactive"):
             return True
         else:
             return False
@@ -109,7 +111,7 @@ class WebServericeImpl:
         :return:
         '''
         try:
-            if (int(hold_or_not)==0 or int(hold_or_not)==1):
+            if (int(hold_or_not) == 0 or int(hold_or_not) == 1):
                 return True
         except ValueError:
             pass
@@ -121,13 +123,12 @@ class WebServericeImpl:
         :param trade: 买入-buy, 卖出-sell
         :return:
         '''
-        if(trade=='buy' or trade=='sell'):
+        if (trade == 'buy' or trade == 'sell'):
             return True
         else:
             return False
 
-
-    def operate_target_impl(self,operation_target_params):
+    def operate_target_impl(self, operation_target_params):
         '''
         实现对标的物进行操作，支持更新，创建
         创建 create之后，operation: 操作， target_type: 标的类型， target_code: 标的代码， exchange_location: 标的上市地，
@@ -165,16 +166,18 @@ class WebServericeImpl:
         # 检查必选参数是否有传入
 
         # 操作是否传入正确
-        if(operation_target_params.operation!="create" and operation_target_params.operation!="update" or operation_target_params.operation==None):
-            return {"msg": "操作参数operation出错", "code":400, "status":"Failure"}
+        if (
+                operation_target_params.operation != "create" and operation_target_params.operation != "update" or operation_target_params.operation == None):
+            return {"msg": "操作参数operation出错", "code": 400, "status": "Failure"}
 
         # 标的类型是否传入正确
-        if (operation_target_params.target_type != "index" and operation_target_params.target_type != "stock" or operation_target_params.target_type == None):
-            return {"msg": "标的类型参数target_type出错", "code":400, "status":"Failure"}
+        if (
+                operation_target_params.target_type != "index" and operation_target_params.target_type != "stock" or operation_target_params.target_type == None):
+            return {"msg": "标的类型参数target_type出错", "code": 400, "status": "Failure"}
 
         # 标的代码是否传入
         if (operation_target_params.target_code == None):
-            return {"msg": "标的代码参数target_code出错", "code":400, "status":"Failure"}
+            return {"msg": "标的代码参数target_code出错", "code": 400, "status": "Failure"}
 
         # 检查上市地参数是否合乎规范
         exchange_location_mic = self.__check_exchange_location_param(operation_target_params.exchange_location)
@@ -197,13 +200,13 @@ class WebServericeImpl:
             return {"msg": "标的持有人参数holder出错", "code": 400, "status": "Failure"}
 
         # 交易方向
-        if(not self.__is_trade_right(operation_target_params.trade)):
+        if (not self.__is_trade_right(operation_target_params.trade)):
             return {"msg": "交易方向参数trade出错", "code": 400, "status": "Failure"}
 
         #####################################    create   #####################################################
 
         # 如果是创建新标的
-        if(operation_target_params.operation=="create"):
+        if (operation_target_params.operation == "create"):
 
             # 跟踪标的名称是否为空
             if (operation_target_params.target_name == None):
@@ -224,7 +227,7 @@ class WebServericeImpl:
                 return {"msg": "指数开发公司参数trigger_percent不是数值", "code": 400, "status": "Failure"}
 
             # 检查 标的策略状态 是否传入正确
-            if(not self.__is_status_right(operation_target_params.status)):
+            if (not self.__is_status_right(operation_target_params.status)):
                 return {"msg": "标的策略状态参数status出错，请从 active，suspend，inactive 中选择", "code": 400, "status": "Failure"}
 
             # 检查 当前是否持有 是否传入正确
@@ -232,47 +235,41 @@ class WebServericeImpl:
                 return {"msg": "当前是否持有参数hold_or_not出错，请从 0，1（1-持有，0-不持有） 中选择", "code": 400, "status": "Failure"}
 
             #####################################    create`index   #################################
-            if(operation_target_params.target_type == "index"):
+            if (operation_target_params.target_type == "index"):
 
                 # 指数开发公司是否为空
                 if (operation_target_params.index_company == None):
-                    return {"msg": "指数开发公司参数index_company为空", "code":400, "status":"Failure"}
+                    return {"msg": "指数开发公司参数index_company为空", "code": 400, "status": "Failure"}
+                # 存储标的指数的信息
+                is_inserted_successfully_dict = investment_target_mapper.InvestmentTargetMapper().save_target_index_info(
+                    operation_target_params.target_type, operation_target_params.target_code,
+                    operation_target_params.target_name, operation_target_params.index_company,
+                    operation_target_params.exchange_location, exchange_location_mic,
+                    operation_target_params.hold_or_not,
+                    operation_target_params.valuation_method, operation_target_params.trigger_value,
+                    operation_target_params.trigger_percent, operation_target_params.buy_and_hold_strategy,
+                    operation_target_params.sell_out_strategy, operation_target_params.trade,
+                    operation_target_params.monitoring_frequency,
+                    operation_target_params.holder, operation_target_params.status, today)
 
-                # 插入的SQL
-                inserting_sql = """INSERT INTO investment_target(target_type, target_code, target_name, 
-                index_company, exchange_location, exchange_location_mic, hold_or_not, valuation_method, trigger_value, 
-                trigger_percent, buy_and_hold_strategy, sell_out_strategy, trade, monitoring_frequency, holder, status, p_day) 
-                VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')""" \
-                                % (operation_target_params.target_type, operation_target_params.target_code,
-                                   operation_target_params.target_name, operation_target_params.index_company,
-                                   operation_target_params.exchange_location, exchange_location_mic,operation_target_params.hold_or_not,
-                                   operation_target_params.valuation_method, operation_target_params.trigger_value,
-                operation_target_params.trigger_percent, operation_target_params.buy_and_hold_strategy ,
-                                   operation_target_params.sell_out_strategy, operation_target_params.trade, operation_target_params.monitoring_frequency,
-                                   operation_target_params.holder,operation_target_params.status,today)
-                # 是否执行成功
-                is_inserted_successfully_dict = db_operator.DBOperator().operate("insert", "target_pool", inserting_sql)
                 # 如果插入成功
-                if(is_inserted_successfully_dict.get("status")):
+                if (is_inserted_successfully_dict.get("status")):
                     # 日志记录
-                    msg = '创建新的指数标的-'+operation_target_params.target_name+'-成功'
-                    return {"msg": msg, "code":200, "status":"Success"}
+                    msg = '创建新的指数标的-' + operation_target_params.target_name + '-成功'
+                    return {"msg": msg, "code": 200, "status": "Success"}
                 # 如果插入失败
                 else:
                     # 日志记录
-                    msg = '创建新的指数标的-'+operation_target_params.target_name+'-失败 ' + is_inserted_successfully_dict.get("msg")
+                    msg = '创建新的指数标的-' + operation_target_params.target_name + '-失败 ' + is_inserted_successfully_dict.get(
+                        "msg")
                     custom_logger.CustomLogger().log_writter(msg, 'error')
-                    return {"msg": msg, "code":400, "status":"Failure"}
+                    return {"msg": msg, "code": 400, "status": "Failure"}
 
             #####################################    create`stock   ###############################################
 
-            elif(operation_target_params.target_type == "stock"):
-                # 插入的SQL
-                inserting_sql = """INSERT INTO investment_target(target_type, target_code, target_name, 
-                exchange_location, exchange_location_mic, hold_or_not, valuation_method, trigger_value, 
-                trigger_percent, buy_and_hold_strategy, sell_out_strategy, trade, monitoring_frequency, holder, status, p_day) 
-                                    VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')""" \
-                                % (operation_target_params.target_type, operation_target_params.target_code,
+            elif (operation_target_params.target_type == "stock"):
+                # 存储标的股票的信息
+                is_inserted_successfully_dict = investment_target_mapper.InvestmentTargetMapper().save_target_stock_info(operation_target_params.target_type, operation_target_params.target_code,
                                    operation_target_params.target_name,
                                    operation_target_params.exchange_location, exchange_location_mic,
                                    operation_target_params.hold_or_not,
@@ -281,9 +278,8 @@ class WebServericeImpl:
                                    operation_target_params.buy_and_hold_strategy,
                                    operation_target_params.sell_out_strategy, operation_target_params.trade,
                                    operation_target_params.monitoring_frequency,
-                                   operation_target_params.holder, operation_target_params.status,today)
-                # 是否执行成功
-                is_inserted_successfully_dict = db_operator.DBOperator().operate("insert", "target_pool", inserting_sql)
+                                   operation_target_params.holder, operation_target_params.status, today)
+
                 # 如果插入成功
                 if (is_inserted_successfully_dict.get("status")):
                     # 日志记录
@@ -292,24 +288,24 @@ class WebServericeImpl:
                 # 如果插入失败
                 else:
                     # 日志记录
-                    msg = '创建新的股票标的'+ operation_target_params.target_name + '失败 ' + is_inserted_successfully_dict.get("msg")
+                    msg = '创建新的股票标的' + operation_target_params.target_name + '失败 ' + is_inserted_successfully_dict.get(
+                        "msg")
                     custom_logger.CustomLogger().log_writter(msg, 'error')
                     return {"msg": msg, "code": 400, "status": "Failure"}
 
 
         #####################################    update   #####################################################
 
-
         # 如果是更新标的
-        elif(operation_target_params.operation=="update"):
+        elif (operation_target_params.operation == "update"):
 
             # 拼接的动态sql
             dynamic_sql = "SET p_day = %(today)s"
             # 待更新的参数值
-            params_dict = {"today":today}
+            params_dict = {"today": today}
 
             # 如果标的名称不为空，则需要更新
-            if(operation_target_params.target_name!=None):
+            if (operation_target_params.target_name != None):
                 dynamic_sql += ", target_name=%(target_name)s"
                 params_dict["target_name"] = operation_target_params.target_name
 
@@ -373,11 +369,12 @@ class WebServericeImpl:
                     params_dict["index_company"] = operation_target_params.index_company
 
                 updating_sql = " UPDATE investment_target " + dynamic_sql + " WHERE target_type=%(target_type)s AND " \
-                             "target_code=%(target_code)s AND exchange_location=%(exchange_location)s AND " \
-                             "valuation_method=%(valuation_method)s AND monitoring_frequency=%(monitoring_frequency)s " \
-                             "AND holder=%(holder)s AND trade=%(trade)s"
+                                                                            "target_code=%(target_code)s AND exchange_location=%(exchange_location)s AND " \
+                                                                            "valuation_method=%(valuation_method)s AND monitoring_frequency=%(monitoring_frequency)s " \
+                                                                            "AND holder=%(holder)s AND trade=%(trade)s"
                 # 是否执行成功
-                is_updated_successfully_dict = db_operator.DBOperator().operate("insert", "target_pool", updating_sql, params_dict)
+                is_updated_successfully_dict = db_operator.DBOperator().operate("insert", "target_pool", updating_sql,
+                                                                                params_dict)
                 # 如果插入成功
                 if (is_updated_successfully_dict.get("status")):
                     # 日志记录
@@ -386,7 +383,8 @@ class WebServericeImpl:
                 # 如果插入失败
                 else:
                     # 日志记录
-                    msg = '更新指数标的-'+operation_target_params.target_code +' 失败 '+ is_updated_successfully_dict.get("msg")
+                    msg = '更新指数标的-' + operation_target_params.target_code + ' 失败 ' + is_updated_successfully_dict.get(
+                        "msg")
                     custom_logger.CustomLogger().log_writter(msg, 'error')
                     return {"msg": msg, "code": 400, "status": "Failure"}
 
@@ -394,9 +392,9 @@ class WebServericeImpl:
             # 如果是更新 股票标的
             elif (operation_target_params.target_type == "stock"):
                 updating_sql = " UPDATE investment_target " + dynamic_sql + " WHERE target_type=%(target_type)s AND " \
-                              "target_code=%(target_code)s AND exchange_location=%(exchange_location)s AND " \
-                              "valuation_method=%(valuation_method)s AND monitoring_frequency=%(monitoring_frequency)s " \
-                              "AND holder=%(holder)s AND trade=%(trade)s"
+                                                                            "target_code=%(target_code)s AND exchange_location=%(exchange_location)s AND " \
+                                                                            "valuation_method=%(valuation_method)s AND monitoring_frequency=%(monitoring_frequency)s " \
+                                                                            "AND holder=%(holder)s AND trade=%(trade)s"
                 # 是否执行成功
                 is_updated_successfully_dict = db_operator.DBOperator().operate("insert", "target_pool", updating_sql,
                                                                                 params_dict)
@@ -438,7 +436,6 @@ class WebServericeImpl:
                 "msg")
             custom_logger.CustomLogger().log_writter(msg, 'error')
             return {"msg": msg, "code": 400, "status": "Failure"}
-
 
     def restart_all_mute_target(self):
         '''

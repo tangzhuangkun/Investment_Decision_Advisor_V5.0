@@ -13,6 +13,7 @@ import parsers.disguise as disguise
 import log.custom_logger as custom_logger
 import database.db_operator as db_operator
 import db_mapper.target_pool.investment_target_mapper as investment_target_mapper
+import db_mapper.financial_data.index_constituent_stocks_weight_mapper as index_constituent_stocks_weight_mapper
 
 class CollectIndexWeightFromCSIndexFile:
     # 从中证官网获取指数成分股及权重文件，并收集信息
@@ -293,14 +294,9 @@ class CollectIndexWeightFromCSIndexFile:
 
         for row_content in file_content_list:
 
-            # 插入的SQL
-            inserting_sql = "INSERT INTO index_constituent_stocks_weight(index_code,index_name," \
-                            "stock_code,stock_name,stock_exchange_location,stock_market_code," \
-                            "weight,source,index_company,p_day)" \
-                            "VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')" % (
-                                row_content[1], row_content[2], row_content[3], row_content[4], row_content[5],
+            # 存储指数构成信息
+            index_constituent_stocks_weight_mapper.IndexConstituentStocksWeightMapper().save_index_info(row_content[1], row_content[2], row_content[3], row_content[4], row_content[5],
                                 row_content[6], row_content[7], '中证权重文件', '中证', row_content[0])
-            db_operator.DBOperator().operate("insert", "financial_data", inserting_sql)
 
     def check_if_saved_before(self, index_code, file_content_list):
         # 与数据库的内容对比，是否已存过
@@ -308,15 +304,15 @@ class CollectIndexWeightFromCSIndexFile:
         # 如： [['2021-11-30', '399997', '中证白酒', '600809', '山西汾酒', 'sh', 'XSHG', 15.983], ['2021-11-30', '399997', '中证白酒', '600519', '贵州茅台', 'sh', 'XSHG', 15.619], ['2021-11-30', '399997', '中证白酒', '000568', '泸州老窖', 'sz', 'XSHE', 14.922], ['2021-11-30', '399997', '中证白酒', '000858', '五 粮 液', 'sz', 'XSHE', 12.799], ['2021-11-30', '399997', '中证白酒', '002304', '洋河股份', 'sz', 'XSHE', 12.586], ['2021-11-30', '399997', '中证白酒', '000799', '酒鬼酒', 'sz', 'XSHE', 6.119], ['2021-11-30', '399997', '中证白酒', '603369', '今世缘', 'sh', 'XSHG', 4.241], ['2021-11-30', '399997', '中证白酒', '000596', '古井贡酒', 'sz', 'XSHE', 3.725], ['2021-11-30', '399997', '中证白酒', '600779', '水井坊', 'sh', 'XSHG', 3.05], ['2021-11-30', '399997', '中证白酒', '603589', '口子窖', 'sh', 'XSHG', 2.853], ['2021-11-30', '399997', '中证白酒', '000860', '顺鑫农业', 'sz', 'XSHE', 1.997], ['2021-11-30', '399997', '中证白酒', '603198', '迎驾贡酒', 'sh', 'XSHG', 1.963], ['2021-11-30', '399997', '中证白酒', '600559', '老白干酒', 'sh', 'XSHG', 1.718], ['2021-11-30', '399997', '中证白酒', '600199', '金种子酒', 'sh', 'XSHG', 0.906], ['2021-11-30', '399997', '中证白酒', '600197', '伊力特', 'sh', 'XSHG', 0.853], ['2021-11-30', '399997', '中证白酒', '603919', '金徽酒', 'sh', 'XSHG', 0.665]]
         # 返回： 如果存储过，则返回True; 未储存过，则返回False
 
-        # 查询sql
-        selecting_sql = "select index_code, index_name, stock_code, stock_name, weight, p_day from " \
-                        "index_constituent_stocks_weight where p_day = (select max(p_day) as max_day from " \
-                        "index_constituent_stocks_weight where index_code = '%s' and source = '%s') and " \
-                        "index_code = '%s' and source = '%s' order by stock_code desc" % (index_code,'中证权重文件',index_code,'中证权重文件')
+        # # 查询sql
+        # selecting_sql = "select index_code, index_name, stock_code, stock_name, weight, p_day from " \
+        #                 "index_constituent_stocks_weight where p_day = (select max(p_day) as max_day from " \
+        #                 "index_constituent_stocks_weight where index_code = '%s' and source = '%s') and " \
+        #                 "index_code = '%s' and source = '%s' order by stock_code desc" % (index_code,'中证权重文件',index_code,'中证权重文件')
 
         # 从数据库获取内容
         # [{'index_code': '399997', 'index_name': '中证白酒', 'stock_code': '600809', 'stock_name': '山西汾酒', 'weight': Decimal('15.983000000000000000'), 'p_day': datetime.date(2021, 11, 30)}, {'index_code': '399997', 'index_name': '中证白酒', 'stock_code': '600519', 'stock_name': '贵州茅台', 'weight': Decimal('15.619000000000000000'), 'p_day': datetime.date(2021, 11, 30)}, {'index_code': '399997', 'index_name': '中证白酒', 'stock_code': '000568', 'stock_name': '泸州老窖', 'weight': Decimal('14.922000000000000000'), 'p_day': datetime.date(2021, 11, 30)}, {'index_code': '399997', 'index_name': '中证白酒', 'stock_code': '000858', 'stock_name': '五 粮 液', 'weight': Decimal('12.799000000000000000'), 'p_day': datetime.date(2021, 11, 30)}, {'index_code': '399997', 'index_name': '中证白酒', 'stock_code': '002304', 'stock_name': '洋河股份', 'weight': Decimal('12.586000000000000000'), 'p_day': datetime.date(2021, 11, 30)}, {'index_code': '399997', 'index_name': '中证白酒', 'stock_code': '000799', 'stock_name': '酒鬼酒', 'weight': Decimal('6.119000000000000000'), 'p_day': datetime.date(2021, 11, 30)}, {'index_code': '399997', 'index_name': '中证白酒', 'stock_code': '603369', 'stock_name': '今世缘', 'weight': Decimal('4.241000000000000000'), 'p_day': datetime.date(2021, 11, 30)}, {'index_code': '399997', 'index_name': '中证白酒', 'stock_code': '000596', 'stock_name': '古井贡酒', 'weight': Decimal('3.725000000000000000'), 'p_day': datetime.date(2021, 11, 30)}, {'index_code': '399997', 'index_name': '中证白酒', 'stock_code': '600779', 'stock_name': '水井坊', 'weight': Decimal('3.050000000000000000'), 'p_day': datetime.date(2021, 11, 30)}, {'index_code': '399997', 'index_name': '中证白酒', 'stock_code': '603589', 'stock_name': '口子窖', 'weight': Decimal('2.853000000000000000'), 'p_day': datetime.date(2021, 11, 30)}, {'index_code': '399997', 'index_name': '中证白酒', 'stock_code': '000860', 'stock_name': '顺鑫农业', 'weight': Decimal('1.997000000000000000'), 'p_day': datetime.date(2021, 11, 30)}, {'index_code': '399997', 'index_name': '中证白酒', 'stock_code': '603198', 'stock_name': '迎驾贡酒', 'weight': Decimal('1.963000000000000000'), 'p_day': datetime.date(2021, 11, 30)}, {'index_code': '399997', 'index_name': '中证白酒', 'stock_code': '600559', 'stock_name': '老白干酒', 'weight': Decimal('1.718000000000000000'), 'p_day': datetime.date(2021, 11, 30)}, {'index_code': '399997', 'index_name': '中证白酒', 'stock_code': '600199', 'stock_name': '金种子酒', 'weight': Decimal('0.906000000000000000'), 'p_day': datetime.date(2021, 11, 30)}, {'index_code': '399997', 'index_name': '中证白酒', 'stock_code': '600197', 'stock_name': '伊力特', 'weight': Decimal('0.853000000000000000'), 'p_day': datetime.date(2021, 11, 30)}, {'index_code': '399997', 'index_name': '中证白酒', 'stock_code': '603919', 'stock_name': '金徽酒', 'weight': Decimal('0.665000000000000000'), 'p_day': datetime.date(2021, 11, 30)}]
-        db_index_content = db_operator.DBOperator().select_all("financial_data", selecting_sql)
+        db_index_content = index_constituent_stocks_weight_mapper.IndexConstituentStocksWeightMapper().get_db_index_company_index_latest_component_stocks('中证权重文件',index_code)
 
         # 文件内容中的成分股个数
         file_content_len = len(file_content_list)

@@ -25,6 +25,9 @@ class IndexConstituentStocksWeightMapper:
     获取某个渠道，某指数，最新的的构成股票
     :param, source， 来源，如 中证权重文件， 中证官网， 国证官网
     :param, index_code, 如 399997
+    :return, 如
+    [{'index_code': '399997', 'index_name': '中证白酒', 'stock_code': '603369', 'stock_name': '今世缘', 'weight': Decimal('4.473297363252433000'), 'p_day': datetime.date(2023, 6, 16)}, 
+    {'index_code': '399997', 'index_name': '中证白酒', 'stock_code': '600809', 'stock_name': '山西汾酒', 'weight': Decimal('12.894086834225680000'), 'p_day': datetime.date(2023, 6, 16)}, ,,,,]
     """
 
     def get_db_index_company_index_latest_component_stocks(self, source, index_code):

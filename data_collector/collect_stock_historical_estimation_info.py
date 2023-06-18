@@ -14,6 +14,7 @@ sys.path.append("..")
 import database.db_operator as db_operator
 import log.custom_logger as custom_logger
 import db_mapper.parser_component.token_record_mapper as token_record_mapper
+import db_mapper.target_pool.all_tracking_stocks_rf_mapper as all_tracking_stocks_rf_mapper
 
 
 
@@ -58,37 +59,11 @@ class CollectStockHistoricalEstimationInfo:
         获取所有交易所的mic码
         :return: mic码的list，如 ['XSHE', 'XHKG', 'XSHG']
         '''
-        selecting_sql = "SELECT DISTINCT exchange_location_mic FROM all_tracking_stocks_rf"
-        all_exchange_locaiton_mics_dict = db_operator.DBOperator().select_all("target_pool", selecting_sql)
+        all_exchange_locaiton_mics_dict = all_tracking_stocks_rf_mapper.AllTrackingStocksRfMapper().get_all_exchange_locaiton_mics()
         exchange_location_mic_list = list()
         for mic in all_exchange_locaiton_mics_dict:
             exchange_location_mic_list.append(mic.get("exchange_location_mic"))
         return exchange_location_mic_list
-
-    def all_tracking_stocks(self, exchange_location_mic):
-        '''
-        数据库中，某交易所，全部需要被收集估值信息的股票
-        :param exchange_location_mic: 交易所MIC码（如 XSHG, XSHE，XHKG）均可， 大小写均可
-        :return:
-        '''
-        # 数据库中，全部需要被收集估值信息的股票
-        # 输出： 需要被收集估值信息的股票代码，股票名称，上市地代码的字典
-        # 如 [{'stock_code': '002688', 'stock_name': '金河生物', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'},
-        #     {'stock_code': '603696', 'stock_name': '安记食品', 'exchange_location': 'sh', 'exchange_location_mic': 'XSHG'},
-        #     {'stock_code': '002234', 'stock_name': '民和股份', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'},
-        #     {'stock_code': '00700', 'stock_name': '腾讯控股', 'exchange_location': 'hk', 'exchange_location_mic': 'XHKG'},,, , , ]
-
-        # 统一处理为大写
-        exchange_location_mic = exchange_location_mic.upper()
-
-        selecting_sql = """SELECT DISTINCT stock_code, stock_name, exchange_location, exchange_location_mic 
-                            FROM all_tracking_stocks_rf where exchange_location_mic = '%s' """ % (exchange_location_mic)
-        all_tracking_stock_dict = db_operator.DBOperator().select_all("target_pool", selecting_sql)
-        # stock_codes_names_dict 如  [{'stock_code': '002688', 'stock_name': '金河生物', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'},
-        # {'stock_code': '603696', 'stock_name': '安记食品', 'exchange_location': 'sh', 'exchange_location_mic': 'XSHG'},
-        # {'stock_code': '002234', 'stock_name': '民和股份', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'},
-        # {'stock_code': '00700', 'stock_name': '腾讯控股', 'exchange_location': 'hk', 'exchange_location_mic': 'XHKG'},,, , , ]
-        return all_tracking_stock_dict
 
     def all_tracking_stocks_counter(self,exchange_location_mic):
         '''
@@ -656,7 +631,8 @@ class CollectStockHistoricalEstimationInfo:
                 #     {'stock_code': '603696', 'stock_name': '安记食品', 'exchange_location': 'sh', 'exchange_location_mic': 'XSHG'},
                 #     {'stock_code': '002234', 'stock_name': '民和股份', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'},
                 #     {'stock_code': '00700', 'stock_name': '腾讯控股', 'exchange_location': 'hk', 'exchange_location_mic': 'XHKG'},,, , , ]
-                exchange_location_stock_info_list = self.all_tracking_stocks(exchange_location_mic)
+                #exchange_location_stock_info_list = self.all_tracking_stocks(exchange_location_mic)
+                exchange_location_stock_info_list = all_tracking_stocks_rf_mapper.AllTrackingStocksRfMapper().get_exchange_all_stocks(exchange_location_mic)
                 for stock_info in exchange_location_stock_info_list:
                     # stock_info_dict 股票代码, 名称, 上市地 字典, 只能1支股票，
                     #  如  {'000001': {'stock_code': '000001', 'stock_name': '平安银行', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}}
@@ -750,7 +726,6 @@ if __name__ == "__main__":
     go = CollectStockHistoricalEstimationInfo()
     #result = go.get_all_exchange_locaiton_mics()
     #print(result)
-    #result = go.all_tracking_stocks("XHKG")
     #print(stock_codes_names_dict)
     #go.collect_a_period_time_estimation("600900", {"600900":{"stock_code": "600900", "stock_name": "长江电力", "exchange_location": "sh", "exchange_location_mic": "XSHG"}}, "2010-01-01", "2023-05-07", "XSHG")
     #go.collect_a_period_time_estimation('000002', {'000002': {'stock_code': '000002', 'stock_name': '万科A', 'exchange_location': 'sz', 'exchange_location_mic': 'XSHE'}}, "2022-04-01", "2022-04-11", 'XSHE')

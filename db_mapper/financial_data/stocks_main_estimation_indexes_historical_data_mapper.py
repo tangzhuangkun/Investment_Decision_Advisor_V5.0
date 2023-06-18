@@ -107,7 +107,7 @@ class StocksMainEstimationIndexesHistoricalDataMapper:
                             (select stock_code, stock_name, date, pe_ttm,
                             row_number() OVER (partition by stock_code ORDER BY pe_ttm asc) AS row_num,  
                             percent_rank() OVER (partition by stock_code ORDER BY pe_ttm asc) AS percent_num
-                            from stocks_main_estimation_indexes_historical_data
+                            from financial_data.stocks_main_estimation_indexes_historical_data
                             where stock_code = '%s'
                             and `date` > SUBDATE(NOW(),INTERVAL '%s' YEAR)) raw
                             left join 
@@ -122,7 +122,7 @@ class StocksMainEstimationIndexesHistoricalDataMapper:
                                 (select stock_code, stock_name, date, pe_ttm_nonrecurring,
                                 row_number() OVER (partition by stock_code ORDER BY pe_ttm_nonrecurring asc) AS row_num,  
                                 percent_rank() OVER (partition by stock_code ORDER BY pe_ttm_nonrecurring asc) AS percent_num
-                                from stocks_main_estimation_indexes_historical_data
+                                from financial_data.stocks_main_estimation_indexes_historical_data
                                 where stock_code = '%s'
                                 and `date` > SUBDATE(NOW(),INTERVAL '%s' YEAR)) raw
                                 left join 
@@ -137,7 +137,7 @@ class StocksMainEstimationIndexesHistoricalDataMapper:
                                 (select stock_code, stock_name, date, pb,
                                 row_number() OVER (partition by stock_code ORDER BY pb asc) AS row_num,  
                                 percent_rank() OVER (partition by stock_code ORDER BY pb asc) AS percent_num
-                                from stocks_main_estimation_indexes_historical_data
+                                from financial_data.stocks_main_estimation_indexes_historical_data
                                 where stock_code = '%s'
                                 and `date` > SUBDATE(NOW(),INTERVAL '%s' YEAR)) raw
                                 left join 
@@ -152,7 +152,7 @@ class StocksMainEstimationIndexesHistoricalDataMapper:
                                     (select stock_code, stock_name, date, pb_wo_gw,
                                     row_number() OVER (partition by stock_code ORDER BY pb_wo_gw asc) AS row_num,  
                                     percent_rank() OVER (partition by stock_code ORDER BY pb_wo_gw asc) AS percent_num
-                                    from stocks_main_estimation_indexes_historical_data
+                                    from financial_data.stocks_main_estimation_indexes_historical_data
                                     where stock_code = '%s'
                                     and `date` > SUBDATE(NOW(),INTERVAL '%s' YEAR)) raw
                                     left join 
@@ -167,7 +167,7 @@ class StocksMainEstimationIndexesHistoricalDataMapper:
                                     (select stock_code, stock_name, date, ps_ttm,
                                     row_number() OVER (partition by stock_code ORDER BY ps_ttm asc) AS row_num,  
                                     percent_rank() OVER (partition by stock_code ORDER BY ps_ttm asc) AS percent_num
-                                    from stocks_main_estimation_indexes_historical_data
+                                    from financial_data.stocks_main_estimation_indexes_historical_data
                                     where stock_code = '%s'
                                     and `date` > SUBDATE(NOW(),INTERVAL '%s' YEAR)) raw
                                     left join 
@@ -182,7 +182,7 @@ class StocksMainEstimationIndexesHistoricalDataMapper:
                                     (select stock_code, stock_name, date, pcf_ttm,
                                     row_number() OVER (partition by stock_code ORDER BY pcf_ttm asc) AS row_num,  
                                     percent_rank() OVER (partition by stock_code ORDER BY pcf_ttm asc) AS percent_num
-                                    from stocks_main_estimation_indexes_historical_data
+                                    from financial_data.stocks_main_estimation_indexes_historical_data
                                     where stock_code = '%s'
                                     and `date` > SUBDATE(NOW(),INTERVAL '%s' YEAR)) raw
                                     left join 
@@ -197,7 +197,7 @@ class StocksMainEstimationIndexesHistoricalDataMapper:
                                     (select stock_code, stock_name, date, dividend_yield,
                                     row_number() OVER (partition by stock_code ORDER BY dividend_yield asc) AS row_num,  
                                     percent_rank() OVER (partition by stock_code ORDER BY dividend_yield asc) AS percent_num
-                                    from stocks_main_estimation_indexes_historical_data
+                                    from financial_data.stocks_main_estimation_indexes_historical_data
                                     where stock_code = '%s'
                                     and `date` > SUBDATE(NOW(),INTERVAL '%s' YEAR)) raw
                                     left join 
@@ -240,14 +240,80 @@ class StocksMainEstimationIndexesHistoricalDataMapper:
             custom_logger.CustomLogger().log_writter(log_msg, 'error')
             return None
 
+    """
+    获取数据库中,某交易所最新收集股票估值信息的日期
+    :param exchange_location_mic: 交易所MIC码（如 XSHG, XSHE，XHKG）均可
+    :return, 如
+    {'p_day': datetime.date(2023, 6, 16)}
+    """
+    def get_the_latest_date_of_exchange(self, exchange_location_mic):
+        selecting_sql = """SELECT max(date) as p_day FROM financial_data.stocks_main_estimation_indexes_historical_data 
+                                    where exchange_location_mic = '%s' """ % (exchange_location_mic)
+        selecting_result = db_operator.DBOperator().select_one("financial_data", selecting_sql)
+        return selecting_result
 
+    """
+    检查数据库中是否有记录，主要是检查是否为同一支股票同一日期
+    # param: stock_code 股票代码，如 000858
+    # param: stock_name 股票名称，如 五粮液
+    # param: p_day 日期，如 2023-06-12
+    """
+    def is_this_stock_existing_info(self,stock_code, stock_name, p_day):
+        selecting_sql = """SELECT pe_ttm FROM stocks_main_estimation_indexes_historical_data 
+                where stock_code = '%s' and stock_name = '%s' and date = '%s' """ % (stock_code, stock_name, p_day)
+        selecting_result = db_operator.DBOperator().select_one("financial_data", selecting_sql)
+        return selecting_result
+
+    """
+    将股票的估值信息存入数据库
+    :param, stock_code, 股票代码,
+    :param, stock_name, 股票名称,
+    :param, date, 日期,
+    :param, exchange_location, 标的上市地，如 sh,sz,hk,
+    :param, exchange_location_mic, 标的上市地MIC，如 XSHG, XSHE，XHKG 等,
+    :param, pe_ttm, 滚动市盈率,
+    :param, pe_ttm_nonrecurring, 扣非滚动市盈率,
+    :param, pb, 市净率,
+    :param, pb_wo_gw, 扣商誉市净率,
+    :param, ps_ttm, 滚动市销率,
+    :param, pcf_ttm, 滚动市现率,
+    :param, ev_ebit, EV/EBIT企业价值倍数 ,
+    :param, stock_yield, 股票收益率,
+    :param, dividend_yield, 股息率,
+    :param, share_price, 股价,
+    :param, turnover, 成交量,
+    :param, fc_rights, 前复权,
+    :param, bc_rights, 后复权,
+    :param, lxr_fc_rights, 理杏仁前复权,
+    :param, shareholders, 股东人数,
+    :param, market_capitalization, 市值,
+    :param, circulation_market_capitalization, 流通市值,
+    :param, free_circulation_market_capitalization, 自由流通市值,
+    :param, free_circulation_market_capitalization_per_capita, 人均自由流通市值,
+    :param, financing_balance, 融资余额,
+    :param, securities_balances, 融券余额,
+    :param, stock_connect_holding_amount, 陆股通持仓金额,
+    :param, source, 数据来源,
+    """
+    def save_stock_info(self, stock_code, stock_name, p_day, exchange_location, exchange_location_mic, pe_ttm,pe_ttm_nonrecurring,pb,pb_wo_gw,ps_ttm,pcf_ttm,ev_ebit,stock_yield,dividend_yield,share_price,turnover,fc_rights,bc_rights,lxr_fc_rights,shareholders,market_capitalization,circulation_market_capitalization,free_circulation_market_capitalization,free_circulation_market_capitalization_per_capita,financing_balance,securities_balances,stock_connect_holding_amount,source):
+        # 存入数据库
+        inserting_sql = "INSERT IGNORE INTO financial_data.stocks_main_estimation_indexes_historical_data (stock_code, stock_name, date, exchange_location, exchange_location_mic, pe_ttm,pe_ttm_nonrecurring,pb,pb_wo_gw,ps_ttm,pcf_ttm,ev_ebit,stock_yield,dividend_yield,share_price,turnover,fc_rights,bc_rights,lxr_fc_rights,shareholders,market_capitalization,circulation_market_capitalization,free_circulation_market_capitalization,free_circulation_market_capitalization_per_capita,financing_balance,securities_balances,stock_connect_holding_amount,source ) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s' )" % (
+            stock_code, stock_name, p_day, exchange_location, exchange_location_mic, pe_ttm, pe_ttm_nonrecurring, pb,
+            pb_wo_gw, ps_ttm, pcf_ttm, ev_ebit,
+            stock_yield, dividend_yield, share_price, turnover, fc_rights, bc_rights, lxr_fc_rights, shareholders,
+            market_capitalization, circulation_market_capitalization, free_circulation_market_capitalization,
+            free_circulation_market_capitalization_per_capita, financing_balance, securities_balances,
+            stock_connect_holding_amount, source)
+        db_operator.DBOperator().operate("insert", "financial_data", inserting_sql)
 
 if __name__ == '__main__':
     time_start = time.time()
     go = StocksMainEstimationIndexesHistoricalDataMapper()
     #result = go.get_stock_latest_estimation_percentile_in_history("600900", "pe_ttm", 5)
     #result = go.get_stock_historical_date_estimation("600900", "pe_ttm", "2023-05-12")
-    result = go.get_stock_all_historical_estimation("600900", "pb_wo_gw")
+    #result = go.get_stock_all_historical_estimation("600900", "pb_wo_gw")
+    #result = go.get_the_latest_date_of_exchange("XSHG")
+    result = go.is_this_stock_existing_info("000858", "五粮液", "2023-06-16")
     print(result)
     time_end = time.time()
     print('time:')

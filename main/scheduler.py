@@ -218,7 +218,7 @@ class Scheduler:
 			# 每个星期五晚上20:00采集中证表现优异的指数
 			scheduler.add_job(func=collect_excellent_index_from_cs_index.CollectExcellentIndexFromCSIndex().main,
 							  trigger='cron',
-							  month='1-12', day_of_week='sun', hour=20,
+							  month='1-12', day_of_week='fri', hour=20,
 							  id='collectCSExcellentIndexes')
 		except Exception as e:
 			# 抛错
@@ -228,7 +228,7 @@ class Scheduler:
 			# 每个星期五晚上20:10采集国证表现优异的指数
 			scheduler.add_job(func=collect_excellent_index_from_cn_index.CollectExcellentIndexFromCNIndex().main,
 							  trigger='cron',
-							  month='1-12', day_of_week='sun', hour=20, minute=10,
+							  month='1-12', day_of_week='fri', hour=20, minute=10,
 							  id='collectCNExcellentIndexes')
 		except Exception as e:
 			# 抛错

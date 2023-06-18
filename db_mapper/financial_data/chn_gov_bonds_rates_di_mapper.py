@@ -51,7 +51,19 @@ class ChnGovBondsRatesDiMapper:
     """
     def max_date(self):
         # 查询sql
-        selecting_max_date_sql = """SELECT max(trading_day) max_day FROM financial_data.chn_gov_bonds_rates_di"""
+        selecting_max_date_sql = """SELECT max(trading_day) as max_day FROM financial_data.chn_gov_bonds_rates_di"""
         # 查询
         max_date = db_operator.DBOperator().select_one("financial_data", selecting_max_date_sql)
         return max_date
+
+    """
+    更新债券信息
+    :param, period, 期限，如 1m --1月，2m --2月，3m --3月，6m --6月，9m --9月，1y --1年，2y --2年，3y --3年，5y --5年，7y --7年，10y --10年
+    :param, rate, 债券利率
+    :param, p_day, 业务日期
+    :param, source, 数据来源
+    """
+    def update_bond_info(self, period, rate, p_day, source):
+
+        updating_sql = "UPDATE chn_gov_bonds_rates_di SET %s  = '%s' WHERE trading_day = '%s' AND source = '%s' " % (period, rate, p_day, source)
+        db_operator.DBOperator().operate("update", "financial_data", updating_sql)

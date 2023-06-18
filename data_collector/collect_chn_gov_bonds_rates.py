@@ -6,7 +6,6 @@ import sys
 sys.path.append("..")
 import parsers.disguise as disguise
 import log.custom_logger as custom_logger
-import database.db_operator as db_operator
 import db_mapper.financial_data.chn_gov_bonds_rates_di_mapper as chn_gov_bonds_rates_di_mapper
 
 class CollectCHNGovBondsRates:
@@ -86,8 +85,9 @@ class CollectCHNGovBondsRates:
                     rate = data_json_list[i]["seriesData"][j][1]
                     try:
                         # 更新的SQL
-                        updating_sql = "UPDATE chn_gov_bonds_rates_di SET "+ term_order_dict[i]+" = '%s' WHERE trading_day = '%s' AND source = '%s' " % (rate, trading_day, '中国债券信息网')
-                        db_operator.DBOperator().operate("update", "financial_data", updating_sql)
+                        # updating_sql = "UPDATE chn_gov_bonds_rates_di SET "+ term_order_dict[i]+" = '%s' WHERE trading_day = '%s' AND source = '%s' " % (rate, trading_day, '中国债券信息网')
+                        # db_operator.DBOperator().operate("update", "financial_data", updating_sql)
+                        chn_gov_bonds_rates_di_mapper.ChnGovBondsRatesDiMapper().update_bond_info(term_order_dict[i], rate, trading_day, '中国债券信息网')
 
                     except Exception as e:
                         # 日志记录

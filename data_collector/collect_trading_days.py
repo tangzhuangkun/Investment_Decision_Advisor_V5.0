@@ -9,14 +9,15 @@ import datetime
 import sys
 sys.path.append("..")
 import log.custom_logger as custom_logger
-import database.db_operator as db_operator
+import db_mapper.financial_data.trading_days_mapper as trading_days_mapper
 
 
 class CollectTradingDays:
-    # 从akshare接口收集交易日
+    # 从接口收集交易日
 
     def __init__(self):
-        pass
+        self.area = "中国大陆"
+        self.source = "akshare"
 
     def collect_all_trading_days(self):
         # 从akshare获取所有的交易日期
@@ -32,29 +33,6 @@ class CollectTradingDays:
             msg = '无法从akshare获取所有的交易日期' + '  ' + str(e)
             custom_logger.CustomLogger().log_writter(msg, 'error')
 
-
-    def is_saved_or_not(self,trading_day):
-        '''
-        检查一个交易日期是否已经存在
-        :param trading_day: 交易日期，如 2021-06-09
-        :return:
-        '''
-
-        try:
-            # 查询sql
-            selecting_sql = "SELECT * FROM trading_days WHERE trading_date = '%s'" %(trading_day)
-            # 查询
-            selecting_result = db_operator.DBOperator().select_one("financial_data", selecting_sql)
-            return selecting_result
-
-        except Exception as e:
-            # 日志记录
-            msg = "无法查询交易日期 " +trading_day+" 是否存在数据库" + '  ' + str(e)
-            custom_logger.CustomLogger().log_writter(msg, 'error')
-            return None
-
-
-
     def save_a_trading_day_into_db(self, trading_day):
         '''
         将一个交易日期存入数据库
@@ -66,14 +44,15 @@ class CollectTradingDays:
         flag = True
 
         # 检查是否曾经存过该日期
-        existOrNot = self.is_saved_or_not(trading_day)
+        existOrNot = trading_days_mapper.TradingDaysMapper().is_saved_the_date(trading_day)
         # 如果没有该日期的记录，则存入
         if existOrNot is None:
             # 插入sql
-            inserting_sql = "INSERT IGNORE INTO trading_days (trading_date, area, source) VALUES ('%s', '%s', '%s')" \
-                            % (trading_day, "中国大陆", "akshare")
-            # 将数据存入数据库
-            db_operator.DBOperator().operate("insert", "financial_data", inserting_sql)
+            # inserting_sql = "INSERT IGNORE INTO trading_days (trading_date, area, source) VALUES ('%s', '%s', '%s')" \
+            #                 % (trading_day, "中国大陆", "akshare")
+            # # 将数据存入数据库
+            # db_operator.DBOperator().operate("insert", "financial_data", inserting_sql)
+            trading_days_mapper.TradingDaysMapper().save_trading_date(trading_day, self.area, self.source)
             return flag
         # 如果该日期存在记录，则返回
         else:

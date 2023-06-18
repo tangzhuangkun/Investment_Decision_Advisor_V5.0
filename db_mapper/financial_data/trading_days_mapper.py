@@ -47,11 +47,43 @@ class TradingDaysMapper:
             custom_logger.CustomLogger().log_writter(log_msg, 'error')
             return "0000-00-00"
 
+    '''
+    检查一个交易日期是否已经存在
+    :param trading_day: 交易日期，如 2021-06-09
+    :return:
+    '''
+    def is_saved_the_date(self,p_day):
+        try:
+            # 查询sql
+            selecting_sql = "SELECT * FROM trading_days WHERE trading_date = '%s'" % (p_day)
+            # 查询
+            selecting_result = db_operator.DBOperator().select_one("financial_data", selecting_sql)
+            return selecting_result
+
+        except Exception as e:
+            # 日志记录
+            msg = "无法查询交易日期 " + p_day + " 是否存在数据库" + '  ' + str(e)
+            custom_logger.CustomLogger().log_writter(msg, 'error')
+            return None
+
+    def save_trading_date(self,p_day, area, source):
+
+        try:
+            # 插入sql
+            inserting_sql = "INSERT IGNORE INTO trading_days (trading_date, area, source) VALUES ('%s', '%s', '%s')" \
+                            % (p_day, area, source)
+            # 将数据存入数据库
+            db_operator.DBOperator().operate("insert", "financial_data", inserting_sql)
+        except Exception as e:
+            # 日志记录
+            msg = "无法存入 " + source + " " + area+ " "+p_day+ " 的交易日信息进数据库 "+ str(e)
+            custom_logger.CustomLogger().log_writter(msg, 'error')
 
 if __name__ == '__main__':
     time_start = time.time()
     go = TradingDaysMapper()
-    result = go.get_the_lastest_trading_date("2023-05-12")
+    #result = go.get_the_lastest_trading_date("2023-05-12")
+    result = go.is_saved_the_date("2023-05-12")
     print(result)
     time_end = time.time()
     print('time:')

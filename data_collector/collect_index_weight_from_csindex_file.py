@@ -11,7 +11,6 @@ import sys
 sys.path.append("..")
 import parsers.disguise as disguise
 import log.custom_logger as custom_logger
-import database.db_operator as db_operator
 import db_mapper.target_pool.investment_target_mapper as investment_target_mapper
 import db_mapper.financial_data.index_constituent_stocks_weight_mapper as index_constituent_stocks_weight_mapper
 

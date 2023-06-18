@@ -3,7 +3,6 @@ import threading
 
 import sys
 sys.path.append("..")
-import database.db_operator as db_operator
 import log.custom_logger as custom_logger
 import data_collector.get_target_real_time_indicator_from_interfaces as get_stock_real_time_indicator_from_interfaces
 import db_mapper.target_pool.investment_target_mapper as investment_target_mapper

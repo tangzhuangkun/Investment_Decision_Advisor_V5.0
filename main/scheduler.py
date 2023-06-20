@@ -153,64 +153,60 @@ class Scheduler:
 			custom_logger.CustomLogger().log_writter(e, 'error')
 
 		try:
-			custom_logger.CustomLogger().log_writter("开始收集最新国债收益率", 'info')
-			# 每个交易日19:30:00, 收集最新国债收益率
+			# 每个交易日20:00:00, 收集最新国债收益率
 			scheduler.add_job(func=collect_chn_gov_bonds_rates.CollectCHNGovBondsRates().main,
 							  trigger='cron',
-							  month='1-12', day_of_week='mon,tue,wed,thu,fri', hour=19, minute=30,
+							  month='1-12', day_of_week='mon,tue,wed,thu,fri', hour=20,
 							  id='weekdayCollectCHNGovBondsRates')
 		except Exception as e:
 			# 抛错
 			custom_logger.CustomLogger().log_writter(e, 'error')
 
 		try:
-			custom_logger.CustomLogger().log_writter("开始收集最新国债收益率", 'info')
-			# 每个交易日19:31:00, 收集最新沪深300指数市值加权估值
+			# 每个交易日20:01:00, 收集最新沪深300指数市值加权估值
 			scheduler.add_job(func=collect_index_estimation_from_lxr.CollectIndexEstimationFromLXR().main,
 							  trigger='cron',
-							  month='1-12', day_of_week='mon,tue,wed,thu,fri', hour=19, minute=31,
+							  month='1-12', day_of_week='mon,tue,wed,thu,fri', hour=20, minute=1,
 							  id='weekdayCollectIndexEstimationFromLXR')
 		except Exception as e:
 			# 抛错
 			custom_logger.CustomLogger().log_writter(e, 'error')
 
 		try:
-			custom_logger.CustomLogger().log_writter("开始运行mysql脚本，计算股债收益率", 'info')
-			# 每个交易日19:31:30, 运行mysql脚本，计算股债收益率
+			# 每个交易日20:01:30, 运行mysql脚本，计算股债收益率
 			scheduler.add_job(func=calculate_stock_bond_ratio.CalculateStockBondRatio().main,
 							  trigger='cron',
-							  month='1-12', day_of_week='mon,tue,wed,thu,fri',hour=19, minute=31, second=30,
+							  month='1-12', day_of_week='mon,tue,wed,thu,fri',hour=20, minute=1, second=30,
 							  id='weekdayCalculateStockBondRatio')
 		except Exception as e:
 			# 抛错
 			custom_logger.CustomLogger().log_writter(e, 'error')
 
 		try:
-			custom_logger.CustomLogger().log_writter("开始通过邮件/微信发送股当日债收益比", 'info')
-			# 每个交易日19:32:00，收集沪深300指数/沪深A股估值，国债收益，计算并通过邮件/微信发送股当日债收益比
+			# 每个交易日20:02:00，收集沪深300指数/沪深A股估值，国债收益，计算并通过邮件/微信发送股当日债收益比
 			scheduler.add_job(func=notification_plan_after_trading.NotificationPlanAfterTrading().stock_bond_yield_strategy_estimation_notification,
 							  trigger='cron',
-							  month='1-12', day_of_week='mon,tue,wed,thu,fri', hour=19, minute=32,
+							  month='1-12', day_of_week='mon,tue,wed,thu,fri', hour=20, minute=2,
 							  id='weekdayStockBondYieldNotification')
 		except Exception as e:
 			# 抛错
 			custom_logger.CustomLogger().log_writter(e, 'error')
 
 		try:
-			# 每个交易日19:32:30 通过邮件/微信发送标的指数估值报告
+			# 每个交易日20:02:30 通过邮件/微信发送标的指数估值报告
 			scheduler.add_job(func=notification_plan_after_trading.NotificationPlanAfterTrading().index_strategy_estimation_notification,
 							  trigger='cron',
-							  month='1-12', day_of_week='mon,tue,wed,thu,fri', hour=19, minute=32, second=30,
+							  month='1-12', day_of_week='mon,tue,wed,thu,fri', hour=20, minute=2, second=30,
 							  id='weekdayTargetIndexEstimationReport')
 		except Exception as e:
 			# 抛错
 			custom_logger.CustomLogger().log_writter(e, 'error')
 
 		try:
-			# 每个交易日20：00, 将所有暂停标的策略重新开启，下一个交易日又可生效
+			# 每个交易日22：00, 将所有暂停标的策略重新开启，下一个交易日又可生效
 			scheduler.add_job(func=web_service_impl.WebServericeImpl().restart_all_mute_target,
 							  trigger='cron',
-							  month='1-12', day_of_week='mon,tue,wed,thu,fri', hour=20,
+							  month='1-12', day_of_week='mon,tue,wed,thu,fri', hour=22,
 							  id='weekdayRestartAllMuteTarget')
 		except Exception as e:
 			# 抛错

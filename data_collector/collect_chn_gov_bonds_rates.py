@@ -51,6 +51,9 @@ class CollectCHNGovBondsRates:
         # [{"ycDefId":"2c9081e50a2f9606010a3068cae700015.0","ycDefName":"中债国债收益率曲线(到期)(5y)","ycYWName":null,"worktime":"","seriesData":[[1635868800000,2.7986],[1635955200000,2.7759]],"isPoint":false,"hyCurve":false,"point":false},{"ycDefId":"2c9081e50a2f9606010a3068cae7000110.0","ycDefName":"中债国债收益率曲线(到期)(10y)","ycYWName":null,"worktime":"","seriesData":[[1635868800000,2.9385],[1635955200000,2.9261]],"isPoint":false,"hyCurve":false,"point":false},{"ycDefId":"yzdcqx","ycDefName":"点差曲线","ycYWName":null,"worktime":null,"seriesData":[[1635868800000,0.1399],[1635955200000,0.1502]],"isPoint":false,"hyCurve":false,"point":false}]
         data_json_list = json.loads(raw_page)
 
+        msg = "当前日期" + self.today + "从中国债券信息网接口收集到的" + start_day + "至" + end_day + "期间的债券信息内容" + str(data_json_list)
+        custom_logger.CustomLogger().log_writter(msg, 'info')
+
         # 国债到期期限排序
         term_order_dict = {0:'1m', 1:'2m', 2:'3m', 3:'6m', 4:'9m', 5:'1y', 6:'2y', 7:'3y', 8:'5y', 9:'7y', 10:'10y'}
 
@@ -100,6 +103,10 @@ class CollectCHNGovBondsRates:
         # 如果为空，从 2010-01-01 开始收集数据
         # 如果不为空，仅 数据库中的已收集的最新交易日至今的国债收益率数据
 
+        # 日志记录
+        msg = "收集截止日期"+self.today+"债券收益率信息，开始"
+        custom_logger.CustomLogger().log_writter(msg, 'info')
+
         try:
             # 获取总行数
             selecting_result = chn_gov_bonds_rates_di_mapper.ChnGovBondsRatesDiMapper().count_rows()
@@ -126,7 +133,9 @@ class CollectCHNGovBondsRates:
                 custom_logger.CustomLogger().log_writter(msg, 'error')
                 return None
 
-
+        # 日志记录
+        msg = "收集截止日期" + self.today + "债券收益率信息，结束"
+        custom_logger.CustomLogger().log_writter(msg, 'info')
 
 
 

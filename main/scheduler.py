@@ -163,40 +163,40 @@ class Scheduler:
 			custom_logger.CustomLogger().log_writter(e, 'error')
 
 		try:
-			# 每个交易日20:01:00, 收集最新沪深300指数市值加权估值
+			# 每个交易日20:20:00, 收集最新沪深300指数市值加权估值
 			scheduler.add_job(func=collect_index_estimation_from_lxr.CollectIndexEstimationFromLXR().main,
 							  trigger='cron',
-							  month='1-12', day_of_week='mon,tue,wed,thu,fri', hour=20, minute=1,
+							  month='1-12', day_of_week='mon,tue,wed,thu,fri', hour=20, minute=20,
 							  id='weekdayCollectIndexEstimationFromLXR')
 		except Exception as e:
 			# 抛错
 			custom_logger.CustomLogger().log_writter(e, 'error')
 
 		try:
-			# 每个交易日20:01:30, 运行mysql脚本，计算股债收益率
+			# 每个交易日20:20:30, 运行mysql脚本，计算股债收益率
 			scheduler.add_job(func=calculate_stock_bond_ratio.CalculateStockBondRatio().main,
 							  trigger='cron',
-							  month='1-12', day_of_week='mon,tue,wed,thu,fri',hour=20, minute=1, second=30,
+							  month='1-12', day_of_week='mon,tue,wed,thu,fri',hour=20, minute=20, second=30,
 							  id='weekdayCalculateStockBondRatio')
 		except Exception as e:
 			# 抛错
 			custom_logger.CustomLogger().log_writter(e, 'error')
 
 		try:
-			# 每个交易日20:02:00，收集沪深300指数/沪深A股估值，国债收益，计算并通过邮件/微信发送股当日债收益比
+			# 每个交易日20:21:00，收集沪深300指数/沪深A股估值，国债收益，计算并通过邮件/微信发送股当日债收益比
 			scheduler.add_job(func=notification_plan_after_trading.NotificationPlanAfterTrading().stock_bond_yield_strategy_estimation_notification,
 							  trigger='cron',
-							  month='1-12', day_of_week='mon,tue,wed,thu,fri', hour=20, minute=2,
+							  month='1-12', day_of_week='mon,tue,wed,thu,fri', hour=20, minute=21,
 							  id='weekdayStockBondYieldNotification')
 		except Exception as e:
 			# 抛错
 			custom_logger.CustomLogger().log_writter(e, 'error')
 
 		try:
-			# 每个交易日20:02:30 通过邮件/微信发送标的指数估值报告
+			# 每个交易日20:21:30 通过邮件/微信发送标的指数估值报告
 			scheduler.add_job(func=notification_plan_after_trading.NotificationPlanAfterTrading().index_strategy_estimation_notification,
 							  trigger='cron',
-							  month='1-12', day_of_week='mon,tue,wed,thu,fri', hour=20, minute=2, second=30,
+							  month='1-12', day_of_week='mon,tue,wed,thu,fri', hour=20, minute=21, second=30,
 							  id='weekdayTargetIndexEstimationReport')
 		except Exception as e:
 			# 抛错

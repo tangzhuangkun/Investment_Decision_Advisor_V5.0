@@ -112,6 +112,8 @@ class CollectIndexEstimationFromLXR:
                 return self.collect_index_estimation_in_a_period_time(start_date, end_date)
 
             try:
+                msg = "当前日期"+self.today + "从理杏仁收集到的"+start_date+"至"+end_date+"期间的指数估值信息表内容" + str(content)
+                custom_logger.CustomLogger().log_writter(msg, 'info')
                 # 数据存入数据库
                 self.save_content_into_db(content)
             except Exception as e:
@@ -198,6 +200,8 @@ class CollectIndexEstimationFromLXR:
             return self.collect_index_estimation_in_a_special_date(date)
 
         try:
+            msg = "当前日期"+self.today + "从理杏仁收集到"+date+"的指数估值信息表内容" + str(content)
+            custom_logger.CustomLogger().log_writter(msg, 'info')
             # 数据存入数据库
             self.save_content_into_db(content)
         except Exception as e:
@@ -286,6 +290,11 @@ class CollectIndexEstimationFromLXR:
 
 
     def main(self):
+
+        # 日志记录
+        msg = "收集理杏仁截止"+ self.today +"的指数估值信息表，开始"
+        custom_logger.CustomLogger().log_writter(msg, 'info')
+
         try:
             # 查询总行数
             selecting_result = index_estimation_from_lxr_di_mapper.IndexEstimationFromLXRDiMapper().count_rows()
@@ -327,7 +336,9 @@ class CollectIndexEstimationFromLXR:
                 custom_logger.CustomLogger().log_writter(msg, 'error')
                 return None
 
-
+        # 日志记录
+        msg = "收集理杏仁截止" + self.today + "的指数估值信息表，结束"
+        custom_logger.CustomLogger().log_writter(msg, 'info')
 
 
 if __name__ == '__main__':

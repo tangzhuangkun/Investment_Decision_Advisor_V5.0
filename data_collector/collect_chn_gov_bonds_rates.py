@@ -1,6 +1,7 @@
 import requests
 import time
 import json
+import datetime
 
 import sys
 sys.path.append("..")
@@ -14,7 +15,8 @@ class CollectCHNGovBondsRates:
 
     def __init__(self):
         # 获取当前时间
-        self.today = time.strftime("%Y-%m-%d", time.localtime())
+        #self.today = time.strftime("%Y-%m-%d", time.localtime())
+        self.today = str(datetime.date.today())
 
     def millisecond_to_time(self, millis):
         """13位时间戳转换为日期格式字符串"""

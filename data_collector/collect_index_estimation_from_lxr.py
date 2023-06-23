@@ -28,7 +28,8 @@ class CollectIndexEstimationFromLXR:
         self.index_code_name_dict = { "1000002":"沪深A股","000300":"沪深300"}
         #self.index_code_name_dict = {"1000002":"沪深A股"}
         # 获取当前时间
-        self.today = time.strftime("%Y-%m-%d", time.localtime())
+        #self.today = time.strftime("%Y-%m-%d", time.localtime())
+        self.today = str(datetime.date.today())
 
 
     def collect_index_estimation_in_a_period_time(self, start_date, end_date):

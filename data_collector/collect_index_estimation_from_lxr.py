@@ -28,7 +28,10 @@ class CollectIndexEstimationFromLXR:
         self.index_code_name_dict = { "1000002":"沪深A股","000300":"沪深300"}
         #self.index_code_name_dict = {"1000002":"沪深A股"}
         # 获取当前时间
-        #self.today = time.strftime("%Y-%m-%d", time.localtime())
+        self.time_check = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+        # 日志记录
+        msg = '从理杏仁收集指数估值信息, 时间检查 ' + self.time_check
+        custom_logger.CustomLogger().log_writter(msg, 'info')
         self.today = str(datetime.date.today())
 
 

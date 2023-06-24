@@ -15,7 +15,10 @@ class CollectCHNGovBondsRates:
 
     def __init__(self):
         # 获取当前时间
-        #self.today = time.strftime("%Y-%m-%d", time.localtime())
+        self.time_check = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+        # 日志记录
+        msg = '收集国债到期收益率, 时间检查 '+ self.time_check
+        custom_logger.CustomLogger().log_writter(msg, 'info')
         self.today = str(datetime.date.today())
 
     def millisecond_to_time(self, millis):

@@ -14,19 +14,14 @@ class CollectCHNGovBondsRates:
     # 运行频率：每个交易日收盘后
 
     def __init__(self):
-        # 获取当前时间
-        self.time_check = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-        # 日志记录
-        msg = '收集国债到期收益率, 时间检查 '+ self.time_check
-        custom_logger.CustomLogger().log_writter(msg, 'info')
-        self.today = str(datetime.date.today())
+        pass
 
     def millisecond_to_time(self, millis):
         """13位时间戳转换为日期格式字符串"""
         # millis, 13位时间戳
         return time.strftime('%Y-%m-%d', time.localtime(millis / 1000))
 
-    def call_bonds_interface_to_collect_all_historical_data(self, start_day, end_day, is_only_today=0):
+    def call_bonds_interface_to_collect_all_historical_data(self, start_day, end_day, today_date, is_only_today=0):
         # 调用中国债券信息网接口,收集国债各到期品种的过往到期收益率
 
         # header，伪装的UA
@@ -34,6 +29,7 @@ class CollectCHNGovBondsRates:
         # start_day, 开始日期， 如 2021-11-01
         # end_day, 结束日期， 如 2021-11-04（start_day和end_day不可相同）
         # is_only_today,是否只收集今天，默认 否（0），选是（1）
+        # today_date, 今天的日期， 如 2023-06-26
 
         bonds_interface_address = "https://yield.chinabond.com.cn/cbweb-mn/yc/queryYz?bjlx=no&&dcq=0.083333,1m;0.166667,2m;0.25,3m;0.5,6m;0.75,9m;1,1y;2,2y;3,3y;5,5y;7,7y;10,10y;&&startTime="+start_day+"&&endTime="+end_day+"&&qxlx=0,&&yqqxN=N&&yqqxK=K&&par=day&&ycDefIds=2c9081e50a2f9606010a3068cae70001,&&locale=zh_CN"
 
@@ -50,13 +46,13 @@ class CollectCHNGovBondsRates:
             # 日志记录
             msg = "从中国债券信息网" + bonds_interface_address + '  ' + "获取当日国债收益率失败,错误为 "+ str(e) +" 即将重试 "
             custom_logger.CustomLogger().log_writter(msg, lev='warning')
-            return self.call_bonds_interface_to_collect_all_historical_data(start_day, end_day, is_only_today=0)
+            return self.call_bonds_interface_to_collect_all_historical_data(start_day, end_day, today_date, is_only_today=0)
 
         # 转换成字典数据
         # [{"ycDefId":"2c9081e50a2f9606010a3068cae700015.0","ycDefName":"中债国债收益率曲线(到期)(5y)","ycYWName":null,"worktime":"","seriesData":[[1635868800000,2.7986],[1635955200000,2.7759]],"isPoint":false,"hyCurve":false,"point":false},{"ycDefId":"2c9081e50a2f9606010a3068cae7000110.0","ycDefName":"中债国债收益率曲线(到期)(10y)","ycYWName":null,"worktime":"","seriesData":[[1635868800000,2.9385],[1635955200000,2.9261]],"isPoint":false,"hyCurve":false,"point":false},{"ycDefId":"yzdcqx","ycDefName":"点差曲线","ycYWName":null,"worktime":null,"seriesData":[[1635868800000,0.1399],[1635955200000,0.1502]],"isPoint":false,"hyCurve":false,"point":false}]
         data_json_list = json.loads(raw_page)
 
-        msg = "当前日期" + self.today + "从中国债券信息网接口收集到的" + start_day + "至" + end_day + "期间的债券信息内容" + str(data_json_list)
+        msg = "当前日期" + today_date + "从中国债券信息网接口收集到的" + start_day + "至" + end_day + "期间的债券信息内容" + str(data_json_list)
         custom_logger.CustomLogger().log_writter(msg, 'info')
 
         # 国债到期期限排序
@@ -77,7 +73,7 @@ class CollectCHNGovBondsRates:
                     rate = data_json_list[i]["seriesData"][j][1]
                     try:
                         # 插入的SQL
-                        chn_gov_bonds_rates_di_mapper.ChnGovBondsRatesDiMapper().collect_bond_rate('1m', rate,trading_day,'中国债券信息网',self.today)
+                        chn_gov_bonds_rates_di_mapper.ChnGovBondsRatesDiMapper().collect_bond_rate('1m', rate,trading_day,'中国债券信息网',today_date)
                     except Exception as e:
                         # 日志记录
                         msg = '收集国债到期收益率(1月期)， 插入 '+str(trading_day)+'的数据 失败' + '  ' + str(e)
@@ -108,8 +104,11 @@ class CollectCHNGovBondsRates:
         # 如果为空，从 2010-01-01 开始收集数据
         # 如果不为空，仅 数据库中的已收集的最新交易日至今的国债收益率数据
 
+        # 今天日期
+        today_date = str(datetime.date.today())
+
         # 日志记录
-        msg = "收集截止日期"+self.today+"债券收益率信息，开始"
+        msg = "收集截止日期"+today_date+"债券收益率信息，开始"
         custom_logger.CustomLogger().log_writter(msg, 'info')
 
         try:
@@ -123,14 +122,14 @@ class CollectCHNGovBondsRates:
 
         # 如果表格为空，收集从 2010-01-01至今的数据
         if selecting_result["total_rows"] == 0:
-            self.call_bonds_interface_to_collect_all_historical_data(start_day = "2010-01-01", end_day = self.today, is_only_today=0)
+            self.call_bonds_interface_to_collect_all_historical_data(start_day = "2010-01-01", end_day = today_date, today_date = today_date, is_only_today=0)
         else:
             # 获取中国国债到期收益率表chn_gov_bonds_rates_di已收集的最新交易日
             try:
                 # 最新的日期
                 selecting_max_date = chn_gov_bonds_rates_di_mapper.ChnGovBondsRatesDiMapper().max_date()
                 self.call_bonds_interface_to_collect_all_historical_data(start_day=str(selecting_max_date["max_day"]),
-                                                                         end_day=self.today, is_only_today=1)
+                                                                         end_day=today_date, today_date = today_date, is_only_today=1)
 
             except Exception as e:
                 # 日志记录
@@ -139,7 +138,7 @@ class CollectCHNGovBondsRates:
                 return None
 
         # 日志记录
-        msg = "收集截止日期" + self.today + "债券收益率信息，结束"
+        msg = "收集截止日期" + today_date + "债券收益率信息，结束"
         custom_logger.CustomLogger().log_writter(msg, 'info')
 
 

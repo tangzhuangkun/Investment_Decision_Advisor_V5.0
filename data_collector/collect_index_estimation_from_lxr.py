@@ -27,19 +27,14 @@ class CollectIndexEstimationFromLXR:
         # 要从理杏仁采集估值的指数
         self.index_code_name_dict = { "1000002":"沪深A股","000300":"沪深300"}
         #self.index_code_name_dict = {"1000002":"沪深A股"}
-        # 获取当前时间
-        self.time_check = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-        # 日志记录
-        msg = '从理杏仁收集指数估值信息, 时间检查 ' + self.time_check
-        custom_logger.CustomLogger().log_writter(msg, 'info')
-        self.today = str(datetime.date.today())
 
 
-    def collect_index_estimation_in_a_period_time(self, start_date, end_date):
+    def collect_index_estimation_in_a_period_time(self, start_date, end_date, today_date):
         # 调取理杏仁接口，获取一段时间范围内，指数估值数据, 并储存
         # param:  index_code, 指数代码，如 000300
         # param:  start_date, 开始时间，如 2020-11-12
         # param:  end_date, 结束时间，默认为空，如 2020-11-13
+        # param:  today_date, 今日日期，如 2020-11-13
         # 输出： 将获取到指数估值数据存入数据库
 
         # 随机获取一个token
@@ -113,13 +108,13 @@ class CollectIndexEstimationFromLXR:
                       index_code+ '' +self.index_code_name_dict.get(index_code) + ' ' + start_date + ' ' + end_date \
                       + ' 报错token为 ' + token
                 custom_logger.CustomLogger().log_writter(msg, 'error')
-                return self.collect_index_estimation_in_a_period_time(start_date, end_date)
+                return self.collect_index_estimation_in_a_period_time(start_date, end_date, today_date)
 
             try:
-                msg = "当前日期"+self.today + "从理杏仁收集到的"+start_date+"至"+end_date+"期间的指数估值信息表内容" + str(content)
+                msg = "从理杏仁收集到的"+start_date+"至"+end_date+"期间的指数估值信息表内容" + str(content)
                 custom_logger.CustomLogger().log_writter(msg, 'info')
                 # 数据存入数据库
-                self.save_content_into_db(content)
+                self.save_content_into_db(content, today_date)
             except Exception as e:
                 # 日志记录失败
                 msg = '数据存入数据库失败。 ' + '理杏仁指数估值接口返回为 '+str(content) + '。 抛错为 '+ str(e) + \
@@ -204,10 +199,10 @@ class CollectIndexEstimationFromLXR:
             return self.collect_index_estimation_in_a_special_date(date)
 
         try:
-            msg = "当前日期"+self.today + "从理杏仁收集到"+date+"的指数估值信息表内容" + str(content)
+            msg = "从理杏仁收集到"+date+"的指数估值信息表内容" + str(content)
             custom_logger.CustomLogger().log_writter(msg, 'info')
             # 数据存入数据库
-            self.save_content_into_db(content)
+            self.save_content_into_db(content, date)
         except Exception as e:
             # 日志记录失败
             msg = '数据存入数据库失败。 ' + '理杏仁指数估值接口返回为 '+str(content) + '。 抛错为 '+ str(e) \
@@ -215,10 +210,10 @@ class CollectIndexEstimationFromLXR:
             custom_logger.CustomLogger().log_writter(msg, 'error')
 
 
-    def save_content_into_db(self,content):
+    def save_content_into_db(self,content, today_date):
         # 将 理杏仁接口返回的数据 存入数据库
         # param:  content, 理杏仁接口返回的数据
-        # param： range， 时间范围，只能填 period 或者 date
+        # param： today_date，今日日期，如，2023-06-23
         # return: 将数据存入数据库
 
         # 解析返回的数据
@@ -290,13 +285,16 @@ class CollectIndexEstimationFromLXR:
             dyr_median = piece['dyr']['median']
 
             # 存入数据库
-            index_estimation_from_lxr_di_mapper.IndexEstimationFromLXRDiMapper().save_index_estimation(index_code,index_name,trading_date,tv,ta,cp,cpc,pe_ttm_mcw,pe_ttm_ew,pe_ttm_ewpvo,pe_ttm_avg,pe_ttm_median,pb_mcw,pb_ew,pb_ewpvo,pb_avg,pb_median,ps_ttm_mcw,ps_ttm_ew,ps_ttm_ewpvo,ps_ttm_avg,ps_ttm_median,dyr_mcw,dyr_ew,dyr_ewpvo,dyr_avg,dyr_median,'理杏仁',self.today)
+            index_estimation_from_lxr_di_mapper.IndexEstimationFromLXRDiMapper().save_index_estimation(index_code,index_name,trading_date,tv,ta,cp,cpc,pe_ttm_mcw,pe_ttm_ew,pe_ttm_ewpvo,pe_ttm_avg,pe_ttm_median,pb_mcw,pb_ew,pb_ewpvo,pb_avg,pb_median,ps_ttm_mcw,ps_ttm_ew,ps_ttm_ewpvo,ps_ttm_avg,ps_ttm_median,dyr_mcw,dyr_ew,dyr_ewpvo,dyr_avg,dyr_median,'理杏仁',today_date)
 
 
     def main(self):
 
+        # 获取今日日期
+        today_date = str(datetime.date.today())
+
         # 日志记录
-        msg = "收集理杏仁截止"+ self.today +"的指数估值信息表，开始"
+        msg = "收集理杏仁截止 "+ today_date +" 的指数估值信息表，开始"
         custom_logger.CustomLogger().log_writter(msg, 'info')
 
         try:
@@ -312,8 +310,8 @@ class CollectIndexEstimationFromLXR:
         # 如果表格为空，收集从 2010-01-01至今的数据
         if selecting_result["total_rows"] == 0:
             # 分开收集，避开平台最多10年跨度限制
-            self.collect_index_estimation_in_a_period_time(start_date="2010-01-01", end_date="2019-12-31")
-            self.collect_index_estimation_in_a_period_time(start_date="2020-01-01", end_date=self.today)
+            self.collect_index_estimation_in_a_period_time(start_date="2010-01-01", end_date="2019-12-31", today_date=today_date)
+            self.collect_index_estimation_in_a_period_time(start_date="2020-01-01", end_date=today_date, today_date=today_date)
         else:
             # 获取 理杏仁的指数估值信息表 index_estimation_from_lxr_di 已收集的最新交易日
             try:
@@ -328,10 +326,10 @@ class CollectIndexEstimationFromLXR:
 
                 # 日期相差1天及以下
                 if( day_diff<=1):
-                    self.collect_index_estimation_in_a_special_date(self.today)
+                    self.collect_index_estimation_in_a_special_date(today_date)
                 # 日期相差2天及以上
                 else:
-                    self.collect_index_estimation_in_a_period_time(start_date = str(selecting_max_date["max_day"]+datetime.timedelta(days=1)), end_date = self.today)
+                    self.collect_index_estimation_in_a_period_time(start_date = str(selecting_max_date["max_day"]+datetime.timedelta(days=1)), end_date = today_date, today_date=today_date)
 
 
             except Exception as e:
@@ -341,7 +339,7 @@ class CollectIndexEstimationFromLXR:
                 return None
 
         # 日志记录
-        msg = "收集理杏仁截止" + self.today + "的指数估值信息表，结束"
+        msg = "收集理杏仁截止 " + today_date + " 的指数估值信息表，结束"
         custom_logger.CustomLogger().log_writter(msg, 'info')
 
 

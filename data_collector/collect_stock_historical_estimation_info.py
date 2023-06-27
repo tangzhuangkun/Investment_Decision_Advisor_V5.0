@@ -48,8 +48,6 @@ class CollectStockHistoricalEstimationInfo:
         # 从数据库取数时，每页取的条数信息
         # 每次向杏理仁请求数据时，每次申请的条数
         self.page_size = 80
-        # 获取当前日期
-        self.today = time.strftime("%Y-%m-%d", time.localtime())
         # 收集数据的起始日期
         self.estimation_start_date = "2010-01-01"
 
@@ -569,6 +567,9 @@ class CollectStockHistoricalEstimationInfo:
         # 如 ['XSHE', 'XHKG', 'XSHG']
         all_exchange_locaiton_mics = self.get_all_exchange_locaiton_mics()
 
+        # 获取当前日期
+        today_date = time.strftime("%Y-%m-%d", time.localtime())
+
         # 遍历交易所代码
         for exchange_location_mic in all_exchange_locaiton_mics:
             # 获取数据库中,该交易所最新收集股票估值信息的日期
@@ -591,10 +592,10 @@ class CollectStockHistoricalEstimationInfo:
                     stock_info_dict = {stock_code: stock_info}
                     # 调取理杏仁接口，获取单个股票一段时间范围内，该股票估值数据, 并储存
                     self.collect_a_period_time_estimation(stock_code, stock_info_dict, self.estimation_start_date,
-                                                          self.today,
+                                                          today_date,
                                                           exchange_location_mic)
                 # 日志记录
-                msg = "数据库中的估值数据为空，已经收集了所有标的股票从 " + self.estimation_start_date + " 至 " + str(self.today) + " 的估值数据"
+                msg = "数据库中的估值数据为空，已经收集了所有标的股票从 " + self.estimation_start_date + " 至 " + str(today_date) + " 的估值数据"
                 custom_logger.CustomLogger().log_writter(msg, 'info')
 
             else:
@@ -617,12 +618,12 @@ class CollectStockHistoricalEstimationInfo:
 
                         # 日志记录
                         msg = "有新增的标的股票" + str(stock_info) + "  需要收集从 " + self.estimation_start_date + " 至 " + str(
-                            self.today) + " 的估值数据"
+                            today_date) + " 的估值数据"
                         custom_logger.CustomLogger().log_writter(msg, 'info')
 
                         # 调取理杏仁接口，获取单个股票一段时间范围内，该股票估值数据, 并储存
                         self.collect_a_period_time_estimation(stock_code, stock_info_dict, self.estimation_start_date,
-                                                              self.today, exchange_location_mic)
+                                                              today_date, exchange_location_mic)
 
                 # 某个交易所，获取数据库中已有的, 且也是那些需要被跟踪的股票的个数
                 saved_stocks_info_counter = self.the_stocks_that_already_in_db_counter(exchange_location_mic,

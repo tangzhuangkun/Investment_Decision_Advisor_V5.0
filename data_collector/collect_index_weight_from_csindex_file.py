@@ -18,8 +18,6 @@ class CollectIndexWeightFromCSIndexFile:
     # 从中证官网获取指数成分股及权重文件，并收集信息
 
     def __init__(self):
-        # 当天的日期
-        self.today = time.strftime("%Y-%m-%d", time.localtime())
         # 权重文件存放路径
         self.index_weight_samples_path = os.path.abspath(os.path.join(os.getcwd(), "../.."))+"/index_weight_samples/"
 
@@ -35,6 +33,9 @@ class CollectIndexWeightFromCSIndexFile:
 
         # 地址模板
         interface_address = 'https://csi-web-dev.oss-cn-shanghai-finance-1-pub.aliyuncs.com/static/html/csindex/public/uploads/file/autofile/closeweight/'+index_code+'closeweight.xls'
+
+        # 当天的日期
+        today_date = time.strftime("%Y-%m-%d", time.localtime())
 
         '''
         herder = {
@@ -65,7 +66,7 @@ class CollectIndexWeightFromCSIndexFile:
             file_data = requests.get(interface_address, headers=header, proxies=proxy, verify=False, stream=False,
                                     timeout=10)
             # open打开excel文件，报存为后缀为xls的文件
-            fp = open(self.index_weight_samples_path+index_code+"_"+index_name+"_"+self.today+".xls", "wb")
+            fp = open(self.index_weight_samples_path+index_code+"_"+index_name+"_"+today_date+".xls", "wb")
             fp.write(file_data.content)
             fp.close()
             # 获取锁，用于线程同步
@@ -203,6 +204,9 @@ class CollectIndexWeightFromCSIndexFile:
         # 返回 预计被下载的并生成的文件名称列表
         # 如 ['399997_中证白酒指数_2021-12-18.xls', '000932_中证主要消费_2021-12-18.xls', '399965_中证800地产_2021-12-18.xls', '399986_中证银行指数_2021-12-18.xls', '000036_上证主要消费行业指数_2021-12-18.xls']
 
+        # 当天的日期
+        today_date = time.strftime("%Y-%m-%d", time.localtime())
+
         # 预计被下载的并生成的文件名称列表
         # 如 ['399997_中证白酒指数_2021-12-18.xls', '000932_中证主要消费_2021-12-18.xls', '399965_中证800地产_2021-12-18.xls', '399986_中证银行指数_2021-12-18.xls', '000036_上证主要消费行业指数_2021-12-18.xls']
         expected_file_name_list = []
@@ -212,7 +216,7 @@ class CollectIndexWeightFromCSIndexFile:
         target_cs_index_dict = self.get_cs_index_from_index_target()
         for index_code in target_cs_index_dict:
             index_name = target_cs_index_dict[index_code]
-            expected_file_name_list.append(index_code+"_"+index_name+"_"+self.today+'.xls')
+            expected_file_name_list.append(index_code+"_"+index_name+"_"+today_date+'.xls')
         return expected_file_name_list
 
     def read_single_file_content(self, file_name):

@@ -338,3 +338,26 @@ index_code	index_name	trading_date	pe	row_num	total_record	percent_num
 000300	沪深300	2022-10-31	10.28601833898130200	1	857	0
 
 """
+
+
+
+"""
+-- 基于当前构成，某个指数，过去x年，每一天，有效PE_TTM的值，有效权重，真实pe_ttm, 排行，百分位
+select historical_date as p_day, pe_ttm, pe_ttm_effective_weight, (pe_ttm*100/pe_ttm_effective_weight) as full_pe_ttm,
+row_number() OVER (partition by index_code ORDER BY (pe_ttm*100/pe_ttm_effective_weight) asc) AS row_num,  
+percent_rank() OVER (partition by index_code ORDER BY (pe_ttm*100/pe_ttm_effective_weight) asc) AS percent_num
+from aggregated_data.index_components_historical_estimations
+where index_code = '399997'
+and historical_date  > SUBDATE('2023-06-30',INTERVAL 3 YEAR)
+and historical_date <= '2023-06-30';
+
+p_day	pe_ttm	pe_ttm_effective_weight	full_pe_ttm	row_num	percent_num
+2022-10-31	25.22863	95.54101	26.406074208	1	0
+2022-10-28	25.80334	95.54101	27.007606472	2	0.0013736263736263737
+2022-10-27	26.41283	95.54101	27.645541951	3	0.0027472527472527475
+2023-06-30	26.52678	95.54101	27.764810106	4	0.004120879120879121
+2023-06-07	26.68922	95.54101	27.934831336	5	0.005494505494505495
+2023-06-29	26.75985	95.54101	28.008757705	6	0.006868131868131868
+2023-06-09	26.81935	95.54101	28.071034627	7	0.008241758241758242
+2023-06-08	26.96818	95.54101	28.226810665	8	0.009615384615384616
+"""

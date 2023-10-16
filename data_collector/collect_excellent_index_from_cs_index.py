@@ -38,7 +38,7 @@ class CollectExcellentIndexFromCSIndex:
         # 每个区块执行的时间
         self.sleep_time = 7
         # 链接超时时间限制
-        self.timeout_limit = 2
+        self.timeout_limit = 5
 
 
     """

@@ -39,7 +39,7 @@ class CollectExcellentIndexFromCNIndex:
         # 每个区块执行的时间
         self.sleep_time = 7
         # 链接超时时间限制
-        self.timeout_limit = 2
+        self.timeout_limit = 5
 
     def parse_interface_to_get_index_code_content(self, header, proxy):
         '''

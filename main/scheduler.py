@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # author: Tang Zhuangkun
-
+import pytz
 from apscheduler.schedulers.blocking import BlockingScheduler
 import sys
 sys.path.append('..')
@@ -31,7 +31,7 @@ class Scheduler:
 
 	def schedule_plan(self):
 		# 调度器，根据时间安排工作
-		scheduler = BlockingScheduler()
+		scheduler = BlockingScheduler(timezone=pytz.timezone("Asia/Shanghai"))
 
 		#####################      每天运行    ###################################################
 

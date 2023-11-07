@@ -126,8 +126,8 @@ class NotificationPlanAfterTrading:
 if __name__ == '__main__':
     time_start = time.time()
     go = NotificationPlanAfterTrading()
-    go.stock_bond_yield_strategy_estimation_notification()
-    #go.index_strategy_estimation_notification()
+    #go.stock_bond_yield_strategy_estimation_notification()
+    go.index_strategy_estimation_notification()
     #go.stock_strategy_estimation_notification()
     time_end = time.time()
     print(time_end - time_start)

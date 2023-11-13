@@ -20,10 +20,10 @@ class GenerateSaveUserAgent:
 
 		for i in range(2000):
 			# 解决总是报 fake_useragent.errors.FakeUserAgentError: Maximum amount of retries reached 问题
-			location = os.getcwd() + '/fake_useragent_0.1.11.json'
+			#location = os.getcwd() + '/fake_useragent_0.1.11.json'
 
 			# 随机生成UA
-			ua = fake_useragent.UserAgent(path=location).random
+			ua = fake_useragent.UserAgent().random
 			# 插入数据库
 			fake_user_agent_mapper.FakeUserAgentMapper().insert_new_ua(ua)
 		

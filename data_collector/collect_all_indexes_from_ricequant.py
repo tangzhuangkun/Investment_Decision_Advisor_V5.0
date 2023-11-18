@@ -61,7 +61,6 @@ class CollectAllIndexesFromRiceQuant:
 
     def main(self):
         page_info_list = self.parse_page_info()
-        print(page_info_list)
         self.save_info_into_db(page_info_list)
 
 if __name__ == '__main__':

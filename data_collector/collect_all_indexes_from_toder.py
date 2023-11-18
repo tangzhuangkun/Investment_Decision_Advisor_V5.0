@@ -23,7 +23,7 @@ class CollectAllIndexesFromToder:
     爬取并解析拓观网的指数列表某一页面
     :param, page_num: 页码, 默认为1
     """
-    def parse_toder_page_info(self, page_num=1):
+    def parse_page_info(self, page_num=1):
         # 页面信息指数列表
         page_info_list = list()
         response = urllib.request.urlopen(self.toder_url+str(page_num))
@@ -58,12 +58,12 @@ class CollectAllIndexesFromToder:
             index_name = item.get('index_name')
             securities_num = item.get('securities_num')
             issuer = item.get('issuer')
-            fin_data_indexes_list_mapper.FinDataIndexesListMapper().insert_all_indexes(index_code, index_name, securities_num, issuer, self.data_source)
+            fin_data_indexes_list_mapper.FinDataIndexesListMapper().insert_all_indexes(index_code, index_name, issuer, self.data_source, securities_num)
 
     """
     收集所有页面的指数信息
     """
-    def collect_all_pages_info(self):
+    def main(self):
         # 从第一页开始
         page_num = 1
         # 标志位，该页是否有内容
@@ -71,7 +71,7 @@ class CollectAllIndexesFromToder:
         # 如果该页有内容，则继续收集下一页
         while (hasPageContentFlag):
             # 获取页面信息
-            page_info_list = self.parse_toder_page_info(page_num)
+            page_info_list = self.parse_page_info(page_num)
             # 储存该页信息
             self.save_info_into_db(page_info_list)
             # 如果该页存在内容
@@ -87,6 +87,6 @@ class CollectAllIndexesFromToder:
 if __name__ == '__main__':
     time_start = time.time()
     go = CollectAllIndexesFromToder()
-    go.collect_all_pages_info()
+    go.main()
     time_end = time.time()
     print('Time Cost: ' + str(time_end - time_start))

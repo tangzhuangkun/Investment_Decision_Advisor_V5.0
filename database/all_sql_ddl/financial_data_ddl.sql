@@ -259,12 +259,13 @@ DROP TABLE IF EXISTS `fin_data_indexes_list`;
 CREATE TABLE IF NOT EXISTS `fin_data_indexes_list`(
 	`id` MEDIUMINT NOT NULL AUTO_INCREMENT,
 	`index_code` VARCHAR(12) NOT NULL COMMENT '指数代码',
-	`index_name` VARCHAR(50) NOT NULL COMMENT '指数名称',
+    `index_name` VARCHAR(50) NOT NULL COMMENT '指数名称(全称)',
+	`index_name_init` VARCHAR(50) DEFAULT NULL COMMENT '指数名称(简称)',
 	`securities_num` INT DEFAULT NULL COMMENT '成分股个数',
 	`issuer` VARCHAR(20) NOT NULL COMMENT '发行人',
     `source` VARCHAR(20) NOT NULL COMMENT '数据源',
 	`submission_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '提交时间',
-	UNIQUE INDEX (index_code),
+	UNIQUE INDEX (`index_code`, `source`),
 	PRIMARY KEY ( `id` )
 	)ENGINE=InnoDB DEFAULT CHARSET=utf8
 COMMENT '指数代码，名称，成分股个数，指数发行人';

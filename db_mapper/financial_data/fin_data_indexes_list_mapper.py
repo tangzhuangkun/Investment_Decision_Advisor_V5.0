@@ -27,8 +27,8 @@ class FinDataIndexesListMapper:
     :param, source, 数据来源
     """
 
-    def insert_all_indexes(self, index_code, index_name, securities_num, issuer, source):
+    def insert_all_indexes(self, index_code, index_name, issuer, source, securities_num=None, index_name_init=None):
         # 插入的SQL
-        inserting_sql = ("INSERT IGNORE INTO fin_data_indexes_list(index_code, index_name, securities_num, issuer, source) "
-                         "VALUES ('%s','%s','%s','%s','%s')") % ( index_code, index_name, securities_num, issuer, source)
+        inserting_sql = ("INSERT IGNORE INTO fin_data_indexes_list(index_code, index_name, index_name_init, securities_num, issuer, source) "
+                         "VALUES ('%s','%s','%s','%s','%s','%s')") % ( index_code, index_name, index_name_init, securities_num, issuer, source)
         db_operator.DBOperator().operate("insert", "financial_data", inserting_sql)

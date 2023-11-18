@@ -246,3 +246,25 @@ CREATE TABLE IF NOT EXISTS `index_excellent_performance_indices_di`(
 	PRIMARY KEY ( `id` )
 	)ENGINE=InnoDB DEFAULT CHARSET=utf8
 COMMENT '表现优异的指数及其跟踪基金';
+
+
+
+
+/* --------- user：investor1 ------ */
+/* --------- db：financial_data ------ */
+/*创建一个表，fin_data_indexes_list，用于存储 指数代码，名称，成分股个数，指数发行人，数据源*/
+
+USE financial_data;
+DROP TABLE IF EXISTS `fin_data_indexes_list`;
+CREATE TABLE IF NOT EXISTS `fin_data_indexes_list`(
+	`id` MEDIUMINT NOT NULL AUTO_INCREMENT,
+	`index_code` VARCHAR(12) NOT NULL COMMENT '指数代码',
+	`index_name` VARCHAR(50) NOT NULL COMMENT '指数名称',
+	`securities_num` INT DEFAULT NULL COMMENT '成分股个数',
+	`issuer` VARCHAR(20) NOT NULL COMMENT '发行人',
+    `source` VARCHAR(20) NOT NULL COMMENT '数据源',
+	`submission_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '提交时间',
+	UNIQUE INDEX (index_code),
+	PRIMARY KEY ( `id` )
+	)ENGINE=InnoDB DEFAULT CHARSET=utf8
+COMMENT '指数代码，名称，成分股个数，指数发行人';

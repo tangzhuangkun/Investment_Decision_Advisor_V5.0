@@ -59,7 +59,7 @@ class FinDataIndexesListMapper:
     :param, compare_len， 对比的指数名称字符长度
     :param, compare_len_init， 对比的指数缩写名称字符长度
     :return
-    index_code	index_name	index_name_init	issuer	index_code_sim	index_name_sim	index_name_init_sim	issuer_sim
+    index_code	index_name	index_name_init	issuer	index_code_tr	index_name_tr	index_name_init_tr	issuer_tr
     000050	上证50等权重指数	50等权	XSHG	H00050	上证50等权重全收益指数	50等权全收益	INDX
     000052	上证50基本面加权指数	50基本	XSHG	H00052	上证50基本面加权全收益指数	50基本全收益	INDX
     000053	上证180基本面加权指数	180基本	XSHG	H00053	上证180基本面加权全收益指数	180基本全收益	INDX
@@ -69,8 +69,8 @@ class FinDataIndexesListMapper:
     """
     def select_similar_total_return_index(self, source, compare_len, compare_len_init):
         select_sql = ("select t1.index_code, t1.index_name, t1.index_name_init, t1.issuer, "
-                      "t2.index_code as index_code_sim, t2.index_name as index_name_sim, t2.index_name_init as index_name_init_sim, "
-                      "t2.issuer as issuer_sim from (select index_code, index_name, index_name_init, issuer, "
+                      "t2.index_code as index_code_tr, t2.index_name as index_name_tr, t2.index_name_init as index_name_init_tr, "
+                      "t2.issuer as issuer_tr from (select index_code, index_name, index_name_init, issuer, "
                       "source from fin_data_indexes_list where source = '%s' and index_name not like '%%全收益%%' "
                       "and index_name not like '%%美元%%' and index_name not like '%%港币%%' "
                       "and index_name not like '%%港元%%' and index_name not like '%%台币%%' "

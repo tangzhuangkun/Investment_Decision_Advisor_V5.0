@@ -57,8 +57,8 @@ class CalculateIndexSimilarTotalReturnIndexes:
         fin_data_total_return_indexes_list_mapper.FinDataTotalReturnIndexesListMapper().delete_specific_source_record(self.data_source)
 
         # 获取相似指数名称列表
-        # 如 [{'index_code': '000050', 'index_name': '上证50等权重指数', 'index_name_init': '50等权', 'issuer': 'XSHG', 'index_code_sim': 'H00050', 'index_name_sim': '上证50等权重全收益指数', 'index_name_init_sim': '50等权全收益', 'issuer_sim': 'INDX'},
-        # {'index_code': '000052', 'index_name': '上证50基本面加权指数', 'index_name_init': '50基本', 'issuer': 'XSHG', 'index_code_sim': 'H00052', 'index_name_sim': '上证50基本面加权全收益指数', 'index_name_init_sim': '50基本全收益', 'issuer_sim': 'INDX'},,,,]
+        # 如 [{'index_code': '000050', 'index_name': '上证50等权重指数', 'index_name_init': '50等权', 'issuer': 'XSHG', 'index_code_tr': 'H00050', 'index_name_tr': '上证50等权重全收益指数', 'index_name_init_tr': '50等权全收益', 'issuer_tr': 'INDX'},
+        # {'index_code': '000052', 'index_name': '上证50基本面加权指数', 'index_name_init': '50基本', 'issuer': 'XSHG', 'index_code_tr': 'H00052', 'index_name_tr': '上证50基本面加权全收益指数', 'index_name_init_tr': '50基本全收益', 'issuer_tr': 'INDX'},,,,]
         similar_index_list = fin_data_indexes_list_mapper.FinDataIndexesListMapper().select_similar_total_return_index(self.data_source, self.compare_len, self.compare_len_init)
         for unit in similar_index_list:
             # 指数代码
@@ -72,16 +72,16 @@ class CalculateIndexSimilarTotalReturnIndexes:
             # 数据源
             source = self.data_source
             # 相似相关指数代码
-            index_code_sim = unit['index_code_sim']
+            index_code_tr = unit['index_code_tr']
             # 相似相关指数名称
-            index_name_sim = unit['index_name_sim']
+            index_name_tr = unit['index_name_tr']
             # 相似相关指数名称简称
-            index_name_init_sim  = unit['index_name_init_sim']
+            index_name_init_tr  = unit['index_name_init_tr']
             # 相似相关指数发行人
-            issuer_sim = unit['issuer_sim']
-            source_sim = self.data_source
+            issuer_tr = unit['issuer_tr']
+            source_tr = self.data_source
             # 存入数据库
-            fin_data_total_return_indexes_list_mapper.FinDataTotalReturnIndexesListMapper().insert_sim_total_return_data(index_code, index_name, index_name_init, issuer, source, index_code_sim, index_name_sim, index_name_init_sim, issuer_sim, source_sim)
+            fin_data_total_return_indexes_list_mapper.FinDataTotalReturnIndexesListMapper().insert_tr_total_return_data(index_code, index_name, index_name_init, issuer, source, index_code_tr, index_name_tr, index_name_init_tr, issuer_tr, source_tr)
 
         # 日志记录
         msg = " 计算挖掘并储存 指数相关的全收益指数"

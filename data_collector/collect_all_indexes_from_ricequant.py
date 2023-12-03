@@ -3,8 +3,8 @@
 # author: Tang Zhuangkun
 import time
 import requests
-import json
 from bs4 import BeautifulSoup
+import log.custom_logger as custom_logger
 
 import sys
 sys.path.append("..")
@@ -60,8 +60,15 @@ class CollectAllIndexesFromRiceQuant:
             fin_data_indexes_list_mapper.FinDataIndexesListMapper().insert_all_indexes(index_code, index_name, issuer, self.data_source, index_name_init=index_name_init)
 
     def main(self):
+        # 收集数据前，先清除数据库中同一源的数据记录，避免重复
+        fin_data_indexes_list_mapper.FinDataIndexesListMapper().delete_specific_source_record(self.data_source)
+        # 爬取数据
         page_info_list = self.parse_page_info()
+        # 存储爬取的数据
         self.save_info_into_db(page_info_list)
+        # 日志记录
+        msg = " 从米筐" + self.ricequant_url + '  ' + "获取指数列表"
+        custom_logger.CustomLogger().log_writter(msg, lev='info')
 
 if __name__ == '__main__':
     time_start = time.time()

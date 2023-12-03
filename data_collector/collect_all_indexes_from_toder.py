@@ -4,6 +4,7 @@
 import time
 import urllib.request
 import json
+import log.custom_logger as custom_logger
 
 import sys
 sys.path.append("..")
@@ -64,6 +65,8 @@ class CollectAllIndexesFromToder:
     收集所有页面的指数信息
     """
     def main(self):
+        # 收集数据前，先清除数据库中同一源的数据记录，避免重复
+        fin_data_indexes_list_mapper.FinDataIndexesListMapper().delete_specific_source_record(self.data_source)
         # 从第一页开始
         page_num = 1
         # 标志位，该页是否有内容
@@ -80,6 +83,9 @@ class CollectAllIndexesFromToder:
             # 如果该页无内容
             else:
                 hasPageContentFlag = False
+        # 日志记录
+        msg = " 从拓观网" + self.toder_url + '  ' + "获取指数列表"
+        custom_logger.CustomLogger().log_writter(msg, lev='info')
 
 
 

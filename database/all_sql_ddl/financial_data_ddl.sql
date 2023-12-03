@@ -259,8 +259,8 @@ DROP TABLE IF EXISTS `fin_data_indexes_list`;
 CREATE TABLE IF NOT EXISTS `fin_data_indexes_list`(
 	`id` MEDIUMINT NOT NULL AUTO_INCREMENT,
 	`index_code` VARCHAR(12) NOT NULL COMMENT '指数代码',
-    `index_name` VARCHAR(50) NOT NULL COMMENT '指数名称(全称)',
-	`index_name_init` VARCHAR(50) DEFAULT NULL COMMENT '指数名称(简称)',
+    `index_name` VARCHAR(128) NOT NULL COMMENT '指数名称(全称)',
+	`index_name_init` VARCHAR(128) DEFAULT NULL COMMENT '指数名称(简称)',
 	`securities_num` INT DEFAULT NULL COMMENT '成分股个数',
 	`issuer` VARCHAR(20) NOT NULL COMMENT '发行人',
     `source` VARCHAR(20) NOT NULL COMMENT '数据源',
@@ -269,3 +269,31 @@ CREATE TABLE IF NOT EXISTS `fin_data_indexes_list`(
 	PRIMARY KEY ( `id` )
 	)ENGINE=InnoDB DEFAULT CHARSET=utf8
 COMMENT '指数代码，名称，成分股个数，指数发行人';
+
+
+
+
+
+/* --------- user：investor1 ------ */
+/* --------- db：financial_data ------ */
+/*创建一个表，fin_data_total_return_indexes_list，用于存储 指数及其可能对应的全收益指数代码，名称，成分股个数，指数发行人，数据源*/
+
+USE financial_data;
+DROP TABLE IF EXISTS `fin_data_total_return_indexes_list`;
+CREATE TABLE IF NOT EXISTS `fin_data_total_return_indexes_list`(
+	`id` MEDIUMINT NOT NULL AUTO_INCREMENT,
+	`index_code` VARCHAR(12) NOT NULL COMMENT '指数代码',
+    `index_name` VARCHAR(128) NOT NULL COMMENT '指数名称(全称)',
+	`index_name_init` VARCHAR(128) DEFAULT NULL COMMENT '指数名称(简称)',
+	`issuer` VARCHAR(20) NOT NULL COMMENT '发行人',
+    `source` VARCHAR(20) NOT NULL COMMENT '数据源',
+    `index_code_sim` VARCHAR(12) NOT NULL COMMENT '相似指数代码',
+    `index_name_sim` VARCHAR(128) NOT NULL COMMENT '相似指数名称(全称)',
+	`index_name_init_sim` VARCHAR(128) DEFAULT NULL COMMENT '指数名称(简称)',
+	`issuer_sim` VARCHAR(20) NOT NULL COMMENT '发行人',
+    `source_sim` VARCHAR(20) NOT NULL COMMENT '数据源',
+	`submission_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '提交时间',
+	UNIQUE INDEX (`index_code`, `source`, `index_code_sim`, `source_sim`),
+	PRIMARY KEY ( `id` )
+	)ENGINE=InnoDB DEFAULT CHARSET=utf8
+COMMENT '指数及其可能对应的全收益指数代码，名称，成分股个数，指数发行人，数据源';

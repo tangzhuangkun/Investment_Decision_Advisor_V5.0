@@ -7,6 +7,7 @@ import requests
 import json
 import threading
 import random
+import decimal
 
 import sys
 sys.path.append("..")
@@ -22,22 +23,21 @@ import db_mapper.financial_data.fin_data_total_return_indexes_list_mapper as fin
 均存入数据库
 """
 
-class CollectExcellentIndexFromCSIndex:
+class CollectExcellentIndexFromCSIndexSingleThread:
 
     def __init__(self):
 
         # 衡量标准
         # 3年年化收益率
-        self.three_year_yield_rate_standard = 10
+        self.three_year_yield_rate_standard = 5
         # 5年年化收益率
-        self.five_year_yield_rate_standard = 15
+        self.five_year_yield_rate_standard = 5
         # 最大线程数
         self.max_thread_num = 15
         # 同时获取x个IP和5x个UA
-        # TODO 改为5
-        self.IP_UA_num = 1
+        self.IP_UA_num = 3
         # 将中证所有指数代码分成多个区块，每个区块最多拥有多少个指数代码
-        self.max_index_codes = 30
+        self.max_index_codes = 20
         # 每个区块执行的时间
         self.sleep_time = 7
         # 链接超时时间限制
@@ -193,6 +193,8 @@ class CollectExcellentIndexFromCSIndex:
                 five_year_yield_rate_re = float(data_json["fiveYear"])
             index_performance_dict["five_year_yield_rate_re"] = five_year_yield_rate_re
 
+            return index_performance_dict
+
         except Exception as e:
             # 日志记录
             msg = "从中证官网接口" + interface_url + '  ' + "获取指数过去表现 " + str(e) + " 即将重试"
@@ -201,7 +203,7 @@ class CollectExcellentIndexFromCSIndex:
             return self.parse_index_yield_performance(index_code, index_performance_dict, header, proxy)
 
 
-    def parse_and_check_whether_an_excellent_index(self,index_code_pair, satisfied_index_list, threadLock, same_time_threading, header, proxy):
+    def parse_and_check_whether_an_excellent_index(self,index_code_pair, header, proxy):
         '''
         解析判断是否为符合要求的优秀指数
         解析接口内容，获取单个指数过去几年的表现
@@ -254,13 +256,13 @@ class CollectExcellentIndexFromCSIndex:
             raw_data = json.loads(raw_page)
             # 判断接口是否调用成功
             if (not raw_data["success"]):
-                same_time_threading.release()
+                #same_time_threading.release()
                 return
 
             # 获取data数据
             data_json = raw_data["data"]
             if(data_json==None):
-                same_time_threading.release()
+                #same_time_threading.release()
                 return
 
             index_name = data_json["indexNameCn"]
@@ -299,11 +301,11 @@ class CollectExcellentIndexFromCSIndex:
 
             # 如果3年年化收益率 或 5年年化收益率 满足需求
             if (three_year_yield_rate > self.three_year_yield_rate_standard) or (five_year_yield_rate > self.five_year_yield_rate_standard):
-                # 通过常规指数代码获取跟踪这个指数的基金
+                # 获取跟踪这个指数的基金
                 relative_funds_list = self.get_satisfied_index_relative_funds(index_code_re)
                 # 如果没有跟踪的指数基金，则没有跟进的意义，放弃
                 if(len(relative_funds_list)==0):
-                    same_time_threading.release()
+                    #same_time_threading.release()
                     return
                 # 如果有跟踪指数基金，才有收集跟进的意义
                 else:
@@ -312,24 +314,17 @@ class CollectExcellentIndexFromCSIndex:
                     # 如果当前采集的是全收益指数情况
                     if index_performance_dict["type"] == "total_return_index":
                         # 则需要收集常规指数的情况
-                        self.parse_index_yield_performance(index_code_pair[0], index_performance_dict, header, proxy)
-
-                    # 获取锁，用于线程同步
-                    threadLock.acquire()
-                    satisfied_index_list.append(index_performance_dict)
-                    # 释放锁，开启下一个线程
-                    threadLock.release()
-
-            same_time_threading.release()
+                        index_performance_dict = self.parse_index_yield_performance(index_code_pair[0], index_performance_dict, header, proxy)
+                    return index_performance_dict
 
         except Exception as e:
             # 日志记录
             msg = "从中证官网接口" + interface_url + '  ' + "获取指数过去表现 " + str(e)+ " 即将重试"
             custom_logger.CustomLogger().log_writter(msg, lev='warning')
             # 返回解析页面得到的股票指标
-            return self.call_interface_to_get_single_index_past_performance(index_code, satisfied_index_list, threadLock, same_time_threading)
+            return self.call_interface_to_get_single_index_past_performance(index_code)
 
-    def call_interface_to_get_single_index_past_performance(self, index_code_pair, satisfied_index_list, threadLock, same_time_threading):
+    def call_interface_to_get_single_index_past_performance(self, index_code_pair):
 
         '''
         调用接口获取指数过去几年的表现
@@ -349,7 +344,7 @@ class CollectExcellentIndexFromCSIndex:
                  "https": 'https://{}:{}@{}'.format(conf.proxyIPUsername, conf.proxyIPPassword,
                                                     self.ip_address_dict_list[pick_an_int]['ip_address'])}
 
-        return self.parse_and_check_whether_an_excellent_index(index_code_pair, satisfied_index_list, threadLock, same_time_threading, header, proxy)
+        return self.parse_and_check_whether_an_excellent_index(index_code_pair, header, proxy)
 
     def check_all_index_and_get_all_excellent_index(self):
         '''
@@ -361,6 +356,7 @@ class CollectExcellentIndexFromCSIndex:
         # 获取所有指数代码列表, [ (指数代码, 全收益指数代码)]
         #     如 [('000979', 'H00979'), ('000984', 'H00984'), ('930927', None), ,,,]
         index_code_list = self.call_interface_to_get_all_index_code_name_from_cs_index()
+
         # 满足条件的指数
         satisfied_index_list = []
 
@@ -378,19 +374,10 @@ class CollectExcellentIndexFromCSIndex:
             self.ip_address_dict_list, self.ua_dict_list = disguise.Disguise().get_multi_IP_UA(self.IP_UA_num)
             # (指数代码, 全收益指数代码)
             for index_code_pair in splitted_list:
-                same_time_threading.acquire()
                 # 启动线程
-                threading.Thread(target=self.call_interface_to_get_single_index_past_performance,
-                                                  kwargs={"index_code_pair": index_code_pair,
-                                                          "satisfied_index_list": satisfied_index_list,
-                                                          "threadLock": threadLock,
-                                                          "same_time_threading":same_time_threading
-                                                          }).start()
-
-            # 每个区块，50个指数，有x秒的时间执行，
-            # x秒之后，如果还未成功获取数据的，可能代理IP已被网站屏蔽，未获取到数据的指数亦可放弃
-            # x秒之后，启动下一个区块的数据抓取工作
-            time.sleep(self.sleep_time)
+                index_performance_dict = self.call_interface_to_get_single_index_past_performance(index_code_pair)
+                if index_performance_dict != None:
+                    satisfied_index_list.append(index_performance_dict)
 
         return satisfied_index_list
 
@@ -660,7 +647,7 @@ class CollectExcellentIndexFromCSIndex:
 
 if __name__ == '__main__':
     time_start = time.time()
-    go = CollectExcellentIndexFromCSIndex()
+    go = CollectExcellentIndexFromCSIndexSingleThread()
     go.main()
     #result = go.get_index_and_total_return_index_dict()
     #result = go.call_interface_to_get_all_index_code_name_from_cs_index()

@@ -3,7 +3,7 @@
 # author: Tang Zhuangkun
 
 
-import time
+import decimal
 
 import sys
 sys.path.append("..")
@@ -67,8 +67,8 @@ class IndexExcellentPerformanceIndicesDiMapper:
     """
     def insert_regular_and_total_return_excellent_indexes(self, index_code, index_name, index_company, one_month_yield_rate, three_month_yield_rate, this_year_yield_rate, one_year_yield_rate, three_year_yield_rate, five_year_yield_rate, index_code_tr, index_name_tr, one_month_yield_rate_tr, three_month_yield_rate_tr, this_year_yield_rate_tr, one_year_yield_rate_tr, three_year_yield_rate_tr, five_year_yield_rate_tr, relative_fund_code, relative_fund_name, p_day):
         # 插入的SQL
-        inserting_sql = "INSERT INTO index_excellent_performance_indices_di(index_code, index_name, index_company, one_month_yield_rate, three_month_yield_rate, this_year_yield_rate, one_year_yield_rate, three_year_yield_rate,five_year_yield_rate, index_code_tr, index_name_tr, one_month_yield_rate_tr, three_month_yield_rate_tr, this_year_yield_rate_tr, one_year_yield_rate_tr, three_year_yield_rate_tr, five_year_yield_rate_tr,relative_fund_code, relative_fund_name,p_day)" \
+        inserting_sql = "INSERT INTO index_excellent_performance_indices_di(index_code, index_name, index_company, one_month_yield_rate, three_month_yield_rate, this_year_yield_rate, one_year_yield_rate, three_year_yield_rate,five_year_yield_rate, index_code_tr, index_name_tr, one_month_yield_rate_tr, three_month_yield_rate_tr, this_year_yield_rate_tr, one_year_yield_rate_tr, three_year_yield_rate_tr, five_year_yield_rate_tr,relative_fund_code, relative_fund_name, p_day)" \
                         "VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')" % (
                             index_code, index_name, index_company, one_month_yield_rate, three_month_yield_rate, this_year_yield_rate, one_year_yield_rate, three_year_yield_rate, five_year_yield_rate,
-                            relative_fund_code, index_code_tr, index_name_tr, one_month_yield_rate_tr, three_month_yield_rate_tr, this_year_yield_rate_tr, one_year_yield_rate_tr, three_year_yield_rate_tr, five_year_yield_rate_tr,relative_fund_name, p_day)
+                            index_code_tr, index_name_tr, one_month_yield_rate_tr, three_month_yield_rate_tr, this_year_yield_rate_tr, one_year_yield_rate_tr, three_year_yield_rate_tr, five_year_yield_rate_tr,relative_fund_code, relative_fund_name, p_day)
         db_operator.DBOperator().operate("insert", "financial_data", inserting_sql)

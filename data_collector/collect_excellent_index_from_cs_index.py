@@ -17,7 +17,7 @@ import db_mapper.financial_data.index_excellent_performance_indices_di_mapper as
 import db_mapper.financial_data.fin_data_total_return_indexes_list_mapper as fin_data_total_return_indexes_list_mapper
 
 """
-从中证指数官网接口收集过去几年表现优异的指数
+从中证指数官网接口收集过去几年表现优异的指数，多线程
 3年年化收益率 或 5年年化收益率 满足要求
 均存入数据库
 """
@@ -28,14 +28,13 @@ class CollectExcellentIndexFromCSIndex:
 
         # 衡量标准
         # 3年年化收益率
-        self.three_year_yield_rate_standard = 10
+        self.three_year_yield_rate_standard = 8
         # 5年年化收益率
-        self.five_year_yield_rate_standard = 15
+        self.five_year_yield_rate_standard = 10
         # 最大线程数
         self.max_thread_num = 15
         # 同时获取x个IP和5x个UA
-        # TODO 改为5
-        self.IP_UA_num = 1
+        self.IP_UA_num = 3
         # 将中证所有指数代码分成多个区块，每个区块最多拥有多少个指数代码
         self.max_index_codes = 30
         # 每个区块执行的时间

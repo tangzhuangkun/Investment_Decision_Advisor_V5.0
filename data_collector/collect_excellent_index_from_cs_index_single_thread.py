@@ -7,7 +7,6 @@ import requests
 import json
 import threading
 import random
-import decimal
 
 import sys
 sys.path.append("..")
@@ -18,7 +17,7 @@ import db_mapper.financial_data.index_excellent_performance_indices_di_mapper as
 import db_mapper.financial_data.fin_data_total_return_indexes_list_mapper as fin_data_total_return_indexes_list_mapper
 
 """
-从中证指数官网接口收集过去几年表现优异的指数
+从中证指数官网接口收集过去几年表现优异的指数, 单线程
 3年年化收益率 或 5年年化收益率 满足要求
 均存入数据库
 """
@@ -29,15 +28,15 @@ class CollectExcellentIndexFromCSIndexSingleThread:
 
         # 衡量标准
         # 3年年化收益率
-        self.three_year_yield_rate_standard = 5
+        self.three_year_yield_rate_standard = 8
         # 5年年化收益率
-        self.five_year_yield_rate_standard = 5
+        self.five_year_yield_rate_standard = 10
         # 最大线程数
         self.max_thread_num = 15
         # 同时获取x个IP和5x个UA
         self.IP_UA_num = 3
         # 将中证所有指数代码分成多个区块，每个区块最多拥有多少个指数代码
-        self.max_index_codes = 20
+        self.max_index_codes = 30
         # 每个区块执行的时间
         self.sleep_time = 7
         # 链接超时时间限制
@@ -355,7 +354,8 @@ class CollectExcellentIndexFromCSIndexSingleThread:
 
         # 获取所有指数代码列表, [ (指数代码, 全收益指数代码)]
         #     如 [('000979', 'H00979'), ('000984', 'H00984'), ('930927', None), ,,,]
-        index_code_list = self.call_interface_to_get_all_index_code_name_from_cs_index()
+        #index_code_list = self.call_interface_to_get_all_index_code_name_from_cs_index()
+        index_code_list = [('930955','H20955'), ('000300', None)]
 
         # 满足条件的指数
         satisfied_index_list = []

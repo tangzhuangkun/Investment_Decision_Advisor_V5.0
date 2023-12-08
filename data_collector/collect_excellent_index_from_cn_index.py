@@ -29,11 +29,11 @@ class CollectExcellentIndexFromCNIndex:
         # 3年年化收益率
         self.three_year_yield_rate_standard = 10
         # 5年年化收益率
-        self.five_year_yield_rate_standard = 15
+        self.five_year_yield_rate_standard = 10
         # 最大线程数
         self.max_thread_num = 15
         # 同时获取x个IP和5x个UA
-        self.IP_UA_num = 5
+        self.IP_UA_num = 3
         # 将中证所有指数代码分成多个区块，每个区块最多拥有多少个指数代码
         self.max_index_codes = 100
         # 每个区块执行的时间
@@ -232,18 +232,35 @@ class CollectExcellentIndexFromCNIndex:
             index_performance_dict["index_name"] = index_name
             index_performance_dict["p_day"] = p_day
 
-            three_year_yield_rate = 0
-            five_year_yield_rate = 0
+            # 获取接口中指数各阶段收益率情况
+            one_month_yield_rate_re = 0
+            three_month_yield_rate_re = 0
+            this_year_yield_rate_re = 0
+            one_year_yield_rate_re = 0
+            three_year_yield_rate_re = 0
+            five_year_yield_rate_re = 0
 
+            if (data_json["perIncome1m"] != "-"):
+                one_month_yield_rate_re = float(data_json["perIncome1m"][:-1])
+            index_performance_dict["one_month_yield_rate_re"] = one_month_yield_rate_re
+            if (data_json["perIncome3m"] != "-"):
+                three_month_yield_rate_re = float(data_json["perIncome3m"][:-1])
+            index_performance_dict["three_month_yield_rate_re"] = three_month_yield_rate_re
+            if (data_json["perIncomeYtd"] != "-"):
+                this_year_yield_rate_re = float(data_json["perIncomeYtd"][:-1])
+            index_performance_dict["this_year_yield_rate_re"] = this_year_yield_rate_re
+            if (data_json["annIncome1y"] != "-"):
+                one_year_yield_rate_re = float(data_json["annIncome1y"][:-1])
+            index_performance_dict["one_year_yield_rate_re"] = one_year_yield_rate_re
             if (data_json["annIncome3y"] != "-"):
-                three_year_yield_rate = float(data_json["annIncome3y"][:-1])
-                index_performance_dict["three_year_yield_rate"] = three_year_yield_rate
+                three_year_yield_rate_re = float(data_json["annIncome3y"][:-1])
+            index_performance_dict["three_year_yield_rate_re"] = three_year_yield_rate_re
             if (data_json["annIncome5y"] != "-"):
-                five_year_yield_rate = float(data_json["annIncome5y"][:-1])
-                index_performance_dict["five_year_yield_rate"] = five_year_yield_rate
+                five_year_yield_rate_re = float(data_json["annIncome5y"][:-1])
+            index_performance_dict["five_year_yield_rate_re"] = five_year_yield_rate_re
 
             # 如果3年年化收益率 和 5年年化收益率 满足需求
-            if (three_year_yield_rate > self.three_year_yield_rate_standard) or (five_year_yield_rate > self.five_year_yield_rate_standard):
+            if (three_year_yield_rate_re > self.three_year_yield_rate_standard) or (five_year_yield_rate_re > self.five_year_yield_rate_standard):
                 # 获取跟踪这个指数的基金
                 relative_funds_list = self.get_satisfied_index_relative_funds(index_code)
                 # 如果没有跟踪的指数基金，则没有跟进的意义，放弃获取相关基金产品失败
@@ -343,10 +360,18 @@ class CollectExcellentIndexFromCNIndex:
             index_code = index_info.get("index_code")
             # 指数名称
             index_name = index_info.get("index_name")
+            # 指数近1月年化收益率
+            one_month_yield_rate_re = index_info.get("one_month_yield_rate_re")
+            # 指数近3月年化收益率
+            three_month_yield_rate_re = index_info.get("three_month_yield_rate_re")
+            # 指数年至今年化收益率
+            this_year_yield_rate_re = index_info.get("this_year_yield_rate_re")
+            # 指数近1年年化收益率
+            one_year_yield_rate_re = index_info.get("one_year_yield_rate_re")
             # 指数近3年年化收益率
-            three_year_yield_rate = index_info.get("three_year_yield_rate")
+            three_year_yield_rate_re = index_info.get("three_year_yield_rate_re")
             # 指数近5年年化收益率
-            five_year_yield_rate = index_info.get("five_year_yield_rate")
+            five_year_yield_rate_re = index_info.get("five_year_yield_rate_re")
             # 业务日期
             p_day =  index_info.get("p_day")
             # 所有关联的跟踪指数基金
@@ -358,18 +383,18 @@ class CollectExcellentIndexFromCNIndex:
                     relative_fund_name = fund.get(relative_fund_code)
                     try:
                         # 将优秀的指数信息及其相关基金产品存入数据库
-                        index_excellent_performance_indices_di_mapper.IndexExcellentPerformanceIndicesDiMapper().insert_excellent_indexes(
-                            index_code, index_name, '国证', three_year_yield_rate, five_year_yield_rate,
+                        index_excellent_performance_indices_di_mapper.IndexExcellentPerformanceIndicesDiMapper().insert_regular_excellent_indexes(
+                            index_code, index_name, '国证', one_month_yield_rate_re, three_month_yield_rate_re, this_year_yield_rate_re, one_year_yield_rate_re, three_year_yield_rate_re, five_year_yield_rate_re,
                             relative_fund_code, relative_fund_name, p_day)
-
-                        # 日志记录
-                        msg = '将从国证官网接口获取的优异指数 ' + p_day + ' '+ index_code + ' '+ index_name + ' 存入数据库成功'
-                        custom_logger.CustomLogger().log_writter(msg, 'info')
 
                     except Exception as e:
                         # 日志记录
                         msg = '将从国证官网接口获取的优异指数' + p_day + ' '+ index_code+ ' ' + index_name + ' 存入数据库时错误  ' + str(e)
                         custom_logger.CustomLogger().log_writter(msg, 'error')
+
+                    # 日志记录
+                    msg = '将从国证官网接口获取的优异指数 ' + p_day + ' ' + index_code + ' ' + index_name + ' 存入数据库成功'
+                    custom_logger.CustomLogger().log_writter(msg, 'info')
 
 
     """

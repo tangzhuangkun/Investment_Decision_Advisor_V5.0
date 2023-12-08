@@ -29,16 +29,19 @@ class IndexExcellentPerformanceIndicesDiMapper:
     :param, one_year_yield_rate, 近1年年化收益率，如 12.73
     :param, three_year_yield_rate, 3年年化收益率，如 12.73
     :param, five_year_yield_rate, 5年年化收益率，如 12.73
+    :param, one_year_volatility, 近1年年化波动率，如 12.73
+    :param, three_year_volatility, 3年年化波动率，如 12.73
+    :param, five_year_volatility, 5年年化波动率，如 12.73
     :param, relative_fund_code, 相关指数基金代码，如 161725
     :param, relative_fund_name, 相关指数基金名称，如 招商中证白酒指数证券投资基金
     :param, p_day
     """
-    def insert_regular_excellent_indexes(self, index_code, index_name, index_company, one_month_yield_rate, three_month_yield_rate, this_year_yield_rate, one_year_yield_rate, three_year_yield_rate, five_year_yield_rate, relative_fund_code, relative_fund_name, p_day):
+    def insert_regular_excellent_indexes(self, index_code, index_name, index_company, one_month_yield_rate, three_month_yield_rate, this_year_yield_rate, one_year_yield_rate, three_year_yield_rate, five_year_yield_rate, one_year_volatility, three_year_volatility, five_year_volatility, relative_fund_code, relative_fund_name, p_day):
         # 插入的SQL
-        inserting_sql = "INSERT INTO index_excellent_performance_indices_di(index_code, index_name, index_company, one_month_yield_rate, three_month_yield_rate, this_year_yield_rate, one_year_yield_rate, three_year_yield_rate,five_year_yield_rate,relative_fund_code, relative_fund_name,p_day)" \
-                        "VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')" % (
+        inserting_sql = "INSERT INTO index_excellent_performance_indices_di(index_code, index_name, index_company, one_month_yield_rate, three_month_yield_rate, this_year_yield_rate, one_year_yield_rate, three_year_yield_rate,five_year_yield_rate, one_year_volatility, three_year_volatility, five_year_volatility, relative_fund_code, relative_fund_name,p_day)" \
+                        "VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')" % (
                             index_code, index_name, index_company, one_month_yield_rate, three_month_yield_rate, this_year_yield_rate, one_year_yield_rate, three_year_yield_rate, five_year_yield_rate,
-                            relative_fund_code, relative_fund_name, p_day)
+                            one_year_volatility, three_year_volatility, five_year_volatility, relative_fund_code, relative_fund_name, p_day)
         db_operator.DBOperator().operate("insert", "financial_data", inserting_sql)
 
 

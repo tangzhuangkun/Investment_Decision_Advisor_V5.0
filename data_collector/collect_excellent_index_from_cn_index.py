@@ -259,6 +259,22 @@ class CollectExcellentIndexFromCNIndex:
                 five_year_yield_rate_re = float(data_json["annIncome5y"][:-1])
             index_performance_dict["five_year_yield_rate_re"] = five_year_yield_rate_re
 
+            # 指数各阶段年化波动率情况
+            one_year_volatility = 0
+            three_year_volatility = 0
+            five_year_volatility = 0
+
+            if (data_json["annVolatility1y"] != "-"):
+                one_year_volatility = float(data_json["annVolatility1y"][:-1])
+            index_performance_dict["one_year_volatility"] = one_year_volatility
+            if (data_json["annVolatility3y"] != "-"):
+                three_year_volatility = float(data_json["annVolatility3y"][:-1])
+            index_performance_dict["three_year_volatility"] = three_year_volatility
+            if (data_json["annVolatility5y"] != "-"):
+                five_year_volatility = float(data_json["annVolatility5y"][:-1])
+            index_performance_dict["five_year_volatility"] = five_year_volatility
+
+
             # 如果3年年化收益率 和 5年年化收益率 满足需求
             if (three_year_yield_rate_re > self.three_year_yield_rate_standard) or (five_year_yield_rate_re > self.five_year_yield_rate_standard):
                 # 获取跟踪这个指数的基金
@@ -372,6 +388,14 @@ class CollectExcellentIndexFromCNIndex:
             three_year_yield_rate_re = index_info.get("three_year_yield_rate_re")
             # 指数近5年年化收益率
             five_year_yield_rate_re = index_info.get("five_year_yield_rate_re")
+            # 指数近1年年化波动率
+            one_year_volatility = index_info.get("one_year_volatility")
+            # 指数近3年年化波动率
+            three_year_volatility = index_info.get("three_year_volatility")
+            # 指数近5年年化波动率
+            five_year_volatility = index_info.get("five_year_volatility")
+
+
             # 业务日期
             p_day =  index_info.get("p_day")
             # 所有关联的跟踪指数基金
@@ -385,7 +409,7 @@ class CollectExcellentIndexFromCNIndex:
                         # 将优秀的指数信息及其相关基金产品存入数据库
                         index_excellent_performance_indices_di_mapper.IndexExcellentPerformanceIndicesDiMapper().insert_regular_excellent_indexes(
                             index_code, index_name, '国证', one_month_yield_rate_re, three_month_yield_rate_re, this_year_yield_rate_re, one_year_yield_rate_re, three_year_yield_rate_re, five_year_yield_rate_re,
-                            relative_fund_code, relative_fund_name, p_day)
+                            one_year_volatility, three_year_volatility, five_year_volatility, relative_fund_code, relative_fund_name, p_day)
 
                     except Exception as e:
                         # 日志记录

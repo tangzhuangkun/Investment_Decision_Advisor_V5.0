@@ -1,4 +1,5 @@
 import pymysql
+from pymysql.constants import CLIENT
 from dbutils.pooled_db import PooledDB
 import conf
 
@@ -37,7 +38,9 @@ class DatabaseConfig:
             user=user_name,
             password=psd,
             database=db_name,
-            charset='utf8'
+            charset='utf8',
+            # pymysql在8.0之后版本，支持同时执行多条sql语句
+            client_flag=CLIENT.MULTI_STATEMENTS
         )
 
 if __name__ == '__main__':

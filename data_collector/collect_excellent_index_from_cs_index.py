@@ -7,6 +7,7 @@ import requests
 import json
 import threading
 import random
+import decimal
 
 import sys
 sys.path.append("..")
@@ -15,6 +16,7 @@ import log.custom_logger as custom_logger
 import conf
 import db_mapper.financial_data.index_excellent_performance_indices_di_mapper as index_excellent_performance_indices_di_mapper
 import db_mapper.financial_data.fin_data_total_return_indexes_list_mapper as fin_data_total_return_indexes_list_mapper
+import utils.get_cs_index_cookie as get_cs_index_cookie
 
 """
 从中证指数官网接口收集过去几年表现优异的指数，多线程
@@ -34,9 +36,9 @@ class CollectExcellentIndexFromCSIndex:
         # 最大线程数
         self.max_thread_num = 15
         # 同时获取x个IP和5x个UA
-        self.IP_UA_num = 3
+        self.IP_UA_num = 5
         # 将中证所有指数代码分成多个区块，每个区块最多拥有多少个指数代码
-        self.max_index_codes = 30
+        self.max_index_codes = 20
         # 每个区块执行的时间
         self.sleep_time = 7
         # 链接超时时间限制
@@ -222,12 +224,12 @@ class CollectExcellentIndexFromCSIndex:
         index_code_tr = index_code_pair[1]
 
         # 默认使用常规指数代码
-        index_code = index_code_pair[0]
+        index_code = index_code_re
         index_performance_dict["type"] = "regular_index"
 
         # 如果该指数存在全收益率代码，则使用全收益率代码
-        if index_code_pair[1] != None:
-            index_code = index_code_pair[1]
+        if index_code_tr != None:
+            index_code = index_code_tr
             index_performance_dict["type"] = "total_return_index"
 
 
@@ -307,6 +309,10 @@ class CollectExcellentIndexFromCSIndex:
                 # 如果有跟踪指数基金，才有收集跟进的意义
                 else:
                     index_performance_dict["relative_funds"] = relative_funds_list
+
+                    # 记录指数年化波动率
+                    index_volatility_list = self.get_index_volatility(index_code_re)
+                    index_performance_dict["index_volatility_list"] = index_volatility_list
 
                     # 如果当前采集的是全收益指数情况
                     if index_performance_dict["type"] == "total_return_index":
@@ -471,6 +477,95 @@ class CollectExcellentIndexFromCSIndex:
         return self.parse_interface_to_get_index_relative_funds(index_code, header, proxy)
 
 
+    def parse_interface_to_get_index_volatility(self, index_code, header, proxy):
+        '''
+        从接口获取指数的年化波动率
+        :param index_code: 指数代码（6位数字， 如 399997）
+        :param header: 伪装的UA
+        :param proxy: 伪装的IP
+        :return: 指数相关基金的信息
+        如 {'one_year_volatility': Decimal('12.00'), 'three_year_volatility': Decimal('15.00'), 'five_year_volatility': Decimal('15.00')}
+        '''
+        # 地址模板
+        interface_url = "https://www.csindex.com.cn/csindex-home/perf/get-index-yield-item-nianHua/"+index_code
+        # 指数1，3，5年化波动率的列表
+        volatility_dict = dict()
+
+        # 递归算法，处理异常
+        try:
+            # 增加连接重试次数,默认10次
+            requests.adapters.DEFAULT_RETRIES = 10
+            # 关闭多余的连接：requests使用了urllib3库，默认的http connection是close的，
+            # requests设置False关闭
+            s = requests.session()
+            s.keep_alive = False
+
+            # 获取cookie
+            cookie_dict = get_cs_index_cookie.GetCSIndexCookie(interface_url, header, proxy).get_cookie()
+            # 将cookie添加进header
+            header["cookie"] = cookie_dict["cookie"]
+
+            # 忽略警告
+            #requests.packages.urllib3.disable_warnings()
+            # 得到页面的信息
+            raw_page = requests.get(interface_url, headers=header, proxies=proxy, verify=False, stream=False,
+                                    timeout=self.timeout_limit).text
+
+            # 转换成字典数据
+            raw_data = json.loads(raw_page)
+
+            # 判断接口是否调用成功
+            if (not raw_data["success"]):
+                return []
+
+            # 获取data数据
+            data_json = raw_data["data"]
+            if (data_json == None):
+                return []
+
+            # 遍历获取到的接口数据
+            for volatility in data_json:
+
+                # 1年年化波动率
+                if volatility == "oneYearNianHua":
+                    volatility_dict["one_year_volatility"] = decimal.Decimal(data_json["oneYearNianHua"])*100
+                # 3年年化波动率
+                if volatility == "threeYearNianHua":
+                    volatility_dict["three_year_volatility"] = decimal.Decimal(data_json["threeYearNianHua"]) * 100
+                # 5年年化波动率
+                if volatility == "fiveYearNianHua":
+                    volatility_dict["five_year_volatility"] = decimal.Decimal(data_json["fiveYearNianHua"]) * 100
+
+
+            # 返回 如， {'one_year_volatility': Decimal('12.00'), 'three_year_volatility': Decimal('15.00'), 'five_year_volatility': Decimal('15.00')}
+            return volatility_dict
+
+        except Exception as e:
+            # 日志记录
+            msg = "从中证官网接口 " + interface_url + '  ' + "获取指数年化波动率失败 " + str(e) + " 即将重试"
+            custom_logger.CustomLogger().log_writter(msg, lev='warning')
+            # 返回解析页面得到的股票指标
+            return self.get_index_volatility(index_code)
+
+
+    def get_index_volatility(self, index_code):
+        '''
+        获取指数的年化波动率
+        :param index_code: 指数代码（6位数字， 如 399997）
+        :return:
+        '''
+
+        # 随机选取，伪装，隐藏UA和IP
+        pick_an_int = random.randint(0, self.IP_UA_num - 1)
+        #header = {"user-agent": self.ua_dict_list[random.randint(0, self.IP_UA_num*5 - 1)]['ua'], 'Connection': 'keep-alive'}
+        header = {"user-agent": self.ua_dict_list[random.randint(0, self.IP_UA_num * 5 - 1)]['ua'], 'Connection': 'close'}
+        proxy = {"http": 'http://{}:{}@{}'.format(conf.proxyIPUsername, conf.proxyIPPassword,
+                                                  self.ip_address_dict_list[pick_an_int]['ip_address']),
+                 "https": 'https://{}:{}@{}'.format(conf.proxyIPUsername, conf.proxyIPPassword,
+                                                    self.ip_address_dict_list[pick_an_int]['ip_address'])}
+
+        return self.parse_interface_to_get_index_volatility(index_code, header, proxy)
+
     def collect_and_save(self):
         # 存储符合收集标准的指数
         # 如 [{'index_code': '930758', 'index_name': '凤凰50', 'p_day': '2022-01-14', 'three_year_yield_rate': 27.12, 'five_year_yield_rate': 16.52, 'relative_funds': [{'512190': '浙商汇金中证凤凰50ETF'}, {'007431': '浙商汇金中证凤凰50ETF联接'}]}, ,,，，，]
@@ -514,6 +609,13 @@ class CollectExcellentIndexFromCSIndex:
             three_year_yield_rate_tr = 0
             # 指数近5年年化收益率
             five_year_yield_rate_tr = 0
+
+            # 指数近1年年化波动率
+            one_year_volatility = index_info.get("index_volatility_list").get("one_year_volatility")
+            # 指数近3年年化波动率
+            three_year_volatility = index_info.get("index_volatility_list").get("three_year_volatility")
+            # 指数近5年年化波动率
+            five_year_volatility = index_info.get("index_volatility_list").get("five_year_volatility")
 
 
             # 如果该指数存在全收益指数
@@ -592,7 +694,9 @@ class CollectExcellentIndexFromCSIndex:
                                 index_code_re, index_name_re, '中证', one_month_yield_rate_re,
                                 three_month_yield_rate_re,
                                 this_year_yield_rate_re, one_year_yield_rate_re, three_year_yield_rate_re,
-                                five_year_yield_rate_re, index_code_tr, index_name_tr, one_month_yield_rate_tr,
+                                five_year_yield_rate_re, one_year_volatility, three_year_volatility,
+                                five_year_volatility,
+                                index_code_tr, index_name_tr, one_month_yield_rate_tr,
                                 three_month_yield_rate_tr,
                                 this_year_yield_rate_tr, one_year_yield_rate_tr, three_year_yield_rate_tr,
                                 five_year_yield_rate_tr, relative_fund_code, relative_fund_name, p_day)
@@ -604,9 +708,12 @@ class CollectExcellentIndexFromCSIndex:
                         elif index_info.get("type") == "regular_index":
                             # 将优秀的指数信息及其相关基金产品存入数据库
                             index_excellent_performance_indices_di_mapper.IndexExcellentPerformanceIndicesDiMapper().insert_regular_excellent_indexes(
-                                index_code_re, index_name_re, '中证', one_month_yield_rate_re, three_month_yield_rate_re,
-                                this_year_yield_rate_re, one_year_yield_rate_re, three_year_yield_rate_re, five_year_yield_rate_re,
-                                relative_fund_code, relative_fund_name, p_day)
+                                index_code_re, index_name_re, '中证', one_month_yield_rate_re,
+                                three_month_yield_rate_re,
+                                this_year_yield_rate_re, one_year_yield_rate_re, three_year_yield_rate_re,
+                                five_year_yield_rate_re,
+                                one_year_volatility, three_year_volatility, five_year_volatility, relative_fund_code,
+                                relative_fund_name, p_day)
                             # 日志记录
                             msg = '将从中证官网接口获取的优异指数 ' + p_day + " " + index_code_re + " " + index_name_re + ' 存入数据库时成功'
                             custom_logger.CustomLogger().log_writter(msg, 'info')

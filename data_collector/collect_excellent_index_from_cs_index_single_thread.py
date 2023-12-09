@@ -599,8 +599,11 @@ class CollectExcellentIndexFromCSIndexSingleThread:
             # 指数近5年年化收益率
             five_year_yield_rate_tr = 0
 
+            # 指数近1年年化波动率
             one_year_volatility = index_info.get("index_volatility_list").get("one_year_volatility")
+            # 指数近3年年化波动率
             three_year_volatility = index_info.get("index_volatility_list").get("three_year_volatility")
+            # 指数近5年年化波动率
             five_year_volatility = index_info.get("index_volatility_list").get("five_year_volatility")
 
 

@@ -62,7 +62,7 @@ class GetCSIndexCookie:
 
         r = requests.get(self.url, headers=self.header, proxies=self.proxy, verify=False, stream=False,
                                     timeout=self.timeout_limit)
-        # 重js中匹配出 arg1
+        # 从js中匹配出 arg1
         arg1 = re.findall("arg1=\'(.*?)\'", r.text)[0]
 
         # 参数生成
@@ -88,7 +88,7 @@ if __name__ == '__main__':
                                                 ip_address_dict_list[pick_an_int]['ip_address'])}
 
 
-    url = "https://www.csindex.com.cn/csindex-home/perf/get-index-yield-item-nianHua/930955"
+    url = "https://www.csindex.com.cn/csindex-home/perf/get-index-yield-item-nianHua/000807"
     go = GetCSIndexCookie(url, header, proxy)
     cookie = go.get_cookie()
     print(cookie)

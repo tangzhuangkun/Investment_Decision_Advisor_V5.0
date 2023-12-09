@@ -88,14 +88,21 @@ class CalculateIndexSimilarTotalReturnIndexes:
         custom_logger.CustomLogger().log_writter(msg, lev='info')
 
 
+    """
+    删除关联错误或者重复的全收益指数, 
+    重点保留人民币计价的全收益指数
+    """
+    def delete_duplicated_indexes(self):
+        fin_data_total_return_indexes_list_mapper.FinDataTotalReturnIndexesListMapper().delete_duplicated_tr_index()
+
+
+    def main(self):
+        self.cal_and_save_given_source_index_name_similarity()
+        self.delete_duplicated_indexes()
+
 if __name__ == '__main__':
     time_start = time.time()
     go = CalculateIndexSimilarTotalReturnIndexes()
-    go.cal_and_save_given_source_index_name_similarity()
-    #sim_index_info_dict = go.cal_given_source_index_name_similarity("米筐")
-    #print(sim_index_info_dict)
-    #ratio = go.calculate_jaccard_similarity("中证红利低波动100全收益指数", "红利低波100全收益")
-    #ratio = go.string_similar("中证红利低波动100全收益指数", "红利低波100全收益")
-    #print(ratio)
+    go.main()
     time_end = time.time()
     print('Time Cost: ' + str(time_end - time_start))

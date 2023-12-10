@@ -1,14 +1,15 @@
 /* 预估所有指数的最新构成 */
 
-/* 将视图删除 */
-drop view if exists all_sources_index_latest_info;
-drop view if exists mix_top10_with_bottom;
+/* 将之前指数的最新构成清空 */
+truncate table all_sources_index_latest_info;
+truncate table mix_top10_with_bottom;
 truncate table mix_top10_with_bottom_no_repeat;
 
-/* 创建视图*/
-create view all_sources_index_latest_info as
+
+insert into all_sources_index_latest_info (index_code, index_name, stock_code, stock_name, stock_exchange_location,
+       stock_market_code, weight, source, index_company, p_day)
 /* 各个来源的指数的最新构成情况*/
-select a.index_code, index_name, stock_code, stock_name, stock_exchange_location,
+select target.target_code, target.target_name, stock_code, stock_name, stock_exchange_location,
        stock_market_code, weight, a.source, index_company, a.p_day
 from
 (select index_code, index_name, stock_code, stock_name, stock_exchange_location,
@@ -22,15 +23,27 @@ group by index_code, source)  m
 on a.index_code = m.index_code
 and a.source = m.source
 and a.p_day = m.p_day
-group by a.index_code, index_name, stock_code, stock_name, stock_exchange_location,
+inner join
+/* 当前标的池中的指数 */
+(
+select target_code, target_name
+from target_pool.investment_target
+where target_type = 'index'
+and status = 'active'
+and monitoring_frequency = 'daily'
+) as target
+on target.target_code = a.index_code
+and target.target_code = m.index_code
+group by target.target_code, target.target_name, stock_code, stock_name, stock_exchange_location,
        stock_market_code, weight, a.source, index_company, a.p_day
-order by a.index_code, a.source, a.weight desc;
+order by target.target_code, a.source, a.weight desc;
 
 
 
 
-/* 创建视图 */
-create view mix_top10_with_bottom as
+
+insert into  mix_top10_with_bottom (index_code, index_name, stock_code, stock_name, stock_exchange_location,
+       stock_market_code, weight, source, index_company, p_day)
 /* 拼接中证的最新前10权重股+每月中证指数文件中的10位之后的权重股+国证指数 */
 select index_code, index_name, stock_code, stock_name, stock_exchange_location,
        stock_market_code, weight, source, index_company, p_day

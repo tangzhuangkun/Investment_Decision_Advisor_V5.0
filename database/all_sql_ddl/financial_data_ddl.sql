@@ -312,3 +312,57 @@ CREATE TABLE IF NOT EXISTS `fin_data_total_return_indexes_list`(
 	PRIMARY KEY ( `id` )
 	)ENGINE=InnoDB DEFAULT CHARSET=utf8
 COMMENT '指数及其可能对应的全收益指数代码，名称，成分股个数，指数发行人，数据源';
+
+
+
+
+
+/* --------- user：investor1 ------ */
+/* --------- db：financial_data ------ */
+/*创建一个表，fin_data_all_sources_index_latest_info，用于存储 各个来源的指数的最新构成情况*/
+
+USE financial_data;
+DROP TABLE IF EXISTS `all_sources_index_latest_info`;
+CREATE TABLE IF NOT EXISTS `all_sources_index_latest_info`(
+	`id` MEDIUMINT NOT NULL AUTO_INCREMENT,
+	`index_code` VARCHAR(12) NOT NULL COMMENT '指数代码',
+    `index_name` VARCHAR(128) NOT NULL COMMENT '指数名称(全称)',
+	`stock_code` VARCHAR(20) NOT NULL COMMENT '股票代码',
+	`stock_name` VARCHAR(20) NOT NULL COMMENT '股票名称',
+    `stock_exchange_location` VARCHAR(20) DEFAULT NULL COMMENT '股票上市地',
+	`stock_market_code` VARCHAR(20) DEFAULT NULL COMMENT '股票交易市场代码',
+    `weight` DECIMAL(21,18) NOT NULL COMMENT '股票权重',
+	`source` VARCHAR(10) DEFAULT NULL COMMENT '数据来源',
+	`index_company` VARCHAR(20) DEFAULT NULL COMMENT '指数开发公司',
+    `p_day` DATE DEFAULT NULL COMMENT '业务日期',
+    `submission_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '提交时间',
+	UNIQUE INDEX (`index_code`, `stock_code`, `weight`, `source`, `index_company`, `p_day`),
+	PRIMARY KEY ( `id` )
+	)ENGINE=InnoDB DEFAULT CHARSET=utf8
+COMMENT '各个来源的指数的最新构成情况';
+
+
+
+/* --------- user：investor1 ------ */
+/* --------- db：financial_data ------ */
+/*创建一个表，mix_top10_with_bottom，用于存储 拼接中证的最新前10权重股+每月中证指数文件中的10位之后的权重股+国证指数*/
+
+USE financial_data;
+DROP TABLE IF EXISTS `mix_top10_with_bottom`;
+CREATE TABLE IF NOT EXISTS `mix_top10_with_bottom`(
+	`id` MEDIUMINT NOT NULL AUTO_INCREMENT,
+	`index_code` VARCHAR(12) NOT NULL COMMENT '指数代码',
+    `index_name` VARCHAR(128) NOT NULL COMMENT '指数名称(全称)',
+	`stock_code` VARCHAR(20) NOT NULL COMMENT '股票代码',
+	`stock_name` VARCHAR(20) NOT NULL COMMENT '股票名称',
+    `stock_exchange_location` VARCHAR(20) DEFAULT NULL COMMENT '股票上市地',
+	`stock_market_code` VARCHAR(20) DEFAULT NULL COMMENT '股票交易市场代码',
+    `weight` DECIMAL(21,18) NOT NULL COMMENT '股票权重',
+	`source` VARCHAR(10) DEFAULT NULL COMMENT '数据来源',
+	`index_company` VARCHAR(20) DEFAULT NULL COMMENT '指数开发公司',
+    `p_day` DATE DEFAULT NULL COMMENT '业务日期',
+    `submission_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '提交时间',
+	UNIQUE INDEX (`index_code`, `stock_code`, `weight`, `source`, `index_company`, `p_day`),
+	PRIMARY KEY ( `id` )
+	)ENGINE=InnoDB DEFAULT CHARSET=utf8
+COMMENT '拼接中证的最新前10权重股+每月中证指数文件中的10位之后的权重股+国证指数';

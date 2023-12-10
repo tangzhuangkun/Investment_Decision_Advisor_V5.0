@@ -23,6 +23,7 @@ import data_miner.calculate_stock_bond_ratio as calculate_stock_bond_ratio
 import data_collector.collect_excellent_index_from_cs_index as collect_excellent_index_from_cs_index
 import data_collector.collect_excellent_index_from_cn_index as collect_excellent_index_from_cn_index
 import data_collector.collect_all_indexes_from_ricequant as collect_all_indexes_from_ricequant
+import data_miner.calculate_index_similar_total_return_indexes as calculate_index_similar_total_return_indexes
 
 class Scheduler:
 	# 任务调度器，根据时间安排工作
@@ -255,6 +256,15 @@ class Scheduler:
 			# 抛错
 			custom_logger.CustomLogger().log_writter(e, 'error')
 
+
+		try:
+			# 每月15号晚上23:03根据指数名称相似度，以求挖掘指数相关的全收益指数
+			scheduler.add_job(func=calculate_index_similar_total_return_indexes.CalculateIndexSimilarTotalReturnIndexes().main, trigger='cron',
+							  month='1-12', day='15', hour=23, minute=3,
+							  id='collectAllIndexListFromRiceQuant')
+		except Exception as e:
+			# 抛错
+			custom_logger.CustomLogger().log_writter(e, 'error')
 
 
 		# 启动调度器

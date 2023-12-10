@@ -22,6 +22,7 @@ import data_collector.collect_index_estimation_from_lxr as collect_index_estimat
 import data_miner.calculate_stock_bond_ratio as calculate_stock_bond_ratio
 import data_collector.collect_excellent_index_from_cs_index as collect_excellent_index_from_cs_index
 import data_collector.collect_excellent_index_from_cn_index as collect_excellent_index_from_cn_index
+import data_collector.collect_all_indexes_from_ricequant as collect_all_indexes_from_ricequant
 
 class Scheduler:
 	# 任务调度器，根据时间安排工作
@@ -244,6 +245,16 @@ class Scheduler:
 			custom_logger.CustomLogger().log_writter(e, 'error')
 
 		#####################      每月运行    ###################################################
+
+		try:
+			# 每月15号晚上23:00从米筐网收集全部指数列表
+			scheduler.add_job(func=collect_all_indexes_from_ricequant.CollectAllIndexesFromRiceQuant().main, trigger='cron',
+							  month='1-12', day='15', hour=23,
+							  id='collectAllIndexListFromRiceQuant')
+		except Exception as e:
+			# 抛错
+			custom_logger.CustomLogger().log_writter(e, 'error')
+
 
 
 		# 启动调度器

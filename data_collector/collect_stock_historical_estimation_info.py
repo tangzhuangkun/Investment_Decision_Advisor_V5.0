@@ -413,9 +413,20 @@ class CollectStockHistoricalEstimationInfo:
             custom_logger.CustomLogger().log_writter(msg, 'error')
             return self.collect_a_special_date_estimation(stock_info_dicts, date, exchange_location_mic)
 
+        # 增加日志记录，打印具体的失败原因
+        if 'error' in content:
+            # 日志记录失败
+            msg = '使用TOKEN ' + token + ' ' + '执行 collect_a_special_date_estimation 获取股票代码 ' + \
+                  str(list(stock_info_dicts.keys())) + ' ' + str(date) + ' 时失败, 失败原因 ' + content.get('error').get('message')
+            custom_logger.CustomLogger().log_writter(msg, 'error')
+            return self.collect_a_special_date_estimation(stock_info_dicts, date, exchange_location_mic)
+
         # 获取股票代码和名称的对应字典表
         # 如 {'000001': '平安银行', '000002': '万科A', '000031': '大悦城'}
         stock_code_name_dict = self.get_stock_code_name(stock_info_dicts)
+
+        if content.get("data") == None:
+            print(stock_info_dicts, date, exchange_location_mic)
 
         # 理杏仁接口返回为空，即 该日期，1/多个股票 没有估值数据，可能是因为 非交易日等原因造成，不予以储存
         if (len(content.get("data")) == 0):

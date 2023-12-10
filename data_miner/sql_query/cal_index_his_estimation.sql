@@ -1,11 +1,24 @@
 /* 利用mysql，基于指数最新的成分股进行计算历史估值信息 */
 /* 将计算结果插入另外一个的表中 */
-insert into aggregated_data.index_components_historical_estimations (index_code, index_name, historical_date, pe_ttm, pe_ttm_effective_weight,
-pe_ttm_nonrecurring, pe_ttm_nonrecurring_effective_weight, pb, pb_effective_weight, pb_wo_gw, pb_wo_gw_effective_weight, ps_ttm, ps_ttm_effective_weight,
-pcf_ttm, pcf_ttm_effective_weight, dividend_yield, dividend_yield_effective_weight)
+insert into aggregated_data.index_components_historical_estimations (index_code, index_name, historical_date,
+                                                                     pe_ttm, pe_ttm_effective_weight, pe_ttm_estimation_overall,
+                                                                     pe_ttm_nonrecurring, pe_ttm_nonrecurring_effective_weight, pe_ttm_nonrecurring_estimation_overall,
+                                                                     pb, pb_effective_weight, pb_estimation_overall,
+                                                                     pb_wo_gw, pb_wo_gw_effective_weight, pb_wo_gw_estimation_overall,
+                                                                     ps_ttm, ps_ttm_effective_weight, ps_ttm_estimation_overall,
+                                                                     pcf_ttm, pcf_ttm_effective_weight, pcf_ttm_estimation_overall,
+                                                                     dividend_yield, dividend_yield_effective_weight, dividend_yield_estimation_overall)
 
-/* 需要验证准确性 */
-select a.index_code, a.index_name, c.date as historical_date,
+select   his.index_code, his.index_name, his.historical_date,
+         his.pe_ttm, his.pe_ttm_effective_weight, round(his.pe_ttm*100/his.pe_ttm_effective_weight, 5) as pe_ttm_estimation_overall,
+         pe_ttm_nonrecurring, pe_ttm_nonrecurring_effective_weight, round(his.pe_ttm_nonrecurring*100/his.pe_ttm_nonrecurring_effective_weight, 5) as pe_ttm_nonrecurring_estimation_overall,
+         pb, pb_effective_weight, round(his.pb*100/his.pb_effective_weight, 5) as pb_estimation_overall,
+         pb_wo_gw, pb_wo_gw_effective_weight, round(his.pb_wo_gw*100/his.pb_wo_gw_effective_weight, 5) as pb_wo_gw_estimation_overall,
+         ps_ttm, ps_ttm_effective_weight, round(his.ps_ttm*100/his.ps_ttm_effective_weight, 5) as ps_ttm_estimation_overall,
+         pcf_ttm, pcf_ttm_effective_weight, round(his.pcf_ttm*100/his.pcf_ttm_effective_weight, 5) as pcf_ttm_estimation_overall,
+         dividend_yield, dividend_yield_effective_weight, round(his.dividend_yield*100/his.dividend_yield_effective_weight, 5) as dividend_yield_estimation_overall
+from
+(select a.index_code, a.index_name, c.date as historical_date,
 /* 计算指数pe_ttm */
 round(sum(
 case
@@ -113,11 +126,11 @@ round(sum(
 	end ),5) as dividend_yield_effective_weight
 from
 /* 获取指数及其成分股，权重，日期 */
-mix_top10_with_bottom_no_repeat a
+financial_data.mix_top10_with_bottom_no_repeat a
 inner join
 /* 获取每个股票的历史指标信息 */
 (select stock_code, stock_name, date, pe_ttm, pe_ttm_nonrecurring, pb, pb_wo_gw, ps_ttm, pcf_ttm, dividend_yield
-from stocks_main_estimation_indexes_historical_data) c
+from financial_data.stocks_main_estimation_indexes_historical_data) c
 on a.stock_code = c.stock_code
 group by c.date,a.index_code, a.index_name
-order by c.date desc;
+order by c.date desc) as his;

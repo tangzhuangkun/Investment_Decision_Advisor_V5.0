@@ -1,3 +1,6 @@
+/* 清空所有需要跟踪的股票 */
+TRUNCATE TABLE target_pool.all_tracking_stocks_rf;
+
 
 /* 所有的来自投资标的池（含指数成分股和目标股）的股票' */
 INSERT IGNORE INTO  target_pool.all_tracking_stocks_rf

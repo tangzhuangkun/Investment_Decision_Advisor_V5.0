@@ -4,12 +4,12 @@
 import time
 import urllib.request
 import json
-import log.custom_logger as custom_logger
+
 
 import sys
 sys.path.append("..")
 import db_mapper.financial_data.fin_data_indexes_list_mapper as fin_data_indexes_list_mapper
-
+import log.custom_logger as custom_logger
 
 class CollectAllIndexesFromToder:
     # 从拓观网收集 中国所有的指数列表

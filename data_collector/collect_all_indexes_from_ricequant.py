@@ -4,11 +4,12 @@
 import time
 import requests
 from bs4 import BeautifulSoup
-import log.custom_logger as custom_logger
+
 
 import sys
 sys.path.append("..")
 import db_mapper.financial_data.fin_data_indexes_list_mapper as fin_data_indexes_list_mapper
+import log.custom_logger as custom_logger
 
 
 class CollectAllIndexesFromRiceQuant:

@@ -74,17 +74,6 @@ class Scheduler:
 
 		#########  盘后(15:00-23:59)  #########
 		try:
-			# 每个交易日18：00 聚合汇总所有需要被跟踪的股票
-			scheduler.add_job(func=gather_all_tracking_stocks.GatherAllTrackingStocks().main,
-							  trigger='cron',
-							  month='1-12', day_of_week='mon,tue,wed,thu,fri', hour=18,
-							  id='gatherAllTrackingStocks')
-		except Exception as e:
-			# 抛错
-			custom_logger.CustomLogger().log_writter(e, 'error')
-
-
-		try:
 			# 每个交易日18：01收集交易日信息
 			scheduler.add_job(func=collect_trading_days.CollectTradingDays().main,
 							  trigger='cron',
@@ -125,10 +114,20 @@ class Scheduler:
 			custom_logger.CustomLogger().log_writter(e, 'error')
 
 		try:
-			# 每个交易日18：05收集所需的股票的估值信息
-			scheduler.add_job(func=collect_stock_historical_estimation_info.CollectStockHistoricalEstimationInfo().main,
+			# 每个交易日18：05 聚合汇总所有需要被跟踪的股票
+			scheduler.add_job(func=gather_all_tracking_stocks.GatherAllTrackingStocks().main,
 							  trigger='cron',
 							  month='1-12', day_of_week='mon,tue,wed,thu,fri', hour=18, minute=5,
+							  id='gatherAllTrackingStocks')
+		except Exception as e:
+			# 抛错
+			custom_logger.CustomLogger().log_writter(e, 'error')
+
+		try:
+			# 每个交易日18：06收集所需的股票的估值信息
+			scheduler.add_job(func=collect_stock_historical_estimation_info.CollectStockHistoricalEstimationInfo().main,
+							  trigger='cron',
+							  month='1-12', day_of_week='mon,tue,wed,thu,fri', hour=18, minute=6,
 							  id='weekdayCollectStockHistoricalEstimationInfo')
 		except Exception as e:
 			# 抛错

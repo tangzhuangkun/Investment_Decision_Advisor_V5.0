@@ -35,10 +35,6 @@ class RerunDaily:
         pass
 
     def main(self):
-        # 聚合汇总所有需要被跟踪的股票
-        gather_all_tracking_stocks.GatherAllTrackingStocks().main()
-        print("聚合汇总所有需要被跟踪的股票, 完成")
-
         # 收集交易日信息
         collect_trading_days.CollectTradingDays().main()
         print("收集交易日信息, 完成")
@@ -54,6 +50,10 @@ class RerunDaily:
         # 收集国证官网指数最新构成信息
         collect_index_weight_from_cnindex_interface.CollectIndexWeightFromCNIndexInterface().main()
         print("收集国证官网指数最新构成信息, 完成")
+
+        # 聚合汇总所有需要被跟踪的股票
+        gather_all_tracking_stocks.GatherAllTrackingStocks().main()
+        print("聚合汇总所有需要被跟踪的股票, 完成")
 
         # 收集所需的股票的估值信息
         collect_stock_historical_estimation_info.CollectStockHistoricalEstimationInfo().main()

@@ -16,7 +16,6 @@ import parsers.disguise as disguise
 import log.custom_logger as custom_logger
 import conf
 import db_mapper.financial_data.index_excellent_performance_indices_di_mapper as index_excellent_performance_indices_di_mapper
-import db_mapper.financial_data.fin_data_total_return_indexes_list_mapper as fin_data_total_return_indexes_list_mapper
 import utils.get_cs_index_cookie as get_cs_index_cookie
 
 """
@@ -44,8 +43,6 @@ class CollectExcellentIndexFromCSIndexSingleThread:
         self.sleep_time = 7
         # 链接超时时间限制
         self.timeout_limit = 5
-        # 指数及其对应的全收益指数信息
-        self.index_relate_tr_dict = dict()
         # 获取指数表现
         self.index_yield_url = "https://www.csindex.com.cn/csindex-home/perf/get-index-yield-item/"
 
@@ -54,8 +51,8 @@ class CollectExcellentIndexFromCSIndexSingleThread:
     从中证接口获取全部指数的代码和名称
     :param header: 伪装的UA
     :param proxy: 伪装的IP
-    :return,  指数代码列表, [ (指数代码, 全收益指数代码)]
-    如 [('000979', 'H00979'), ('000984', 'H00984'), ('930927', None), ,,,]
+    :return,  指数代码列表, [指数代码,,, ]
+    如 ['000001', '000009', '000010', '000015', '000016', '000018', '000021', '000029', '000036', '000037',,,,]
     """
     def parse_interface_to_get_index_code_name_content(self, header, proxy):
 
@@ -96,14 +93,7 @@ class CollectExcellentIndexFromCSIndexSingleThread:
             # 存入列表中
             for index_info in data_json:
                 index_code = index_info["indexCode"]
-                # 如果该指数存在关联的全收益指数
-                if index_code in self.index_relate_tr_dict:
-                # 全收益指数代码
-                    index_code_tr = self.index_relate_tr_dict.get(index_code).get('index_code_tr')
-                    # 将指数代码和全收益指数代码组装成一个pair
-                    index_code_list.append((index_code, index_code_tr))
-                else:
-                    index_code_list.append((index_code, None))
+                index_code_list.append(index_code)
             return index_code_list
 
         except Exception as e:
@@ -117,7 +107,7 @@ class CollectExcellentIndexFromCSIndexSingleThread:
     """
     调用接口，从中证指数官网获取全部指数代码和名称
     :return,  指数代码列表, [ (指数代码, 全收益指数代码)]
-    如 [('000979', 'H00979'), ('000984', 'H00984'), ('930927', None), ,,,]
+    如 ['000001', '000009', '000010', '000015', '000016', '000018', '000021', '000029', '000036', '000037',,,,]
     """
     def call_interface_to_get_all_index_code_name_from_cs_index(self):
 
@@ -205,11 +195,11 @@ class CollectExcellentIndexFromCSIndexSingleThread:
             return self.parse_index_yield_performance(index_code, index_performance_dict, header, proxy)
 
 
-    def parse_and_check_whether_an_excellent_index(self,index_code_pair, header, proxy):
+    def parse_and_check_whether_an_excellent_index(self, index_code, header, proxy):
         '''
         解析判断是否为符合要求的优秀指数
         解析接口内容，获取单个指数过去几年的表现
-        :param index_code_pair: 指数代码pair(指数代码, 全收益指数代码), 如 ('000979', 'H00979'), ('930927', None)
+        :param index_code: 指数代码, 如 '000979'
         :param satisfied_index_list: 满足收集指标的指数
         :param threadLock: 线程锁
         :param: same_time_threading, 线程数量的限制
@@ -218,23 +208,10 @@ class CollectExcellentIndexFromCSIndexSingleThread:
         :return:
         '''
 
+        # ToDo 验证至此
+
         # 指数收益表现的字典
         index_performance_dict = dict()
-
-        # 常规指数代码
-        index_code_re = index_code_pair[0]
-        # 全收益指数代码
-        index_code_tr = index_code_pair[1]
-
-        # 默认使用常规指数代码
-        index_code = index_code_re
-        index_performance_dict["type"] = "regular_index"
-
-        # 如果该指数存在全收益率代码，则使用全收益率代码
-        if index_code_tr != None:
-            index_code = index_code_tr
-            index_performance_dict["type"] = "total_return_index"
-
 
         # 接口地址
         interface_url = self.index_yield_url + index_code
@@ -304,7 +281,7 @@ class CollectExcellentIndexFromCSIndexSingleThread:
             # 如果3年年化收益率 或 5年年化收益率 满足需求
             if (three_year_yield_rate > self.three_year_yield_rate_standard) or (five_year_yield_rate > self.five_year_yield_rate_standard):
                 # 获取跟踪这个指数的基金
-                relative_funds_list = self.get_satisfied_index_relative_funds(index_code_re)
+                relative_funds_list = self.get_satisfied_index_relative_funds(index_code)
                 # 如果没有跟踪的指数基金，则没有跟进的意义，放弃
                 if(len(relative_funds_list)==0):
                     #same_time_threading.release()
@@ -315,13 +292,13 @@ class CollectExcellentIndexFromCSIndexSingleThread:
                     index_performance_dict["relative_funds"] = relative_funds_list
 
                     # 记录指数年化波动率
-                    index_volatility_list = self.get_index_volatility(index_code_re)
+                    index_volatility_list = self.get_index_volatility(index_code)
                     index_performance_dict["index_volatility_list"] = index_volatility_list
 
                     # 如果当前采集的是全收益指数情况
                     if index_performance_dict["type"] == "total_return_index":
                         # 则需要收集常规指数的情况
-                        index_performance_dict = self.parse_index_yield_performance(index_code_re, index_performance_dict, header, proxy)
+                        index_performance_dict = self.parse_index_yield_performance(index_code, index_performance_dict, header, proxy)
                     return index_performance_dict
 
         except Exception as e:
@@ -331,11 +308,11 @@ class CollectExcellentIndexFromCSIndexSingleThread:
             # 返回解析页面得到的股票指标
             return self.call_interface_to_get_single_index_past_performance(index_code)
 
-    def call_interface_to_get_single_index_past_performance(self, index_code_pair):
+    def call_interface_to_get_single_index_past_performance(self, index_code):
 
         '''
         调用接口获取指数过去几年的表现
-        :param index_code_pair: 指数代码pair(指数代码, 全收益指数代码), 如 ('000979', 'H00979'), ('930927', None)
+        :param index_code: 指数代码 , 如 '000979'
         :param satisfied_index_list: 满足收集指标的指数
         :param threadLock: 线程锁
         param: same_time_threading, 线程数量的限制
@@ -351,7 +328,7 @@ class CollectExcellentIndexFromCSIndexSingleThread:
                  "https": 'https://{}:{}@{}'.format(conf.proxyIPUsername, conf.proxyIPPassword,
                                                     self.ip_address_dict_list[pick_an_int]['ip_address'])}
 
-        return self.parse_and_check_whether_an_excellent_index(index_code_pair, header, proxy)
+        return self.parse_and_check_whether_an_excellent_index(index_code, header, proxy)
 
     def check_all_index_and_get_all_excellent_index(self):
         '''
@@ -360,8 +337,8 @@ class CollectExcellentIndexFromCSIndexSingleThread:
         # 如 [{'index_code': '930758', 'index_name': '凤凰50', 'p_day': '2022-01-14', 'three_year_yield_rate': 27.12, 'five_year_yield_rate': 16.52, 'relative_funds': [{'512190': '浙商汇金中证凤凰50ETF'}, {'007431': '浙商汇金中证凤凰50ETF联接'}]}, ,,，，，]
         '''
 
-        # 获取所有指数代码列表, [ (指数代码, 全收益指数代码)]
-        #     如 [('000979', 'H00979'), ('000984', 'H00984'), ('930927', None), ,,,]
+        # 获取所有指数代码列表, [ 指数代码,,,,]
+        #     如 ['000001', '000009', '000010', '000015', '000016', '000018', '000021', '000029', '000036', '000037',,,]
         index_code_list = self.call_interface_to_get_all_index_code_name_from_cs_index()
 
         # 满足条件的指数
@@ -379,10 +356,10 @@ class CollectExcellentIndexFromCSIndexSingleThread:
             # 获取到的IP和UA样式
             # 如 ([{'ip_address': '27.158.237.107:24135'}, {'ip_address': '27.151.158.219:50269'}], [{'ua': 'Mozilla/5.0 (Windows NT 6.2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1464.0 Safari/537.36'}, {'ua': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:17.0) Gecko/20100101 Firefox/17.0.6'}])
             self.ip_address_dict_list, self.ua_dict_list = disguise.Disguise().get_multi_IP_UA(self.IP_UA_num)
-            # (指数代码, 全收益指数代码)
-            for index_code_pair in splitted_list:
+            # 指数代码
+            for index_code in splitted_list:
                 # 启动线程
-                index_performance_dict = self.call_interface_to_get_single_index_past_performance(index_code_pair)
+                index_performance_dict = self.call_interface_to_get_single_index_past_performance(index_code)
                 if index_performance_dict != None:
                     satisfied_index_list.append(index_performance_dict)
 
@@ -553,6 +530,79 @@ class CollectExcellentIndexFromCSIndexSingleThread:
                                                     self.ip_address_dict_list[pick_an_int]['ip_address'])}
 
         return self.parse_interface_to_get_index_volatility(index_code, header, proxy)
+
+    def parse_interface_to_get_derivative_index(self, index_code, header, proxy):
+        '''
+        从接口获取指数的衍生指数
+        :param index_code: 指数代码（6位数字， 如 399997）
+        :param header: 伪装的UA
+        :param proxy: 伪装的IP
+        :return: 全收益和净收益 指数字典
+        如 {'399997CNY02': '中证白酒净收益', 'H20539': '中证白酒全收益'}  或 {'H20539': '中证白酒全收益'}
+        '''
+        # 地址模板
+        interface_url = "https://www.csindex.com.cn/csindex-home/perf/get-derivative-index?indexCode="+index_code
+        # 全收益和净收益指数字典,
+        derivative_index_dict = dict()
+
+        # 递归算法，处理异常
+        try:
+            # 增加连接重试次数,默认10次
+            requests.adapters.DEFAULT_RETRIES = 10
+            # 关闭多余的连接：requests使用了urllib3库，默认的http connection是close的，
+            # requests设置False关闭
+            s = requests.session()
+            s.keep_alive = False
+
+            # 忽略警告
+            #requests.packages.urllib3.disable_warnings()
+            # 得到页面的信息
+            raw_page = requests.get(interface_url, headers=header, proxies=proxy, verify=False, stream=False,
+                                    timeout=self.timeout_limit).text
+
+            # 转换成字典数据
+            raw_data = json.loads(raw_page)
+
+            # 判断接口是否调用成功
+            if (not raw_data["success"]):
+                return []
+
+            # 获取data数据
+            data_json = raw_data["data"]
+            if (data_json == None):
+                return []
+
+            # 遍历获取到的接口数据
+            for index_info in data_json:
+                # 衍生指数代码及其对应的指数名称
+                derivative_index_dict[index_info.get("indexCode")] = index_info.get("indexNameCn")
+
+            # 返回 如， {'one_year_volatility': Decimal('12.00'), 'three_year_volatility': Decimal('15.00'), 'five_year_volatility': Decimal('15.00')}
+            return derivative_index_dict
+
+        except Exception as e:
+            # 日志记录
+            msg = "从中证官网接口 " + interface_url + '  ' + "获取指数的衍生指数，失败， " + str(e) + " 即将重试"
+            custom_logger.CustomLogger().log_writter(msg, lev='warning')
+            return self.get_derivative_index(index_code)
+
+
+    def get_derivative_index(self, index_code):
+        '''
+        获取常规指数的衍生指数
+        :param index_code: 指数代码（6位数字， 如 399997）
+        :return: 全收益和净收益 指数字典
+        如 {'399997CNY02': '中证白酒净收益', 'H20539': '中证白酒全收益'}  或 {'H20539': '中证白酒全收益'}
+        '''
+
+        # 随机选取，伪装，隐藏UA和IP
+        pick_an_int = random.randint(0, self.IP_UA_num - 1)
+        header = {"user-agent": self.ua_dict_list[random.randint(0, self.IP_UA_num * 5 - 1)]['ua'], 'Connection': 'close'}
+        proxy = {"http": 'http://{}:{}@{}'.format(conf.proxyIPUsername, conf.proxyIPPassword,
+                                                  self.ip_address_dict_list[pick_an_int]['ip_address']),
+                 "https": 'https://{}:{}@{}'.format(conf.proxyIPUsername, conf.proxyIPPassword,
+                                                    self.ip_address_dict_list[pick_an_int]['ip_address'])}
+        return self.parse_interface_to_get_derivative_index(index_code, header, proxy)
 
 
     def collect_and_save(self):
@@ -727,40 +777,23 @@ class CollectExcellentIndexFromCSIndexSingleThread:
 
         return splitted_lists
 
-    """
-    获取特定数据源的指数及其相关全收益指数
-    :return , 例如 {'000050': {'index_code': '000050', 'index_name': '上证50等权重指数', 'index_code_tr': 'H00050', 'index_name_tr': '上证50等权重全收益指数'}, 
-    '000052': {'index_code': '000052', 'index_name': '上证50基本面加权指数', 'index_code_tr': 'H00052', 'index_name_tr': '上证50基本面加权全收益指数'},,,,]
-    """
-    def get_index_and_total_return_index_dict(self):
-        # 指数及其对应的全收益指数信息
-        index_relate_tr_dict = dict()
-        # 指数及其相关全收益指数
-        index_list = fin_data_total_return_indexes_list_mapper.FinDataTotalReturnIndexesListMapper().select_index_name_feature()
-        # 将指数及其相关全收益指数转为dict
-        for unit in index_list:
-            index_code = unit.get("index_code")
-            index_relate_tr_dict[index_code] = unit
-
-        return index_relate_tr_dict
 
     def main(self):
-        # 指数及其对应的全收益指数信息
-        self.index_relate_tr_dict = self.get_index_and_total_return_index_dict()
         self.collect_and_save()
 
 if __name__ == '__main__':
     time_start = time.time()
     go = CollectExcellentIndexFromCSIndexSingleThread()
-    go.main()
+    #go.main()
+    #result = go.get_derivative_index("399997")
     #result = go.get_index_and_total_return_index_dict()
-    #result = go.call_interface_to_get_all_index_code_name_from_cs_index()
+    result = go.call_interface_to_get_all_index_code_name_from_cs_index()
     #result = go.call_interface_to_get_single_index_past_performance("399997")
     #result = go.check_all_index_and_get_all_excellent_index()
     #result = go.get_satisfied_index_relative_funds("930758")
     #go.call_interface_to_get_single_index_past_performance("H50059")
     #result = go.get_index_volatility("930955")
     #result = go.get_index_volatility("000807")
-    #print(result)
+    print(result)
     time_end = time.time()
     print('Time Cost: ' + str(time_end - time_start))

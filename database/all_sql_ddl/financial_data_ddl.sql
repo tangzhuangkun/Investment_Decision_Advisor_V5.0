@@ -253,6 +253,14 @@ CREATE TABLE IF NOT EXISTS `index_excellent_performance_indices_di`(
 	`one_year_yield_rate_tr` DECIMAL(5,2) DEFAULT NULL COMMENT '全收益近1年年化收益率',
     `three_year_yield_rate_tr` DECIMAL(5,2) DEFAULT NULL COMMENT '全收益近3年年化收益率',
 	`five_year_yield_rate_tr` DECIMAL(5,2) DEFAULT NULL COMMENT '全收益近5年年化收益率',
+    `index_code_net` VARCHAR(60) DEFAULT NULL COMMENT '净收益指数代码',
+	`index_name_net` VARCHAR(60) DEFAULT NULL COMMENT '净收益指数名称',
+    `one_month_yield_rate_net` DECIMAL(5,2) DEFAULT NULL COMMENT '净收益近1月年化收益率',
+	`three_month_yield_rate_net` DECIMAL(5,2) DEFAULT NULL COMMENT '净收益近3月年化收益率',
+    `this_year_yield_rate_net` DECIMAL(5,2) DEFAULT NULL COMMENT '净收益年至今年化收益率',
+	`one_year_yield_rate_net` DECIMAL(5,2) DEFAULT NULL COMMENT '净收益近1年年化收益率',
+    `three_year_yield_rate_net` DECIMAL(5,2) DEFAULT NULL COMMENT '净收益近3年年化收益率',
+	`five_year_yield_rate_net` DECIMAL(5,2) DEFAULT NULL COMMENT '净收益近5年年化收益率',
 	`relative_fund_code` VARCHAR(60) DEFAULT NULL COMMENT '跟踪指数基金代码',
 	`relative_fund_name` VARCHAR(60) DEFAULT NULL COMMENT '跟踪指数基金名称',
 	`p_day` DATE DEFAULT NULL COMMENT '业务日期',
@@ -268,7 +276,7 @@ COMMENT '表现优异的指数及其跟踪基金';
 /* --------- user：investor1 ------ */
 /* --------- db：financial_data ------ */
 /*创建一个表，fin_data_indexes_list，用于存储 指数代码，名称，成分股个数，指数发行人，数据源*/
-
+/*
 USE financial_data;
 DROP TABLE IF EXISTS `fin_data_indexes_list`;
 CREATE TABLE IF NOT EXISTS `fin_data_indexes_list`(
@@ -284,7 +292,7 @@ CREATE TABLE IF NOT EXISTS `fin_data_indexes_list`(
 	PRIMARY KEY ( `id` )
 	)ENGINE=InnoDB DEFAULT CHARSET=utf8
 COMMENT '指数代码，名称，成分股个数，指数发行人';
-
+*/
 
 
 
@@ -292,7 +300,7 @@ COMMENT '指数代码，名称，成分股个数，指数发行人';
 /* --------- user：investor1 ------ */
 /* --------- db：financial_data ------ */
 /*创建一个表，fin_data_total_return_indexes_list，用于存储 指数及其可能对应的全收益指数代码，名称，成分股个数，指数发行人，数据源*/
-
+/*
 USE financial_data;
 DROP TABLE IF EXISTS `fin_data_total_return_indexes_list`;
 CREATE TABLE IF NOT EXISTS `fin_data_total_return_indexes_list`(
@@ -312,7 +320,7 @@ CREATE TABLE IF NOT EXISTS `fin_data_total_return_indexes_list`(
 	PRIMARY KEY ( `id` )
 	)ENGINE=InnoDB DEFAULT CHARSET=utf8
 COMMENT '指数及其可能对应的全收益指数代码，名称，成分股个数，指数发行人，数据源';
-
+*/
 
 
 

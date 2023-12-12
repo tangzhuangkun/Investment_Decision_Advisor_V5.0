@@ -35,6 +35,17 @@ class RerunDaily:
         pass
 
     def main(self):
+
+        # ------------ 盘中 ----------------
+        # 每分钟执行一次股票的监控策略
+        # notification_plan_during_trading.NotificationPlanDuringTrading().minutely_stock_estimation_notification()
+        # print("每分钟执行一次股票的监控策略, 完成")
+        #
+        # # 盘中计算并通过邮件/微信发送指数的动态估值信息
+        # notification_plan_during_trading.NotificationPlanDuringTrading().daily_estimation_notification()
+        # print("盘中计算并通过邮件/微信发送指数的动态估值信息, 完成")
+
+        # ------------ 盘后 ----------------
         # 收集交易日信息
         collect_trading_days.CollectTradingDays().main()
         print("收集交易日信息, 完成")

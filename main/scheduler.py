@@ -260,7 +260,7 @@ class Scheduler:
 			# 每月15号晚上23:03根据指数名称相似度，以求挖掘指数相关的全收益指数
 			scheduler.add_job(func=calculate_index_similar_total_return_indexes.CalculateIndexSimilarTotalReturnIndexes().main, trigger='cron',
 							  month='1-12', day='15', hour=23, minute=3,
-							  id='collectAllIndexListFromRiceQuant')
+							  id='calSimilarTotalReturnIndex')
 		except Exception as e:
 			# 抛错
 			custom_logger.CustomLogger().log_writter(e, 'error')

@@ -126,11 +126,19 @@ class CollectExcellentIndexFromCSIndexSingleThread:
     :param index_performance_dict, 指数收益表现的字典
     :param header: 伪装的UA
     :param proxy: 伪装的IP
+    :param index_name: 指数名称，（如 中证白酒净收益， 中证白酒全收益）
     """
-    def parse_index_yield_performance(self, index_code, index_performance_dict, header, proxy):
+    def parse_index_yield_performance(self, index_code, index_performance_dict, header, proxy, index_name=None):
 
         # 接口地址
         interface_url = self.index_yield_url + index_code
+
+        # 标识后缀
+        postfix = ""
+        if("全收益" in index_name):
+            postfix = "_tr"
+        elif ("净收益" in index_name):
+            postfix = "_net"
 
         # 递归算法，处理异常
         try:
@@ -154,36 +162,36 @@ class CollectExcellentIndexFromCSIndexSingleThread:
 
             # 指数代码和名称
             index_name = data_json["indexNameCn"]
-            index_performance_dict["index_code_re"] = index_code
-            index_performance_dict["index_name_re"] = index_name
+            index_performance_dict["index_code"+postfix] = index_code
+            index_performance_dict["index_name"+postfix] = index_name
 
 
             # 获取接口中指数各阶段收益率情况
-            one_month_yield_rate_re = 0
-            three_month_yield_rate_re = 0
-            this_year_yield_rate_re = 0
-            one_year_yield_rate_re = 0
-            three_year_yield_rate_re = 0
-            five_year_yield_rate_re = 0
+            one_month_yield_rate = 0
+            three_month_yield_rate = 0
+            this_year_yield_rate = 0
+            one_year_yield_rate = 0
+            three_year_yield_rate = 0
+            five_year_yield_rate = 0
 
             if (data_json["oneMonth"] != None):
-                one_month_yield_rate_re = float(data_json["oneMonth"])
-            index_performance_dict["one_month_yield_rate_re"] = one_month_yield_rate_re
+                one_month_yield_rate = float(data_json["oneMonth"])
+            index_performance_dict["one_month_yield_rate"+postfix] = one_month_yield_rate
             if (data_json["threeMonth"] != None):
-                three_month_yield_rate_re = float(data_json["threeMonth"])
-            index_performance_dict["three_month_yield_rate_re"] = three_month_yield_rate_re
+                three_month_yield_rate = float(data_json["threeMonth"])
+            index_performance_dict["three_month_yield_rate"+postfix] = three_month_yield_rate
             if (data_json["thisYear"] != None):
-                this_year_yield_rate_re = float(data_json["thisYear"])
-            index_performance_dict["this_year_yield_rate_re"] = this_year_yield_rate_re
+                this_year_yield_rate = float(data_json["thisYear"])
+            index_performance_dict["this_year_yield_rate"+postfix] = this_year_yield_rate
             if (data_json["oneYear"] != None):
-                one_year_yield_rate_re = float(data_json["oneYear"])
-            index_performance_dict["one_year_yield_rate_re"] = one_year_yield_rate_re
+                one_year_yield_rate = float(data_json["oneYear"])
+            index_performance_dict["one_year_yield_rate"+postfix] = one_year_yield_rate
             if (data_json["threeYear"] != None):
-                three_year_yield_rate_re = float(data_json["threeYear"])
-            index_performance_dict["three_year_yield_rate_re"] = three_year_yield_rate_re
+                three_year_yield_rate = float(data_json["threeYear"])
+            index_performance_dict["three_year_yield_rate"+postfix] = three_year_yield_rate
             if (data_json["fiveYear"] != None):
-                five_year_yield_rate_re = float(data_json["fiveYear"])
-            index_performance_dict["five_year_yield_rate_re"] = five_year_yield_rate_re
+                five_year_yield_rate = float(data_json["fiveYear"])
+            index_performance_dict["five_year_yield_rate"+postfix] = five_year_yield_rate
 
             return index_performance_dict
 
@@ -192,7 +200,28 @@ class CollectExcellentIndexFromCSIndexSingleThread:
             msg = "从中证官网接口" + interface_url + '  ' + "获取指数过去表现 " + str(e) + " 即将重试"
             custom_logger.CustomLogger().log_writter(msg, lev='warning')
             # 返回解析页面得到的股票指标
-            return self.parse_index_yield_performance(index_code, index_performance_dict, header, proxy)
+            return self.get_index_yield_performance(index_code, index_performance_dict, index_name)
+
+
+    def get_index_yield_performance(self, index_code, index_performance_dict, index_name=None):
+        '''
+        调用接口获取指数收益表现
+        :param index_code: 指数代码 , 如 '000979'
+        :param index_performance_dict, 指数收益表现的字典
+        :param index_name: 指数名称，（如 中证白酒净收益， 中证白酒全收益）
+        :return:
+        '''
+
+        # 随机选取，伪装，隐藏UA和IP
+        pick_an_int = random.randint(0, self.IP_UA_num - 1)
+        #header = {"user-agent": self.ua_dict_list[random.randint(0, self.IP_UA_num*5 - 1)]['ua'], 'Connection': 'keep-alive'}
+        header = {"user-agent": self.ua_dict_list[random.randint(0, self.IP_UA_num * 5 - 1)]['ua'], 'Connection': 'close'}
+        proxy = {"http": 'http://{}:{}@{}'.format(conf.proxyIPUsername, conf.proxyIPPassword,
+                                                  self.ip_address_dict_list[pick_an_int]['ip_address']),
+                 "https": 'https://{}:{}@{}'.format(conf.proxyIPUsername, conf.proxyIPPassword,
+                                                    self.ip_address_dict_list[pick_an_int]['ip_address'])}
+
+        return self.parse_index_yield_performance(index_code, index_performance_dict, header, proxy, index_name)
 
 
     def parse_and_check_whether_an_excellent_index(self, index_code, header, proxy):
@@ -207,8 +236,6 @@ class CollectExcellentIndexFromCSIndexSingleThread:
         :param proxy: 伪装的IP
         :return:
         '''
-
-        # ToDo 验证至此
 
         # 指数收益表现的字典
         index_performance_dict = dict()
@@ -295,11 +322,16 @@ class CollectExcellentIndexFromCSIndexSingleThread:
                     index_volatility_list = self.get_index_volatility(index_code)
                     index_performance_dict["index_volatility_list"] = index_volatility_list
 
-                    # 如果当前采集的是全收益指数情况
-                    if index_performance_dict["type"] == "total_return_index":
-                        # 则需要收集常规指数的情况
-                        index_performance_dict = self.parse_index_yield_performance(index_code, index_performance_dict, header, proxy)
-                    return index_performance_dict
+                    # 获取衍生指数
+                    derivative_index_dict = self.get_derivative_index(index_code)
+                    # 如果存在衍生指数
+                    if (len(derivative_index_dict) !=0 ):
+                        for derivative_index_code in derivative_index_dict:
+                            # 如果有全收益或净收益 衍生指数
+                            if ("全收益" in derivative_index_dict.get(derivative_index_code)) or ("净收益" in derivative_index_dict.get(derivative_index_code)) :
+                                derivative_index_name = derivative_index_dict.get(derivative_index_code)
+                                index_performance_dict = self.get_index_yield_performance(index_code, index_performance_dict, derivative_index_name)
+            return index_performance_dict
 
         except Exception as e:
             # 日志记录
@@ -610,6 +642,7 @@ class CollectExcellentIndexFromCSIndexSingleThread:
         # 如 [{'index_code': '930758', 'index_name': '凤凰50', 'p_day': '2022-01-14', 'three_year_yield_rate': 27.12, 'five_year_yield_rate': 16.52, 'relative_funds': [{'512190': '浙商汇金中证凤凰50ETF'}, {'007431': '浙商汇金中证凤凰50ETF联接'}]}, ,,，，，]
         satisfied_index_list = self.check_all_index_and_get_all_excellent_index()
 
+        # TODO  验证至此
         # 遍历
         for index_info in satisfied_index_list:
 

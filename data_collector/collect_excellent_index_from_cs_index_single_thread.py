@@ -796,7 +796,7 @@ class CollectExcellentIndexFromCSIndexSingleThread:
 
     """
     将列表平均分，平均分后，每份个数为num
-    :param index_code_list: 获取指数代码列表, [ (指数代码, 全收益指数代码)], 如 [('000979', 'H00979'), ('000984', 'H00984'), ('930927', None), ,,,]
+    :param index_code_list: 获取指数代码列表, [ 指数代码], 如 ['000979','000984', '930927',, ,,,]
     :param num: 平分后每份列表的的个数num
     :return
     如，

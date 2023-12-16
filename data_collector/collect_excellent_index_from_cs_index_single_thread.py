@@ -36,9 +36,9 @@ class CollectExcellentIndexFromCSIndexSingleThread:
         # 最大线程数
         self.max_thread_num = 15
         # 同时获取x个IP和5x个UA
-        self.IP_UA_num = 5
+        self.IP_UA_num = 2
         # 将中证所有指数代码分成多个区块，每个区块最多拥有多少个指数代码
-        self.max_index_codes = 30
+        self.max_index_codes = 20
         # 每个区块执行的时间
         self.sleep_time = 7
         # 链接超时时间限制
@@ -312,7 +312,7 @@ class CollectExcellentIndexFromCSIndexSingleThread:
                 # 如果没有跟踪的指数基金，则没有跟进的意义，放弃
                 if(len(relative_funds_list)==0):
                     #same_time_threading.release()
-                    return
+                    return None
                 # 如果有跟踪指数基金，才有收集跟进的意义
                 else:
                     # 记录跟踪基金的信息
@@ -330,8 +330,8 @@ class CollectExcellentIndexFromCSIndexSingleThread:
                             # 如果有全收益或净收益 衍生指数
                             if ("全收益" in derivative_index_dict.get(derivative_index_code)) or ("净收益" in derivative_index_dict.get(derivative_index_code)) :
                                 derivative_index_name = derivative_index_dict.get(derivative_index_code)
-                                index_performance_dict = self.get_index_yield_performance(index_code, index_performance_dict, derivative_index_name)
-            return index_performance_dict
+                                index_performance_dict = self.get_index_yield_performance(derivative_index_code, index_performance_dict, derivative_index_name)
+                        return index_performance_dict
 
         except Exception as e:
             # 日志记录
@@ -371,7 +371,10 @@ class CollectExcellentIndexFromCSIndexSingleThread:
 
         # 获取所有指数代码列表, [ 指数代码,,,,]
         #     如 ['000001', '000009', '000010', '000015', '000016', '000018', '000021', '000029', '000036', '000037',,,]
-        index_code_list = self.call_interface_to_get_all_index_code_name_from_cs_index()
+        # todo
+        #index_code_list = self.call_interface_to_get_all_index_code_name_from_cs_index()
+
+        index_code_list = ['000068','399997','000928','000932', '000986']
 
         # 满足条件的指数
         satisfied_index_list = []
@@ -394,7 +397,6 @@ class CollectExcellentIndexFromCSIndexSingleThread:
                 index_performance_dict = self.call_interface_to_get_single_index_past_performance(index_code)
                 if index_performance_dict != None:
                     satisfied_index_list.append(index_performance_dict)
-
         return satisfied_index_list
 
     def parse_interface_to_get_index_relative_funds(self, index_code, header, proxy):
@@ -642,45 +644,65 @@ class CollectExcellentIndexFromCSIndexSingleThread:
         # 如 [{'index_code': '930758', 'index_name': '凤凰50', 'p_day': '2022-01-14', 'three_year_yield_rate': 27.12, 'five_year_yield_rate': 16.52, 'relative_funds': [{'512190': '浙商汇金中证凤凰50ETF'}, {'007431': '浙商汇金中证凤凰50ETF联接'}]}, ,,，，，]
         satisfied_index_list = self.check_all_index_and_get_all_excellent_index()
 
-        # TODO  验证至此
         # 遍历
         for index_info in satisfied_index_list:
 
+            # 业务日期
+            p_day = index_info.get("p_day")
+
             # 常规指数的收益率信息
             # 指数代码
-            index_code_re = ""
+            index_code = index_info.get("index_code")
             # 指数名称
-            index_name_re = ""
+            index_name = index_info.get("index_name")
             # 指数近1月年化收益率
-            one_month_yield_rate_re = 0
+            one_month_yield_rate = index_info.get("one_month_yield_rate")
             # 指数近3月年化收益率
-            three_month_yield_rate_re = 0
+            three_month_yield_rate = index_info.get("three_month_yield_rate")
             # 指数年至今年化收益率
-            this_year_yield_rate_re = 0
+            this_year_yield_rate = index_info.get("this_year_yield_rate")
             # 指数近1年年化收益率
-            one_year_yield_rate_re = 0
+            one_year_yield_rate = index_info.get("one_year_yield_rate")
             # 指数近3年年化收益率
-            three_year_yield_rate_re = 0
+            three_year_yield_rate = index_info.get("three_year_yield_rate")
             # 指数近5年年化收益率
-            five_year_yield_rate_re = 0
+            five_year_yield_rate = index_info.get("five_year_yield_rate")
 
             # 全收益指数收益率信息
             # 指数代码
-            index_code_tr = ""
+            index_code_tr = index_info.get("index_code_tr")
             # 指数名称
-            index_name_tr = ""
+            index_name_tr = index_info.get("index_name_tr")
             # 指数近1月年化收益率
-            one_month_yield_rate_tr = 0
+            one_month_yield_rate_tr = index_info.get("one_month_yield_rate_tr")
             # 指数近3月年化收益率
-            three_month_yield_rate_tr = 0
+            three_month_yield_rate_tr = index_info.get("three_month_yield_rate_tr")
             # 指数年至今年化收益率
-            this_year_yield_rate_tr = 0
+            this_year_yield_rate_tr = index_info.get("this_year_yield_rate_tr")
             # 指数近1年年化收益率
-            one_year_yield_rate_tr = 0
+            one_year_yield_rate_tr = index_info.get("one_year_yield_rate_tr")
             # 指数近3年年化收益率
-            three_year_yield_rate_tr = 0
+            three_year_yield_rate_tr = index_info.get("three_year_yield_rate_tr")
             # 指数近5年年化收益率
-            five_year_yield_rate_tr = 0
+            five_year_yield_rate_tr = index_info.get("five_year_yield_rate_tr")
+
+            # 净收益指数收益率信息
+            # 指数代码
+            index_code_net = index_info.get("index_code_net")
+            # 指数名称
+            index_name_net = index_info.get("index_name_net")
+            # 指数近1月年化收益率
+            one_month_yield_rate_net = index_info.get("one_month_yield_rate_net")
+            # 指数近3月年化收益率
+            three_month_yield_rate_net = index_info.get("three_month_yield_rate_net")
+            # 指数年至今年化收益率
+            this_year_yield_rate_net = index_info.get("this_year_yield_rate_net")
+            # 指数近1年年化收益率
+            one_year_yield_rate_net = index_info.get("one_year_yield_rate_net")
+            # 指数近3年年化收益率
+            three_year_yield_rate_net = index_info.get("three_year_yield_rate_net")
+            # 指数近5年年化收益率
+            five_year_yield_rate_net = index_info.get("five_year_yield_rate_net")
 
             # 指数近1年年化波动率
             one_year_volatility = index_info.get("index_volatility_list").get("one_year_volatility")
@@ -690,67 +712,6 @@ class CollectExcellentIndexFromCSIndexSingleThread:
             five_year_volatility = index_info.get("index_volatility_list").get("five_year_volatility")
 
 
-            # 如果该指数存在全收益指数
-            if index_info.get("type") == "total_return_index":
-                # 常规指数的收益率信息
-                # 指数代码
-                index_code_re = index_info.get("index_code_re")
-                # 指数名称
-                index_name_re = index_info.get("index_name_re")
-                # 指数近1月年化收益率
-                one_month_yield_rate_re = index_info.get("one_month_yield_rate_re")
-                # 指数近3月年化收益率
-                three_month_yield_rate_re = index_info.get("three_month_yield_rate_re")
-                # 指数年至今年化收益率
-                this_year_yield_rate_re = index_info.get("this_year_yield_rate_re")
-                # 指数近1年年化收益率
-                one_year_yield_rate_re = index_info.get("one_year_yield_rate_re")
-                # 指数近3年年化收益率
-                three_year_yield_rate_re = index_info.get("three_year_yield_rate_re")
-                # 指数近5年年化收益率
-                five_year_yield_rate_re = index_info.get("five_year_yield_rate_re")
-
-                # 全收益指数收益率信息
-                # 指数代码
-                index_code_tr = index_info.get("index_code")
-                # 指数名称
-                index_name_tr = index_info.get("index_name")
-                # 指数近1月年化收益率
-                one_month_yield_rate_tr = index_info.get("one_month_yield_rate")
-                # 指数近3月年化收益率
-                three_month_yield_rate_tr = index_info.get("three_month_yield_rate")
-                # 指数年至今年化收益率
-                this_year_yield_rate_tr = index_info.get("this_year_yield_rate")
-                # 指数近1年年化收益率
-                one_year_yield_rate_tr = index_info.get("one_year_yield_rate")
-                # 指数近3年年化收益率
-                three_year_yield_rate_tr = index_info.get("three_year_yield_rate")
-                # 指数近5年年化收益率
-                five_year_yield_rate_tr = index_info.get("five_year_yield_rate")
-
-            elif index_info.get("type") == "regular_index":
-                # 常规指数收益率信息
-                # 指数代码
-                index_code_re = index_info.get("index_code")
-                # 指数名称
-                index_name_re = index_info.get("index_name")
-                # 指数近1月年化收益率
-                one_month_yield_rate_re = index_info.get("one_month_yield_rate")
-                # 指数近3月年化收益率
-                three_month_yield_rate_re = index_info.get("three_month_yield_rate")
-                # 指数年至今年化收益率
-                this_year_yield_rate_re = index_info.get("this_year_yield_rate")
-                # 指数近1年年化收益率
-                one_year_yield_rate_re = index_info.get("one_year_yield_rate")
-                # 指数近3年年化收益率
-                three_year_yield_rate_re = index_info.get("three_year_yield_rate")
-                # 指数近5年年化收益率
-                five_year_yield_rate_re = index_info.get("five_year_yield_rate")
-
-
-
-            # 业务日期
-            p_day =  index_info.get("p_day")
             # 所有关联的跟踪指数基金
             relative_funds = index_info.get("relative_funds")
             # 遍历这些指数基金
@@ -759,38 +720,26 @@ class CollectExcellentIndexFromCSIndexSingleThread:
                     # 基金名称
                     relative_fund_name = fund.get(relative_fund_code)
                     try:
-                        # 如果该指数存在全收益指数, 则将常规指数信息和全收益指数信息全存进数据库
-                        if index_info.get("type") == "total_return_index":
-                            # 将优秀的指数信息及其相关基金产品存入数据库
-                            index_excellent_performance_indices_di_mapper.IndexExcellentPerformanceIndicesDiMapper().insert_regular_and_total_return_excellent_indexes(
-                                index_code_re, index_name_re, '中证', one_month_yield_rate_re,
-                                three_month_yield_rate_re,
-                                this_year_yield_rate_re, one_year_yield_rate_re, three_year_yield_rate_re,
-                                five_year_yield_rate_re, one_year_volatility, three_year_volatility, five_year_volatility,
-                                index_code_tr, index_name_tr, one_month_yield_rate_tr,
-                                three_month_yield_rate_tr,
-                                this_year_yield_rate_tr, one_year_yield_rate_tr, three_year_yield_rate_tr,
-                                five_year_yield_rate_tr, relative_fund_code, relative_fund_name, p_day)
-                            # 日志记录
-                            msg = '将从中证官网接口获取的优异指数 ' + p_day + " " + index_code_re + " " + index_name_re + ' 存入数据库时成功'
-                            custom_logger.CustomLogger().log_writter(msg, 'info')
-
-                        # 如果该指数仅存在常规指数, 则将常规指数存进数据库
-                        elif index_info.get("type") == "regular_index":
-                            # 将优秀的指数信息及其相关基金产品存入数据库
-                            index_excellent_performance_indices_di_mapper.IndexExcellentPerformanceIndicesDiMapper().insert_regular_excellent_indexes(
-                                index_code_re, index_name_re, '中证', one_month_yield_rate_re, three_month_yield_rate_re,
-                                this_year_yield_rate_re, one_year_yield_rate_re, three_year_yield_rate_re, five_year_yield_rate_re,
-                                one_year_volatility, three_year_volatility, five_year_volatility, relative_fund_code, relative_fund_name, p_day)
-                            # 日志记录
-                            msg = '将从中证官网接口获取的优异指数 ' + p_day + " " + index_code_re + " " + index_name_re + ' 存入数据库时成功'
-                            custom_logger.CustomLogger().log_writter(msg, 'info')
+                        # 将优秀的指数信息及其相关基金产品存入数据库
+                        index_excellent_performance_indices_di_mapper.IndexExcellentPerformanceIndicesDiMapper().insert_excellent_indexes_overall_info(
+                            index_code, index_name, '中证', one_month_yield_rate, three_month_yield_rate, this_year_yield_rate, one_year_yield_rate, three_year_yield_rate, five_year_yield_rate,
+                                                          index_code_tr, index_name_tr, one_month_yield_rate_tr, three_month_yield_rate_tr, this_year_yield_rate_tr, one_year_yield_rate_tr, three_year_yield_rate_tr, five_year_yield_rate_tr,
+                                                          index_code_net, index_name_net, one_month_yield_rate_net,
+                                                          three_month_yield_rate_net, this_year_yield_rate_net,
+                                                          one_year_yield_rate_net, three_year_yield_rate_net,
+                                                          five_year_yield_rate_net,
+                                                          one_year_volatility, three_year_volatility, five_year_volatility,
+                                                          relative_fund_code, relative_fund_name, p_day)
 
                     except Exception as e:
                         # 日志记录
-                        msg = '将从中证官网接口获取的优异指数 ' + p_day + " " + index_code_re + " " + index_name_re + " " + ' 存入数据库时错误  ' + str(
+                        msg = '将从中证官网接口获取的优异指数 ' + p_day + " " + index_code + " " + index_name + " " + ' 存入数据库时错误  ' + str(
                             e)
                         custom_logger.CustomLogger().log_writter(msg, 'error')
+
+            # 日志记录
+            msg = '将从中证官网接口获取的优异指数 ' + p_day + " " + index_code + " " + index_name + ' 存入数据库时成功'
+            custom_logger.CustomLogger().log_writter(msg, 'info')
 
 
 
@@ -817,16 +766,16 @@ class CollectExcellentIndexFromCSIndexSingleThread:
 if __name__ == '__main__':
     time_start = time.time()
     go = CollectExcellentIndexFromCSIndexSingleThread()
-    #go.main()
+    go.main()
     #result = go.get_derivative_index("399997")
     #result = go.get_index_and_total_return_index_dict()
-    result = go.call_interface_to_get_all_index_code_name_from_cs_index()
+    #result = go.call_interface_to_get_all_index_code_name_from_cs_index()
     #result = go.call_interface_to_get_single_index_past_performance("399997")
     #result = go.check_all_index_and_get_all_excellent_index()
     #result = go.get_satisfied_index_relative_funds("930758")
     #go.call_interface_to_get_single_index_past_performance("H50059")
     #result = go.get_index_volatility("930955")
     #result = go.get_index_volatility("000807")
-    print(result)
+    #print(result)
     time_end = time.time()
     print('Time Cost: ' + str(time_end - time_start))

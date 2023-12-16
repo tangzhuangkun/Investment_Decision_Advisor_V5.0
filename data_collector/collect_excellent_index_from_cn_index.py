@@ -416,9 +416,9 @@ class CollectExcellentIndexFromCNIndex:
                         msg = '将从国证官网接口获取的优异指数' + p_day + ' '+ index_code+ ' ' + index_name + ' 存入数据库时错误  ' + str(e)
                         custom_logger.CustomLogger().log_writter(msg, 'error')
 
-                    # 日志记录
-                    msg = '将从国证官网接口获取的优异指数 ' + p_day + ' ' + index_code + ' ' + index_name + ' 存入数据库成功'
-                    custom_logger.CustomLogger().log_writter(msg, 'info')
+            # 日志记录
+            msg = '将从国证官网接口获取的优异指数 ' + p_day + ' ' + index_code + ' ' + index_name + ' 存入数据库成功'
+            custom_logger.CustomLogger().log_writter(msg, 'info')
 
 
     """

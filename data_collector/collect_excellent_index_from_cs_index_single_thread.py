@@ -371,10 +371,7 @@ class CollectExcellentIndexFromCSIndexSingleThread:
 
         # 获取所有指数代码列表, [ 指数代码,,,,]
         #     如 ['000001', '000009', '000010', '000015', '000016', '000018', '000021', '000029', '000036', '000037',,,]
-        # todo
-        #index_code_list = self.call_interface_to_get_all_index_code_name_from_cs_index()
-
-        index_code_list = ['000068','399997','000928','000932', '000986']
+        index_code_list = self.call_interface_to_get_all_index_code_name_from_cs_index()
 
         # 满足条件的指数
         satisfied_index_list = []

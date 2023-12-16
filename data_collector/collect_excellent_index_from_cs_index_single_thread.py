@@ -106,7 +106,7 @@ class CollectExcellentIndexFromCSIndexSingleThread:
 
     """
     调用接口，从中证指数官网获取全部指数代码和名称
-    :return,  指数代码列表, [ (指数代码, 全收益指数代码)]
+    :return,  指数代码列表, [ 指数代码]
     如 ['000001', '000009', '000010', '000015', '000016', '000018', '000021', '000029', '000036', '000037',,,,]
     """
     def call_interface_to_get_all_index_code_name_from_cs_index(self):
@@ -312,7 +312,7 @@ class CollectExcellentIndexFromCSIndexSingleThread:
                 # 如果没有跟踪的指数基金，则没有跟进的意义，放弃
                 if(len(relative_funds_list)==0):
                     #same_time_threading.release()
-                    return None
+                    return
                 # 如果有跟踪指数基金，才有收集跟进的意义
                 else:
                     # 记录跟踪基金的信息
@@ -640,7 +640,7 @@ class CollectExcellentIndexFromCSIndexSingleThread:
         # 存储符合收集标准的指数
         # 如 [{'index_code': '930758', 'index_name': '凤凰50', 'p_day': '2022-01-14', 'three_year_yield_rate': 27.12, 'five_year_yield_rate': 16.52, 'relative_funds': [{'512190': '浙商汇金中证凤凰50ETF'}, {'007431': '浙商汇金中证凤凰50ETF联接'}]}, ,,，，，]
         satisfied_index_list = self.check_all_index_and_get_all_excellent_index()
-
+        
         # 遍历
         for index_info in satisfied_index_list:
 

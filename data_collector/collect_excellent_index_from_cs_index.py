@@ -393,7 +393,7 @@ class CollectExcellentIndexFromCSIndex:
             # 获取到的IP和UA样式
             # 如 ([{'ip_address': '27.158.237.107:24135'}, {'ip_address': '27.151.158.219:50269'}], [{'ua': 'Mozilla/5.0 (Windows NT 6.2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1464.0 Safari/537.36'}, {'ua': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:17.0) Gecko/20100101 Firefox/17.0.6'}])
             self.ip_address_dict_list, self.ua_dict_list = disguise.Disguise().get_multi_IP_UA(self.IP_UA_num)
-            # (指数代码, 全收益指数代码)
+            # 指数代码
             for index_code in splitted_list:
                 same_time_threading.acquire()
                 # 启动线程
@@ -761,7 +761,7 @@ class CollectExcellentIndexFromCSIndex:
 
     """
     将列表平均分，平均分后，每份个数为num
-    :param index_code_list: 获取指数代码列表, [ (指数代码, 全收益指数代码)], 如 [('000979', 'H00979'), ('000984', 'H00984'), ('930927', None), ,,,]
+    :param index_code_list: 获取指数代码列表, [ 指数代码,,,,], 如 [('000979', 'H00979'), ('000984', 'H00984'), ('930927', None), ,,,]
     :param num: 平分后每份列表的的个数num
     :return
     如，

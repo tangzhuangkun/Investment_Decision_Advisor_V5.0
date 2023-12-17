@@ -331,11 +331,11 @@ class CollectExcellentIndexFromCSIndex:
                                 derivative_index_name = derivative_index_dict.get(derivative_index_code)
                                 index_performance_dict = self.get_index_yield_performance(derivative_index_code, index_performance_dict, derivative_index_name)
 
-                    # 获取锁，用于线程同步
-                    threadLock.acquire()
-                    satisfied_index_list.append(index_performance_dict)
-                    # 释放锁，开启下一个线程
-                    threadLock.release()
+                # 获取锁，用于线程同步
+                threadLock.acquire()
+                satisfied_index_list.append(index_performance_dict)
+                # 释放锁，开启下一个线程
+                threadLock.release()
 
             same_time_threading.release()
 

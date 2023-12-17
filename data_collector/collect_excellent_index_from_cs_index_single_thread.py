@@ -331,7 +331,7 @@ class CollectExcellentIndexFromCSIndexSingleThread:
                             if ("全收益" in derivative_index_dict.get(derivative_index_code)) or ("净收益" in derivative_index_dict.get(derivative_index_code)) :
                                 derivative_index_name = derivative_index_dict.get(derivative_index_code)
                                 index_performance_dict = self.get_index_yield_performance(derivative_index_code, index_performance_dict, derivative_index_name)
-                        return index_performance_dict
+                return index_performance_dict
 
         except Exception as e:
             # 日志记录

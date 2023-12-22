@@ -134,7 +134,6 @@ db_init_content.sql
 daily_log
 /.idea/
 /test/
-TodoList.py
 # 剔除所有以~$开头的文件
 ~$*
 # 剔除所有子路径里以~$开头的文件

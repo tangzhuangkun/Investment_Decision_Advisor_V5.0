@@ -8,7 +8,7 @@ class DatabaseConfig:
     def __init__(self):
         pass
 
-    def database_config(self,host_address, user_name, psd, db_name):
+    def database_config(self,host_address, port, user_name, psd, db_name):
         # 数据库的配置
         # 输入：
         # host_address：数据库地址
@@ -34,7 +34,7 @@ class DatabaseConfig:
             # 4 = when a query is executed,
             # 7 = always
             host=host_address,
-            port=3306,
+            port=port,
             user=user_name,
             password=psd,
             database=db_name,
@@ -45,4 +45,4 @@ class DatabaseConfig:
 
 if __name__ == '__main__':
     go = DatabaseConfig()
-    print(go.database_config(conf.db_host, conf.db_user, conf.db_password, 'financial_data').connection())
+    print(go.database_config(conf.db_host, conf.db_port, conf.db_user, conf.db_password, 'financial_data').connection())

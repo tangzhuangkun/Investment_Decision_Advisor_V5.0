@@ -20,7 +20,7 @@ class DBOperator:
         # 输出：与数据库的链接，数据库操作游标
 
         # 连接数据库
-        conn = database_config.DatabaseConfig().database_config(conf.db_host, conf.db_user, conf.db_password, db_name).connection()
+        conn = database_config.DatabaseConfig().database_config(conf.db_host, conf.db_port, conf.db_user, conf.db_password, db_name).connection()
         # 数据库操作游标
         cursor = conn.cursor(pymysql.cursors.DictCursor)
         return conn, cursor

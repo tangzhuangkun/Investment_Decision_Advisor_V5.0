@@ -44,6 +44,9 @@ class CollectStockEstimationIndexes:
             # 遍历数据，直接全部存储
             for index, row in df.iterrows():
                 stocks_main_estimation_indexes_mapper.StocksMainEstimationIndexesMapper().save_akshare_stock_estimation(stock_code, stock_name, exchange_location, exchange_location_mic, row['trade_date'], row['pe_ttm'], row['pb'], row['ps_ttm'], row['dv_ratio'], row['dv_ttm'],row['total_mv'])
+            # 日志记录
+            msg = "从akshare的API-stock_a_indicator_lg 获取" + stock_name + " "+ stock_code + " 的全部历史交易日， 市盈率TTM， 市净率， 市销率TTM， 股息率， 股息率TTM，总市值 信息"
+            custom_logger.CustomLogger().log_writter(msg, lev='info')
         else:
             # 遍历数据
             for index, row in df.iterrows():
@@ -55,10 +58,14 @@ class CollectStockEstimationIndexes:
                 # 如果时间与数据库中的日期一致或小于数据库中的日期，舍弃，跳出循环
                 else:
                    break
+            # 日志记录
+            msg = "从akshare的API-stock_a_indicator_lg 获取" + stock_name + " " + stock_code + " 从 " + str(stock_latest_date + datetime.timedelta(days = 1)) + "至" + str(df.iloc[0]["trade_date"])+ "的全部历史交易日， 市盈率TTM， 市净率， 市销率TTM， 股息率， 股息率TTM，总市值 信息"
+            custom_logger.CustomLogger().log_writter(msg, lev='info')
 
     def main(self):
-        self.call_api_to_get_single_stock_estimation_from_akshare("600519", "贵州茅台", "sh", "XSHG")
-        #self.call_interface_to_get_stock_estimation_from_akshare("000568", "泸州老窖", "sz", "XSHE")
+        #self.call_api_to_get_single_stock_estimation_from_akshare("600519", "贵州茅台", "sh", "XSHG")
+        #self.call_api_to_get_single_stock_estimation_from_akshare("000568", "泸州老窖", "sz", "XSHE")
+        self.call_api_to_get_single_stock_estimation_from_akshare("000596", "古井贡酒", "sz", "XSHE")
 
 
 if __name__ == '__main__':

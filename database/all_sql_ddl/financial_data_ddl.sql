@@ -374,3 +374,51 @@ CREATE TABLE IF NOT EXISTS `mix_top10_with_bottom`(
 	PRIMARY KEY ( `id` )
 	)ENGINE=InnoDB DEFAULT CHARSET=utf8
 COMMENT '拼接中证的最新前10权重股+每月中证指数文件中的10位之后的权重股+国证指数';
+
+
+/* --------- user：investor1 ------ */
+/* --------- db：financial_data ------ */
+/*创建一个表，stocks_main_estimation_indexes，用于存储 股票估值指标数据*/
+
+USE financial_data;
+DROP TABLE IF EXISTS `stocks_main_estimation_indexes`;
+CREATE TABLE IF NOT EXISTS `stocks_main_estimation_indexes`(
+	`id` BIGINT NOT NULL AUTO_INCREMENT,
+	`p_day` DATE NOT NULL COMMENT '日期',
+	`stock_code` VARCHAR(20) NOT NULL COMMENT '股票代码',
+	`stock_name` VARCHAR(20) NOT NULL COMMENT '股票名称',
+	`exchange_location`  VARCHAR(10) NOT NULL COMMENT '标的上市地，如 sh,sz,hk',
+    `exchange_location_mic`  VARCHAR(10) NOT NULL COMMENT '标的上市地MIC，如 XSHG, XSHE，XHKG 等',
+	`pe_ttm` DECIMAL(28,22) DEFAULT NULL COMMENT '滚动市盈率',
+	`pe_ttm_nonrecurring` DECIMAL(28,22) DEFAULT NULL COMMENT '扣非滚动市盈率',
+	`pb` DECIMAL(28,22) DEFAULT NULL COMMENT '市净率',
+	`pb_wo_gw` DECIMAL(28,22) DEFAULT NULL COMMENT '扣商誉市净率',
+    `pcf_ttm` DECIMAL(28,22) DEFAULT NULL COMMENT '滚动市现率',
+	`ps_ttm` DECIMAL(28,22)DEFAULT NULL COMMENT '滚动市销率',
+	`ev_ebit` DECIMAL(28,22) DEFAULT NULL COMMENT 'EV/EBIT企业价值倍数',
+	`dividend_yield` DECIMAL(28,22) DEFAULT NULL COMMENT '股息率',
+    `dividend_yield_ttm` DECIMAL(28,22) DEFAULT NULL COMMENT '滚动股息率',
+    `peg_ttm` DECIMAL(28,22) DEFAULT NULL COMMENT '滚动PEG',
+	`peg_ttm_nonrecurring` DECIMAL(28,22) DEFAULT NULL COMMENT '扣非滚动PEG',
+    -- `roe` DECIMAL(28,22) DEFAULT NULL COMMENT '净资产收益率',
+    -- `roe_avg` DECIMAL(28,22) NOT NULL COMMENT '平均净资产收益率',
+    -- `roe_avg_nonrecurring` DECIMAL(28,22) NOT NULL COMMENT '扣除非经常损益平均净资产收益率',
+    `share_price` DECIMAL(20,6) DEFAULT NULL COMMENT '股价',
+    `change_rate` DECIMAL(28,22) DEFAULT NULL COMMENT '当日涨跌幅',
+	-- `turnover` BIGINT DEFAULT NULL COMMENT '成交量',
+	`fc_rights` DECIMAL(20,6) DEFAULT NULL COMMENT '前复权',
+	`bc_rights` DECIMAL(20,6)DEFAULT NULL COMMENT '后复权',
+	-- `shareholders` BIGINT DEFAULT NULL COMMENT '股东人数',
+	`market_capitalization` DECIMAL(28,6) DEFAULT NULL COMMENT '市值',
+	`circulation_market_capitalization` DECIMAL(28,6) DEFAULT NULL COMMENT '流通市值',
+	`free_circulation_market_capitalization` DECIMAL(28,6) DEFAULT NULL COMMENT '自由流通市值',
+    `total_shares` BIGINT DEFAULT NULL COMMENT '总股本',
+    `free_shares` BIGINT DEFAULT NULL COMMENT '流通股本',
+    -- `industry` VARCHAR(20) DEFAULT NULL COMMENT '所属行业',
+	-- `source` VARCHAR(20) DEFAULT NULL COMMENT '数据来源',
+	`submission_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '提交时间',
+	UNIQUE INDEX (stock_code, p_day, exchange_location, exchange_location_mic),
+	INDEX (p_day),
+	PRIMARY KEY ( `id` )
+	)ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8
+COMMENT '股票估值指标历史数据';

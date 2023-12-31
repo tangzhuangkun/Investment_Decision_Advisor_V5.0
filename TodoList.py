@@ -64,13 +64,7 @@ order by raw.weight desc
 # TODO 股票策略，每天仅提醒一次
 
 # TODO 需要收集个股指标，
-"""
-当日收盘价(元)	
-当日涨跌幅(%)	
-总市值(元)	
-流通市值(元)	
-总股本(股)	
-流通股本	
+"""	
 PE(TTM)	
 PE(扣非)	
 市净率	
@@ -80,6 +74,16 @@ PE(扣非)
 股息率ttm
 PEG值（TTM）
 PEG值（扣非TTM）
+净资产收益率roe
+加权平均净资产收益率 roe_avg
+加权平均净资产收益率_扣除非经常损益
+当日收盘价(元)	
+当日涨跌幅(%)	
+总市值(元)	
+流通市值(元)	
+总股本(股)	
+流通股本
+行业
 """
 
 #todo 收集步骤
@@ -90,7 +94,7 @@ PEG值（扣非TTM）
 
 3、通过 AKSHARE stock_a_indicator_lg， 获取 股息率，股息率ttm；
 
-4、通过 AKSHARE stock_financial_analysis_indicator（https://vip.stock.finance.sina.com.cn/corp/go.php/vFD_FinanceSummary/stockid/600004.phtml）, 新浪财经-财务分析-财务指标， 公告日期前，加权平均净资产收益率 和 扣非净利润， 
+4、通过 AKSHARE stock_financial_analysis_indicator（https://vip.stock.finance.sina.com.cn/corp/go.php/vFD_FinanceSummary/stockid/600004.phtml）, 新浪财经-财务分析-财务指标， 公告日期前，加权平均净资产收益率 和 扣非净利润
 
 5、计算，净利润TTM, 扣非净利润TTM， 计算 PE(扣非)	， 填补 估值数据
 

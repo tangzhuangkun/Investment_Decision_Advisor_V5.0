@@ -12,7 +12,7 @@ import notification.notification_plan_during_trading as notification_plan_during
 import notification.notification_plan_after_trading as notification_plan_after_trading
 import data_collector.collect_trading_days as collect_trading_days
 import data_miner.calculate_index_historial_estimations as calculate_index_historial_estimations
-import data_collector.collect_csindex_top_10_stocks_weight_daily as collect_csindex_top_10_stocks_weight_daily
+#import data_collector.collect_csindex_top_10_stocks_weight_daily as collect_csindex_top_10_stocks_weight_daily
 import data_collector.collect_index_weight_from_csindex_file as collect_index_weight_from_csindex_file
 import data_collector.collect_index_weight_from_cnindex_interface as collect_index_weight_from_cnindex_interface
 import data_miner.gather_all_tracking_stocks as gather_all_tracking_stocks
@@ -91,15 +91,15 @@ class Scheduler:
 			# 抛错
 			custom_logger.CustomLogger().log_writter(e, 'error')
 
-		try:
-			# 每个交易日18：03收集中证官网指数前十权重股的最新构成信息
-			scheduler.add_job(func=collect_csindex_top_10_stocks_weight_daily.CollectCSIndexTop10StocksWeightDaily().main,
-							  trigger='cron',
-							  month='1-12', day_of_week='mon,tue,wed,thu,fri', hour=18, minute=3,
-							  id='weekdayCollectCSIndexTop10StocksWeight')
-		except Exception as e:
-			# 抛错
-			custom_logger.CustomLogger().log_writter(e, 'error')
+		# try:
+		# 	# 每个交易日18：03收集中证官网指数前十权重股的最新构成信息
+		# 	scheduler.add_job(func=collect_csindex_top_10_stocks_weight_daily.CollectCSIndexTop10StocksWeightDaily().main,
+		# 					  trigger='cron',
+		# 					  month='1-12', day_of_week='mon,tue,wed,thu,fri', hour=18, minute=3,
+		# 					  id='weekdayCollectCSIndexTop10StocksWeight')
+		# except Exception as e:
+		# 	# 抛错
+		# 	custom_logger.CustomLogger().log_writter(e, 'error')
 
 		try:
 			# 每个交易日18：04收集国证官网指数最新构成信息

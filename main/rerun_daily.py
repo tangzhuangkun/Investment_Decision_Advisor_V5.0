@@ -53,8 +53,8 @@ class RerunDaily:
         print("收集中证官网指数的最新构成信息, 完成")
 
         # 收集中证官网指数前十权重股的最新构成信息
-        collect_csindex_top_10_stocks_weight_daily.CollectCSIndexTop10StocksWeightDaily().main()
-        print("收集中证官网指数前十权重股的最新构成信息, 完成")
+        #collect_csindex_top_10_stocks_weight_daily.CollectCSIndexTop10StocksWeightDaily().main()
+        #print("收集中证官网指数前十权重股的最新构成信息, 完成")
 
         # 收集国证官网指数最新构成信息
         collect_index_weight_from_cnindex_interface.CollectIndexWeightFromCNIndexInterface().main()
@@ -65,40 +65,40 @@ class RerunDaily:
         print("聚合汇总所有需要被跟踪的股票, 完成")
 
         # 收集所需的股票的估值信息
-        #collect_stock_historical_estimation_info.CollectStockHistoricalEstimationInfo().main()
-        #print("收集所需的股票的估值信息, 完成")
+        collect_stock_historical_estimation_info.CollectStockHistoricalEstimationInfo().main()
+        print("收集所需的股票的估值信息, 完成")
 
         # 计算指数估值
-        # calculate_index_historial_estimations.CalculateIndexHistoricalEstimations().main()
-        # print("计算指数估值, 完成")
+        calculate_index_historial_estimations.CalculateIndexHistoricalEstimations().main()
+        print("计算指数估值, 完成")
 
         # 通过邮件/微信发送标的股票估值报告
-        #notification_plan_after_trading.NotificationPlanAfterTrading().stock_strategy_estimation_notification()
-        #print("通过邮件/微信发送标的股票估值报告, 完成")
+        notification_plan_after_trading.NotificationPlanAfterTrading().stock_strategy_estimation_notification()
+        print("通过邮件/微信发送标的股票估值报告, 完成")
 
         # 收集最新国债收益率
-        #collect_chn_gov_bonds_rates.CollectCHNGovBondsRates().main()
-        #print("收集最新国债收益率, 完成")
+        collect_chn_gov_bonds_rates.CollectCHNGovBondsRates().main()
+        print("收集最新国债收益率, 完成")
 
         # 收集最新沪深300指数市值加权估值
-        #collect_index_estimation_from_lxr.CollectIndexEstimationFromLXR().main()
-        #print("收集最新沪深300指数市值加权估值, 完成")
+        collect_index_estimation_from_lxr.CollectIndexEstimationFromLXR().main()
+        print("收集最新沪深300指数市值加权估值, 完成")
 
         # 运行mysql脚本，计算股债收益率
-        #calculate_stock_bond_ratio.CalculateStockBondRatio().main()
-        #print("运行mysql脚本，计算股债收益率, 完成")
+        calculate_stock_bond_ratio.CalculateStockBondRatio().main()
+        print("运行mysql脚本，计算股债收益率, 完成")
 
         # 收集沪深300指数/沪深A股估值，国债收益，计算并通过邮件/微信发送股当日债收益比
-        #notification_plan_after_trading.NotificationPlanAfterTrading().stock_bond_yield_strategy_estimation_notification()
-        #print("收集沪深300指数/沪深A股估值，国债收益，计算并通过邮件/微信发送股当日债收益比, 完成")
+        notification_plan_after_trading.NotificationPlanAfterTrading().stock_bond_yield_strategy_estimation_notification()
+        print("收集沪深300指数/沪深A股估值，国债收益，计算并通过邮件/微信发送股当日债收益比, 完成")
 
         # 通过邮件/微信发送标的指数估值报告
-        #notification_plan_after_trading.NotificationPlanAfterTrading().index_strategy_estimation_notification()
-        #print("通过邮件/微信发送标的指数估值报告, 完成")
+        notification_plan_after_trading.NotificationPlanAfterTrading().index_strategy_estimation_notification()
+        print("通过邮件/微信发送标的指数估值报告, 完成")
 
         # 将所有暂停标的策略重新开启，下一个交易日又可生效
-        #web_service_impl.WebServericeImpl().restart_all_mute_target()
-        #print("将所有暂停标的策略重新开启，下一个交易日又可生效, 完成")
+        web_service_impl.WebServericeImpl().restart_all_mute_target()
+        print("将所有暂停标的策略重新开启，下一个交易日又可生效, 完成")
 
 if __name__ == '__main__':
     time_start = time.time()

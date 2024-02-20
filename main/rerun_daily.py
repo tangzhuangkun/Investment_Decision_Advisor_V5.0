@@ -53,8 +53,8 @@ class RerunDaily:
         print("收集中证官网指数的最新构成信息, 完成")
 
         # 收集中证官网指数前十权重股的最新构成信息
-        #collect_csindex_top_10_stocks_weight_daily.CollectCSIndexTop10StocksWeightDaily().main()
-        #print("收集中证官网指数前十权重股的最新构成信息, 完成")
+        collect_csindex_top_10_stocks_weight_daily.CollectCSIndexTop10StocksWeightDaily().main()
+        print("收集中证官网指数前十权重股的最新构成信息, 完成")
 
         # 收集国证官网指数最新构成信息
         collect_index_weight_from_cnindex_interface.CollectIndexWeightFromCNIndexInterface().main()
